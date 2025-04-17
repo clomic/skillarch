@@ -25,6 +25,8 @@ alias c='code'
 alias C='code .'
 alias k='cursor'
 alias K='cursor .'
+alias zed='ZED_ALLOW_EMULATED_GPU=1 zeditor'
+alias c='zed'
 alias p='python'
 alias cdtmp='pushd $(mktemp -d)'
 
@@ -61,6 +63,7 @@ alias dns-8='echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf'
 alias dns-9='echo "nameserver 9.9.9.9" | sudo tee /etc/resolv.conf'
 alias get-ip='curl -sS ipinfo.io/ip ; echo'
 alias get-ip-cpy='curl -sS ipinfo.io/ip | cpy'
+alias pub='export PUB=$(curl -s ipv4.ident.me|| curl -sS ifconfig.io); echo -n $PUB | cpy; echo $PUB'
 
 # Video, Audio
 alias webcam-guvcview='guvcview'
@@ -87,6 +90,7 @@ alias b64d='base64 -d'
 alias b64e='base64 -w 0'
 alias back-n='sed "s/\\\n/\n/g"'
 alias cgrep='grep --color=always'
+alias rgrep='grep -r'
 alias cheat='f(){ curl -s "cheat.sh/$1";  unset -f f; }; f'
 alias clean-swap='sudo swapoff -a && sudo swapon -a'
 alias cpy='xclip -selection clipboard'
@@ -155,6 +159,8 @@ alias dgitleaks="dockit zricethezav/gitleaks"
 alias drecon-amass='dockit caffix/amass'
 alias drecon-findomain='dockit edu4rdshl/findomain -t'
 alias drecon-wappa='dockit wappalyzer/cli -r -D 2 -P -a "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) snap Chromium/83.0.4103.106 Chrome/83.0.4103.106 Safari/537.36" $@'
+alias nmap-i='f(){ mkdir -p nmap;ports=$(nmap -p- --min-rate=1000 -T4 $1 $2 | grep "^[0-9]" | cut -d "/" -f1 | tr "\n" "," | sed s/,$//) ; echo "OPEN ports: $ports"; sudo nmap -sC -sV -Pn -vv --version-all -oA nmap/tcp-full -p$ports $1 $2 &; sleep 120; sudo nmap -p- -sU -oA nmap/udp $1 $2 &;  unset -f f; }; f'
+
 
 ## Fuzz & Crawl
 alias dsecator="dockit -v ~/.secator:/root/.secator freelabz/secator" # normalize offensive arsenal

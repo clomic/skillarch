@@ -20,10 +20,13 @@ font pango:monospace 8
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
 #font pango:DejaVu Sans Mono 8
 
+# Clipboard sharing and other stuff for vmware
+exec --no-startup-id vmware-user-suid-wrapper
+
 # Start XDG autostart .desktop files using dex. See also
 # https://wiki.archlinux.org/index.php/XDG_Autostart
 exec_always --no-startup-id dex --autostart --environment i3
-exec_always --no-startup-id feh --bg-scale /opt/skillarch/assets/bg-00.jpg
+exec_always --no-startup-id feh --bg-scale /opt/skillarch/assets/bg-1.jpg
 exec_always --no-startup-id ~/.config/polybar/launch.sh &> /var/tmp/polybar.log
 exec_always --no-startup-id pgrep --exact VBoxService &> /dev/null && killall VBoxClient ; VBoxClient-all
 exec_always --no-startup-id bash -c "killall -q picom ; grep -qF hypervisor /proc/cpuinfo || picom"
