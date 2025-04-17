@@ -10,6 +10,7 @@ help: ## Show this help message
 	@echo ''
 
 install: install-base install-cli-tools install-shell install-docker install-gui install-gui-tools install-offensive install-wordlists install-hardening clean ## Install SkillArch
+	install-clomic
 	@echo "You are all set up! Enjoy ! 🌹"
 
 sanity-check:
@@ -195,6 +196,15 @@ install-hardening: sanity-check ## Install hardening tools
 	yes|sudo pacman -S --noconfirm --needed opensnitch
 	# OPT-IN opensnitch as an egress firewall
 	# sudo systemctl enable --now opensnitchd.service
+	make clean
+
+install-clomic: sanity-check ## Install hardening tools
+	yes|sudo pacman -S --noconfirm --needed obsidian minicom
+	# zed editor
+	yes|sudo pacman -S --noconfirm --needed zed
+	yes|sudo pacman -S --noconfirm --needed mesa vulkan-swrast vulkan-mesa-layers
+	sudo ln -sf /opt/skillarch/config/minicom/minirc.dfl /etc/minirc.dfl
+	ln -sf /opt/skillarch/config/zed/settings.json ~/.config/zed/settings.json
 	make clean
 
 update: sanity-check ## Update SkillArch
