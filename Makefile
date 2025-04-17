@@ -199,7 +199,7 @@ install-hardening: sanity-check ## Install hardening tools
 	make clean
 
 install-clomic: sanity-check ## Install hardening tools
-	yes|sudo pacman -S --noconfirm --needed obsidian minicom
+	yes|sudo pacman -S --noconfirm --needed obsidian minicom sagemath
 	# zed editor
 	yes|sudo pacman -S --noconfirm --needed zed
 	yes|sudo pacman -S --noconfirm --needed mesa vulkan-swrast vulkan-mesa-layers
