@@ -189,6 +189,7 @@ bindsym $mod+n exec nautilus
 bindsym $mod+v exec vlc
 bindsym $mod+c exec code
 bindsym $mod+k exec cursor
+bindsym $mod+o exec obsidian
 bindsym $mod+BackSpace split toggle
 bindsym $mod+m exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
 

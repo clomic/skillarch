@@ -26,7 +26,7 @@ alias C='code .'
 alias k='cursor'
 alias K='cursor .'
 alias zed='ZED_ALLOW_EMULATED_GPU=1 zeditor'
-alias c='zed'
+alias z='zed'
 alias p='python'
 alias cdtmp='pushd $(mktemp -d)'
 
