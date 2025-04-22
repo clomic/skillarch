@@ -4,7 +4,7 @@
 
 > The lite/full install takes 20/30 minutes 🕑️\
 > Please watch this intro video to onboard yourself! 🙏\
-> ➡️ TODO:(lalu) ⬅️
+> ➡️ TBD ⬅️
 
 <img src='assets/rice-01.png' width='800'>
 
