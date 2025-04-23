@@ -99,6 +99,7 @@ alias mcrypt-enc='f(){ PASS=$(cat /dev/urandom | base64 | head -c 20) && echo "$
 alias mcrypt-dec='mdecrypt'
 alias get-meteo='curl https://wttr.in/'
 alias fab='fabric-ai -s'
+cchef() (set -e;cd /opt/cyberchef && xdg-open index.html >&/dev/null &;)
 
 # Python
 alias pv='f(){ if [ -z "$1" ] ; then echo "Use: pv 3.12" ; else mise use "python@$1" ; mise config set env._.python.venv.path .venv ; mise config set --type bool env._.python.venv.create true ; mise exec -- which python ; mise exec -- python --version ; fi;  unset -f f; }; f'
