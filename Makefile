@@ -16,7 +16,7 @@ sanity-check:
 	set -x
 	@# Ensure we are in /opt/skillarch or /opt/skillarch-original (maintainer only)
 	@[ "$$(pwd)" != "/opt/skillarch" ] && [ "$$(pwd)" != "/opt/skillarch-original" ] && echo "You must be in /opt/skillarch or /opt/skillarch-original to run this command" && exit 1
-	@sudo id || (echo "Error: sudo access is required" ; exit 1)
+	@sudo -v || (echo "Error: sudo access is required" ; exit 1)
 
 install-base: sanity-check ## Install base packages
 	# Clean up, Update, Basics
@@ -200,13 +200,10 @@ install-hardening: sanity-check ## Install hardening tools
 	# sudo systemctl enable --now opensnitchd.service
 	make clean
 
-install-clomic: sanity-check ## Install hardening tools
+install-clomic: sanity-check ## Install clomic tools
 	yes|sudo pacman -S --noconfirm --needed obsidian minicom sagemath 7zip
-	# zed editor
-	yes|sudo pacman -S --noconfirm --needed zed
-	yes|sudo pacman -S --noconfirm --needed mesa vulkan-swrast vulkan-mesa-layers
+	mise use uv
 	sudo ln -sf /opt/skillarch/config/minicom/minirc.dfl /etc/minirc.dfl
-	ln -sf /opt/skillarch/config/zed/settings.json ~/.config/zed/settings.json
 	[ ! -d /opt/cyberchef ] && mkdir -p /tmp/cyberchef && wget "https://gchq.github.io/CyberChef/CyberChef_v10.19.4.zip" -O /tmp/cyberchef/cc.zip && 7z x -o/tmp/cyberchef /tmp/cyberchef/cc.zip && rm /tmp/cyberchef/cc.zip && gunzip /tmp/cyberchef/index.html.gz && sudo mv /tmp/cyberchef /opt/cyberchef
 	make clean
 

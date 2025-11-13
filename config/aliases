@@ -25,8 +25,6 @@ alias c='code'
 alias C='code .'
 alias k='cursor'
 alias K='cursor .'
-alias zed='ZED_ALLOW_EMULATED_GPU=1 zeditor'
-alias z='zed'
 alias p='python'
 alias cdtmp='pushd $(mktemp -d)'
 
@@ -47,8 +45,8 @@ alias te='trash-empty'
 alias cp='cp -i'
 
 ## Networking
-alias ipa="ip -br a | grep -vF DOWN"
-alias ipaa="ip -br a"
+alias ipa="ip -c -br a | grep -vF DOWN"
+alias ipaa="ip -c -br a"
 alias nc='ncat'
 alias ncl='ncat -lnvp'
 alias ssh-yolo='ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
@@ -160,8 +158,13 @@ alias dgitleaks="dockit zricethezav/gitleaks"
 alias drecon-amass='dockit caffix/amass'
 alias drecon-findomain='dockit edu4rdshl/findomain -t'
 alias drecon-wappa='dockit wappalyzer/cli -r -D 2 -P -a "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) snap Chromium/83.0.4103.106 Chrome/83.0.4103.106 Safari/537.36" $@'
-alias nmap-i='f(){ mkdir -p nmap;ports=$(nmap -p- --min-rate=1000 -T4 $1 $2 | grep "^[0-9]" | cut -d "/" -f1 | tr "\n" "," | sed s/,$//) ; echo "OPEN ports: $ports"; sudo nmap -sC -sV -Pn -vv --version-all -oA nmap/tcp-full -p$ports $1 $2 &; sleep 120; sudo nmap -p- -sU -oA nmap/udp $1 $2 &;  unset -f f; }; f'
-
+nmap-i() {
+    sudo -v && mkdir -p nmap || return
+    local t=$1
+    local p=($(nmap -p- --min-rate=1000 -T4 -Pn $1|awk '/^[0-9]/{print $1}'|cut -d/ -f1))
+    echo "Ports: $p"
+    sudo nmap -sC -sV -vv --version-all -oA nmap/tcp -p${(j:,:)p} $1 & sudo nmap -sU -T4 -oA nmap/udp $1 &
+}
 
 ## Fuzz & Crawl
 alias dsecator="dockit -v ~/.secator:/root/.secator freelabz/secator" # normalize offensive arsenal
