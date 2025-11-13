@@ -9,7 +9,7 @@ alias ska-update-advanced='echo "# SAVE your changes on your repo" ; echo "git a
 alias ska-vbox-install-guestutils='sudo pacman -S virtualbox-guest-utils & sudo usermod -aG vboxsf "$USER"'
 alias ska-vbox-install='sudo pacman -S virtualbox virtualbox-host-dkms && echo -e "\n\n\nNow reboot to load the vbox drivers"'
 alias ska-sudo-unlock='su -c "faillock --user $USER --reset"'
-alias fastfetch='/usr/bin/fastfetch --logo /opt/skillarch/assets/skillarch-full.png --logo-width 50'
+alias fastfetch='/usr/bin/fastfetch --logo /opt/skillarch/assets/logo-round-hot.png --logo-width 50'
 alias neofetch='fastfetch'
 alias hifetch='fastfetch'
 
@@ -27,6 +27,7 @@ alias k='cursor'
 alias K='cursor .'
 alias p='python'
 alias cdtmp='pushd $(mktemp -d)'
+alias ff='f(){ find . -iname "*$1*" 2>/dev/null; unset -f f; }; f'
 
 # Git stuff
 alias git-clone-all-github='curl -sk -H "Authorization: token ${GITHUB_READ_TOKEN}" "https://api.github.com/search/repositories?q=user:$GITHUB_USER" | jq -r ".items[].ssh_url" | parallel -j10 "git clone {}"'
@@ -43,6 +44,7 @@ alias t3="t -L 3 $@"
 alias rm='trash-put'
 alias te='trash-empty'
 alias cp='cp -i'
+compdef _files trash-put # fix trash-put file completion
 
 ## Networking
 alias ipa="ip -c -br a | grep -vF DOWN"
@@ -65,7 +67,8 @@ alias pub='export PUB=$(curl -s ipv4.ident.me|| curl -sS ifconfig.io); echo -n $
 
 # Video, Audio
 alias webcam-guvcview='guvcview'
-alias yt-dlp-likes='yt-dlp --cookies www.youtube.com_cookies.txt -x --audio-format mp3  :ytfav' # https://chromewebstore.google.com/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc
+alias yt-dlp-likes='yt-dlp --cookies-from-browser chrome -x --audio-format mp3  :ytfav'
+alias yt-mp3="yt-dlp --extract-audio --audio-format mp3"
 alias flameshotz='while true; do flameshot full -p ~/Downloads; sleep 1; done'
 
 # Monitoring, Upload, Sleep
@@ -86,9 +89,16 @@ alias usleep='f(){ python3 -c "import time; time.sleep($1)";  unset -f f; }; f'
 alias makeqrcode='qrencode -t ANSI -o -'
 alias b64d='base64 -d'
 alias b64e='base64 -w 0'
-alias back-n='sed "s/\\\n/\n/g"'
+alias back-n='sed -u "s/\\\n/\n/g"'
+alias back-t='sed -u "s/\\\t/\t/g"'
 alias cgrep='grep --color=always'
+<<<<<<< HEAD
 alias rgrep='grep -r'
+=======
+alias lgrep='grep --line-buffered'
+alias sortn='sort -V | uniq -c | sort -n'
+alias grephilight='export GREP_COLORS="mt=30;46"'
+>>>>>>> upstream/main
 alias cheat='f(){ curl -s "cheat.sh/$1";  unset -f f; }; f'
 alias clean-swap='sudo swapoff -a && sudo swapon -a'
 alias cpy='xclip -selection clipboard'
@@ -100,7 +110,7 @@ alias fab='fabric-ai -s'
 cchef() (set -e;cd /opt/cyberchef && xdg-open index.html >&/dev/null &;)
 
 # Python
-alias pv='f(){ if [ -z "$1" ] ; then echo "Use: pv 3.12" ; else mise use "python@$1" ; mise config set env._.python.venv.path .venv ; mise config set --type bool env._.python.venv.create true ; mise exec -- which python ; mise exec -- python --version ; fi;  unset -f f; }; f'
+alias pv='f(){ if [ -z "$1" ] ; then echo "Use: pv 3.12" ; else mise use "python@$1" ; mise config set env._.python.venv.path .venv ; mise config set --type list env._.python.venv.uv_create_args -- --seed ; mise config set --type bool env._.python.venv.create true ; mise exec -- which python ; mise exec -- python --version ; fi;  unset -f f; }; f'
 alias pyreq='pip install -r requirements.txt'
 alias pysrv='mkdir -pv /tmp/empty ; python -m http.server -d /tmp/empty'
 
@@ -111,9 +121,10 @@ alias get-bytes-raw='python3 -c "for i in range(0,256): print(chr(i))"'
 alias get-bytes-url='python3 -c "for i in range(0,256): print(hex(i).replace(\"0x\", \"%\"))"'
 alias nocolor='sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g"'
 alias nonullbyte='sed "s/\x00//g"'
-alias urldecode='python3 -c "import sys; from urllib.parse import unquote; print(unquote(sys.argv[1]))"'
-alias urlencode='python3 -c "import sys; from urllib.parse import quote; print(quote(sys.argv[1], safe=str()))"'
-alias urlencode-deep='f(){ echo -n "$1" | xxd -p -c 1000000 | sed "s#..#%&#g"; unset -f f; }; f'
+alias urldec='python3 -c "import sys; from urllib.parse import unquote; print(unquote(sys.argv[1]))"'
+alias urlenc='python3 -c "import sys; from urllib.parse import quote; print(quote(sys.argv[1], safe=str()))"'
+alias urlencall='f(){ echo -n "$1" | xxd -p -c 1000000 | sed "s#..#%&#g"; unset -f f; }; f'
+alias urld="perl -MURI::Escape -ne 'print uri_unescape(\$_);'" # url decode stdin stream
 
 # Web Based Recon
 alias getinfo-known-creds='f(){ xdg-open "https://cirt.net/passwords?criteria=$@" ;  unset -f f; }; f'
@@ -123,16 +134,19 @@ alias getinfo-certspotter='f(){ curl -sS "https://api.certspotter.com/v1/issuanc
 alias getinfo-virustotal='f(){ xdg-open "https://www.virustotal.com/gui/domain/$1" ;  unset -f f; }; f'
 alias getinfo-crtsh='f(){ curl -sk "https://crt.sh/json?q=$1" | jq . ; unset -f f; }; f'
 alias getinfo-wayback='f(){ curl -sk "https://web.archive.org/cdx/search/cdx?fl=original&collapse=urlkey&url=*.$1" ; unset -f f; }; f'
-alias getinfo-favhash='f(){ pip install mmh3 &>/dev/null ; MMH3=$(python3 -c "from mmh3 import hash as h;from codecs import encode as e ; print(h(e(open(\"$1\", \"rb\").read(), \"base64\")))"); xdg-open "https://www.shodan.io/search?query=http.favicon.hash%3A$MMH3" ;  unset -f f; }; f'
+alias getinfo-leakix='f(){ curl -sk "https://leakix.net/api/graph/hostname/$1?v[]=hostname&v[]=ip&d=auto&l=auto" | jq | grep -ioP "hostname/[^\"]+" | cut -d/ -f2 | sort -uV ; unset -f f; }; f'
+unalias gau # gau real tool instead of omz git alias
 
 # Web Fuzzing
 alias probe-urls='f(){ while read url; do curl -sk "$url" -o /dev/null -w "%{http_code}:%{size_download}:%{url_effective}\n" ; done < "$@" ; ; unset -f f; }; f'
 alias fu='ffuf --of json -mc all -t 2 -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"'
-alias cfu='f(){ jq -r ".results[] | [(.status|tostring), (.length|tostring), (.lines|tostring), (.words|tostring), .url] | join(\"|\")" $@ | sort -uV;  unset -f f; }; f'
+alias cfu='f(){ jq -r ".results[]|[.status,.length,.lines,.words,.url]|@tsv" "$@"|sort -uV; unset -f f; }; f'
 alias cfu-clean='f(){ cfu $@ | cut -d "|" -f1,3- | awk -F/ "!_[\$1]++" | sort -u -t: -k1,1 ;  unset -f f; }; f'
 alias cfu-clean-url='f(){ cfu-clean $@ | cut -d"|" -f4- ;  unset -f f; }; f'
+alias lfu='flfu(){ outfile=fu-$(echo -n "$@" | sed -E "s#[/ ]#_#g").json ; ffuf --of json -o "$outfile" -mc all -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36" $@ ; cfu-clean "$outfile" ; unset -f flfu; }; flfu'
 alias crl='curl -sS --path-as-is -gk -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) snap Chromium/83.0.4103.106 Chrome/83.0.4103.106 Safari/537.36"'
 alias crli='crl -D /dev/stderr'
+alias crlix='crli -x http://127.0.0.1:8080/'
 
 # Docker Utils
 alias dockit='docker run --rm -it -v /tmp:/tmp -v "$PWD":/skahost -w /skahost'
@@ -148,6 +162,8 @@ alias dwipe-image='docker rmi -f $(docker images -q)'
 alias dwipe-network='docker network rm $(docker network ls -q | tr "\n" " ")'
 alias dwipe-process='docker rm $(docker ps -a -q)'
 alias dwipe-volume='docker volume rm $(docker volume ls -q | tr "\n" " ")'
+alias di='docker inspect $(docker ps | grep -vF "NAMES" | fzf | cut -d" " -f1) | jq'
+alias dip='docker inspect $(docker ps | grep -vF "NAMES" | fzf | cut -d" " -f1) | jq -r ".[0].NetworkSettings.IPAddress"'
 
 # Docker Tooling
 ## Git stuff
@@ -170,7 +186,9 @@ nmap-i() {
 alias dsecator="dockit -v ~/.secator:/root/.secator freelabz/secator" # normalize offensive arsenal
 alias drustscan='dockit rustscan/rustscan' # web path enum
 alias doneforall='dockit -w /OneForAll -v /tmp/results:/OneForAll/results shmilylty/oneforall' # noisy recon
-alias dgetfuzz='echo "AA<fuzz1>\"fuzz2'"'"'fuzz3\`%}})fuzz4\${{fuzz5\\"BB'
+alias getfuzz='echo "AA<fuzz1>\"fuzz2'"'"'fuzz3\`%}})fuzz4\${{fuzz5\\"BB'
+alias getcan='f(){ echo "skanary$(date +%s%N)"; unset -f f; }; f'
+alias getcaninfo='f(){ date -d "@${1:0:-9}" "+%Y-%m-%d %H:%M:%S.${1: -9}"; unset -f f; }; f'
 
 ## Compliance
 alias dssh-audit="dockit positronsecurity/ssh-audit"

@@ -97,6 +97,7 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
           scanners: 'misconfig,secret'
+          timeout: '30m'
           skip-dirs: '/opt/lists,/opt/ghidra,/opt/metasploit,/opt/exploitdb,/home/hacker/.rustup/toolchains,/home/hacker/.local/go,/opt/phpggc,/opt/pypotomux/wordlists,/usr/NX/etc/keys,/usr/NX/share/keys,/home/hacker/.nuclei-templates,/home/hacker/.local/share/mise/installs/go' # Chunky boys
           skip-files: '/home/hacker/.local/share/pipx/venvs/yt-dlp/lib/python3.13/site-packages/yt_dlp/extractor/shahid.py'
   
@@ -106,9 +107,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: --redact -v --exit-code=2 --report-format=sarif --report-path=results.sarif --log-level=debug
 
   trufflesecurity:
     name: trufflesecurity

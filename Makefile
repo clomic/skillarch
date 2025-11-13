@@ -22,6 +22,7 @@ install-base: sanity-check ## Install base packages
 	# Clean up, Update, Basics
 	sudo sed -e "s#.*ParallelDownloads.*#ParallelDownloads = 10#g" -i /etc/pacman.conf
 	echo 'BUILDDIR="/dev/shm/makepkg"' | sudo tee /etc/makepkg.conf.d/00-skillarch.conf
+	sudo cachyos-rate-mirrors # Increase install speed & Update repos
 	yes|sudo pacman -Scc
 	yes|sudo pacman -Syu
 	yes|sudo pacman -S --noconfirm --needed git vim tmux wget curl archlinux-keyring
@@ -30,7 +31,7 @@ install-base: sanity-check ## Install base packages
 	sudo pacman-key --refresh-keys
 
 	# Add chaotic-aur to pacman
-	sudo pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com
+	curl -sS "https://keyserver.ubuntu.com/pks/lookup?op=get&options=mr&search=0x3056513887B78AEB" | sudo pacman-key --add -
 	sudo pacman-key --lsign-key 3056513887B78AEB
 	sudo pacman --noconfirm -U 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
 	sudo pacman --noconfirm -U 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
@@ -46,7 +47,7 @@ install-base: sanity-check ## Install base packages
 	make clean
 
 install-cli-tools: sanity-check ## Install system packages
-	yes|sudo pacman -S --noconfirm --needed base-devel bison bzip2 ca-certificates cloc cmake dos2unix expect ffmpeg foremost gdb gnupg htop bottom hwinfo icu inotify-tools iproute2 jq llvm lsof ltrace make mlocate mplayer ncurses net-tools ngrep nmap openssh openssl parallel perl-image-exiftool pkgconf python-virtualenv re2c readline ripgrep rlwrap socat gnu-netcat sqlite sshpass tmate tor traceroute trash-cli tree unzip vbindiff xclip xz yay zip veracrypt git-delta viu xsv asciinema htmlq neovim glow jless websocat superfile gron exa fastfetch bat sysstat cronie
+	yes|sudo pacman -S --noconfirm --needed base-devel bison bzip2 ca-certificates cloc cmake dos2unix expect ffmpeg foremost gdb gnupg htop bottom hwinfo icu inotify-tools iproute2 jq llvm lsof ltrace make mlocate mplayer ncurses net-tools ngrep nmap openssh openssl parallel perl-image-exiftool pkgconf python-virtualenv re2c readline ripgrep rlwrap socat sqlite sshpass tmate tor traceroute trash-cli tree unzip vbindiff xclip xz yay zip veracrypt git-delta viu xsv asciinema htmlq neovim glow jless websocat superfile gron exa fastfetch bat sysstat cronie
 	sudo ln -sf /usr/bin/bat /usr/local/bin/batcat
 	bash -c "$$(curl -fsSL https://gef.blah.cat/sh)"
 	missing_exa_lib=$$(ldd $$(which exa) | grep -ioP 'libgit2.*not found' | cut -d' ' -f 1)
@@ -60,7 +61,7 @@ install-cli-tools: sanity-check ## Install system packages
 	# Install pipx & tools
 	yay --noconfirm --needed -S python-pipx
 	pipx ensurepath
-	for package in argcomplete bypass-url-parser dirsearch exegol pre-commit sqlmap wafw00f yt-dlp semgrep; do pipx install -q "$$package" && pipx inject -q "$$package" setuptools; done
+	for package in argcomplete bypass-url-parser dirsearch exegol pre-commit sqlmap wafw00f yt-dlp semgrep defaultcreds-cheat-sheet; do pipx install -q "$$package" && pipx inject -q "$$package" setuptools; done
 
 	# Install mise and all php-build dependencies
 	yes|sudo pacman -S --noconfirm --needed mise libedit libffi libjpeg-turbo libpcap libpng libxml2 libzip postgresql-libs php-gd
@@ -80,7 +81,7 @@ install-shell: sanity-check ## Install shell packages
 	[ ! -d ~/.oh-my-zsh/plugins/zsh-autosuggestions ] && git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/plugins/zsh-autosuggestions
 	[ ! -d ~/.oh-my-zsh/plugins/zsh-syntax-highlighting ] && git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/plugins/zsh-syntax-highlighting
 	[ ! -d ~/.ssh ] && mkdir ~/.ssh && chmod 700 ~/.ssh # Must exist for ssh-agent to work
-	for plugin in colored-man-pages docker extract fzf mise npm terraform tmux zsh-autosuggestions zsh-completions zsh-syntax-highlighting ssh-agent; do zsh -c "source ~/.zshrc && omz plugin enable $$plugin || true"; done
+	for plugin in colored-man-pages docker extract fzf mise npm terraform tmux zsh-autosuggestions zsh-completions zsh-syntax-highlighting ssh-agent z ; do zsh -c "source ~/.zshrc && omz plugin enable $$plugin || true"; done
 	make clean
 
 	# Install and configure fzf, tmux, vim
@@ -145,7 +146,7 @@ install-gui-tools: sanity-check ## Install system packages
 	yes|sudo pacman -S --noconfirm --needed arandr blueman cheese code code-marketplace discord dunst filezilla flameshot ghex google-chrome gparted kdenlive kompare libreoffice-fresh meld okular qbittorrent torbrowser-launcher wireshark-qt ghidra signal-desktop dragon-drop-git nomachine obs-studio-browser emote guvcview audacity polkit-gnome
 	# Do not start services in docker
 	[ ! -f /.dockerenv ] && sudo systemctl disable --now nxserver.service
-	xargs -n1 code --install-extension < config/extensions.txt
+	xargs -n1 -I{} code --install-extension {} --force < config/extensions.txt
 	yay --noconfirm --needed -S fswebcam cursor-bin
 	sudo ln -sf /usr/bin/google-chrome-stable /usr/local/bin/gog
 	make clean
@@ -182,7 +183,6 @@ install-wordlists: sanity-check ## Install wordlists
 	[ ! -d /opt/lists ] && mkdir /tmp/lists && sudo mv /tmp/lists /opt/lists
 	[ ! -f /opt/lists/rockyou.txt ] && curl -L https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt -o /opt/lists/rockyou.txt
 	[ ! -d /opt/lists/PayloadsAllTheThings ] && git clone --depth=1 https://github.com/swisskyrepo/PayloadsAllTheThings /opt/lists/PayloadsAllTheThings
-	[ ! -d /opt/lists/fuzzing-templates ] && git clone --depth=1 https://github.com/projectdiscovery/fuzzing-templates /opt/lists/fuzzing-templates
 	[ ! -d /opt/lists/BruteX ] && git clone --depth=1 https://github.com/1N3/BruteX /opt/lists/BruteX
 	[ ! -d /opt/lists/IntruderPayloads ] && git clone --depth=1 https://github.com/1N3/IntruderPayloads /opt/lists/IntruderPayloads
 	[ ! -d /opt/lists/Probable-Wordlists ] && git clone --depth=1 https://github.com/berzerk0/Probable-Wordlists /opt/lists/Probable-Wordlists

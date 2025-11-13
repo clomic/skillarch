@@ -1,10 +1,9 @@
 # SkillArch - [![Security Checks & Docker Builds](https://github.com/laluka/skillarch/actions/workflows/cicd.yml/badge.svg)](https://github.com/laluka/skillarch/actions/workflows/cicd.yml)
 
-<img src='assets/skillarch-full.png' width='250'>
+<img src='assets/logo-round-cold.png' width='250'><img src='assets/logo-round-hot.png' width='250'>
 
-> The lite/full install takes 20/30 minutes 🕑️\
-> Please watch this intro video to onboard yourself! 🙏\
-> ➡️ TBD ⬅️
+> The lite/full install takes 10/15 minutes 🕑️\
+> And here is a gentle rice 😇
 
 <img src='assets/rice-01.png' width='800'>
 
@@ -14,6 +13,10 @@
 
 ### SIMPLE / NO-CUSTOMIZE / NO-BACKUP
 
+> 🔴🎬🙏 Please watch this 5mn intro video to onboard yourself! 🙏🎬🔴
+
+[![](https://img.youtube.com/vi/HB1hxJgGoDo/0.jpg)](https://youtu.be/HB1hxJgGoDo)
+
 - First, download the `Desktop Edition` at https://cachyos.org/download/
 - Install it, pick the `Gnome` flavor
 - Then open `Console` and install SkillArch 🥂
@@ -22,9 +25,16 @@
 git clone https://github.com/laluka/skillarch
 sudo mv skillarch /opt/skillarch && cd /opt/skillarch
 make install # Then reboot && pick i3 at login
+
+# Update by running this command (will pull changes & apply them):
+ska-update-simple
 ```
 
 ###  ADVANCED / FULL-CUSTOMIZE / FULL-BACKUP
+
+> 🔴🎬🙏 Please watch this 10mn intro video to onboard yourself! 🙏🎬🔴
+
+[![](https://img.youtube.com/vi/Wq6CmJJnTJk/0.jpg)](https://youtu.be/Wq6CmJJnTJk)
 
 1. [Fork this repo](https://github.com/laluka/skillarch/fork)
 1. Install `your` SkillArch with the [usual install process](#simple--no-customize--no-backup)
@@ -32,8 +42,12 @@ make install # Then reboot && pick i3 at login
 1. When you'll want to `add a tweak` or  `update your setup` 🫶
 
 ```bash
+# Update by running this command (simply follow the process):
+ska-update-advanced
+
+# "The process" is mostly like below:
 # SAVE your changes on your repo
-git add foo ; git commit -m 'added foo' ; git push
+git add foo ; git commit -m i-added-foo ; git push
 # Then, from a CLEAN git state
 ska && git status
 # PULL & CHECKOUT upstream changes
@@ -55,6 +69,10 @@ ska-update-simple
 ---
 
 ## Documentation
+
+> 🔴🎬🙏 Please watch this 1h FULL TOUR video so you can make the most out of your SkillArch Adventure! 🙏🎬🔴
+
+[![](https://img.youtube.com/vi/pUm7KEgM2g8/0.jpg)](https://youtu.be/pUm7KEgM2g8)
 
 ### Get Help
 
@@ -100,18 +118,18 @@ make help
 ### MISC Gotchas
 
 - If `make install` or `ska-update-simple` loop on a y/n question, fix your pacman config first! 😉
-- The main config is azerty (shhh I know), here is a refetrence to [tweak your config back to qwerty](https://github.com/CachyOS/cachyos-i3wm-settings/blob/develop/etc/skel/.config/i3/config)
+- The main config is azerty (shhh I know), here is a reference to [tweak your config back to qwerty](https://github.com/CachyOS/cachyos-i3wm-settings/blob/develop/etc/skel/.config/i3/config)
 - Kitty visual/rectangle select is done with `ctrl+alt+click/drag`, you're welcome!
 - The docker `latest` is actually the `lite` image with everything CLI related
 - The docker `full` image contains GUI stuff and wordlists
 - Why `sleep` in `Makefile`? Building TOO fast was triggering github limit-rate
-- If for some reasons, multiple polybar appear, it's because no primary monitor is assigned
- - Check it's actually true: `polybar  --list-monitors` # Should have one primary label
- - Fix it by openin `arandr` + right click to set `primary` on your main screen.
- - Reload i3 with `mod+Shift+r`, then make it permanent, aka goto doc `Multiple Monitor`
 - No [CachyOs on ARM](https://discuss.cachyos.org/t/arm-future-for-cachyos/727), therefore no SkillArch on ARM.
+- Extensions are installed for VsCode. Cursor packaging is weird, so while it's open: `ctrl+shift+p` > `Import VsCode Extensions`
+- Chrome extensions are not installed by default. Have a look to [/config/chrome-extensions.lst](/config/chrome-extensions.lst)
 
 ### VM & VirtualBox Stuff
+
+> I've had tons of issues with VirtualBox laterly, and things worked PERFECTLY on Gnome Boxes (from `qemu-full` and `gnome-extra`), I strongly suggest using it instead, see the install guide above.
 
 - The `ska-vbox-install-guestutils` alias will auto-install `virtualbox-guest-utils`
 - In `VirtualBox`, when i3 starts it will run `VBoxClient-all` for clipboard & goodies
@@ -134,6 +152,11 @@ echo "$HOME/.screenlayout/arandr-main-layout.sh &" > ~/.xprofile
 chmod +x ~/.xprofile
 # Logout, Login, should work first try!
 ```
+
+- If for some reasons, multiple polybar appear, it's because no primary monitor is assigned
+ - Check it's actually true: `polybar  --list-monitors` # Should have one primary label
+ - Fix it by openin `arandr` + right click to set `primary` on your main screen.
+ - Reload i3 with `mod+Shift+r`, then make it permanent, aka goto doc `Multiple Monitor`
 
 ### Docker Usage
 
@@ -163,6 +186,7 @@ bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ to
 bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3status
 bindsym XF86MonBrightnessUp exec --no-startup-id brightnessctl set +20%   # && notify-send --icon=/dev/null --expire-time=500 "Brightness +20%"
 bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl set 20%- # && notify-send --icon=/dev/null --expire-time=500 "Brightness -20%"
+bindsym $mod+Shift+l exec --no-startup-id brightnessctl set 1%
 bindsym $mod+m exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
 
 # Term & Apps
@@ -248,11 +272,11 @@ bindsym $mod+k exec cursor
 
 ### Installed Packages, Plugins, Tools
 
-- For an exhaustive view inspect [Makefile](/Makefile)
+- For an exhaustive view inspect [/Makefile](/Makefile)
 
 ```bash
 # Pacman Packages
-arandr asciinema base-devel bat bettercap bison blueman bottom brightnessctl burpsuite bzip2 ca-certificates cheese cloc cmake code code-marketplace curl discord dmenu docker docker-compose dos2unix dragon-drop-git dunst emote exa expect fastfetch feh ffmpeg filezilla flameshot foremost fq fx gdb ghex ghidra git git-delta gitleaks glow gnupg google-chrome gparted gron guvcview hashcat htmlq htop hwinfo i3-gaps i3blocks i3lock i3lock-fancy-git i3status icu inotify-tools iproute2 jless jq kdenlive kitty kompare lazygit libedit libffi libjpeg-turbo libpcap libpng libreoffice-fresh libxml2 libzip llvm lsof ltrace make meld metasploit mise mlocate mplayer ncurses neovim net-tools ngrep nm-connection-editor nmap nomachine obs-studio-browser okular opensnitch openssh openssl parallel perl-image-exiftool php-gd picom pkgconf polybar postgresql-libs python-virtualenv qbittorrent re2c readline ripgrep rlwrap rofi signal-desktop socat sqlite sshpass superfile sysstat tmate tmux tor torbrowser-launcher traceroute trash-cli tree unzip vbindiff veracrypt vim viu vlc-luajit websocat wget wireshark-qt xclip xsv xz yay zip zsh zsh-autosuggestions zsh-completions zsh-history-substring-search zsh-syntax-highlighting zsh-theme-powerlevel10k cronie audacity xorg-xhost gnu-netcat archlinux-keyring jdk21-openjdk polkit-gnome
+arandr asciinema base-devel bat bettercap bison blueman bottom brightnessctl burpsuite bzip2 ca-certificates cheese cloc cmake code code-marketplace curl discord dmenu docker docker-compose dos2unix dragon-drop-git dunst emote exa expect fastfetch feh ffmpeg filezilla flameshot foremost fq fx gdb ghex ghidra git git-delta gitleaks glow gnupg google-chrome gparted gron guvcview hashcat htmlq htop hwinfo i3-gaps i3blocks i3lock i3lock-fancy-git i3status icu inotify-tools iproute2 jless jq kdenlive kitty kompare lazygit libedit libffi libjpeg-turbo libpcap libpng libreoffice-fresh libxml2 libzip llvm lsof ltrace make meld metasploit mise mlocate mplayer ncurses neovim net-tools ngrep nm-connection-editor nmap nomachine obs-studio-browser okular opensnitch openssh openssl parallel perl-image-exiftool php-gd picom pkgconf polybar postgresql-libs python-virtualenv qbittorrent re2c readline ripgrep rlwrap rofi signal-desktop socat sqlite sshpass superfile sysstat tmate tmux tor torbrowser-launcher traceroute trash-cli tree unzip vbindiff veracrypt vim viu vlc-luajit websocat wget wireshark-qt xclip xsv xz yay zip zsh zsh-autosuggestions zsh-completions zsh-history-substring-search zsh-syntax-highlighting zsh-theme-powerlevel10k cronie audacity xorg-xhost archlinux-keyring jdk21-openjdk polkit-gnome
 
 # Yay packages
 ffuf gau pdtm-bin waybackurls cursor-bin fswebcam i3-battery-popup-git python-pipx rofi-power-menu fabric-ai-bin
@@ -307,7 +331,6 @@ https://github.com/hugsy/gef
 # Clones Wordlists
 https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt
 https://github.com/swisskyrepo/PayloadsAllTheThings
-https://github.com/projectdiscovery/fuzzing-templates
 https://github.com/1N3/BruteX
 https://github.com/1N3/IntruderPayloads
 https://github.com/berzerk0/Probable-Wordlists
