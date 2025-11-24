@@ -202,7 +202,7 @@ install-hardening: sanity-check ## Install hardening tools
 
 install-clomic: sanity-check ## Install clomic tools
 	yes|sudo pacman -S --noconfirm --needed obsidian minicom sagemath 7zip
-	mise use uv
+	mise use -g uv@latest
 	sudo ln -sf /opt/skillarch/config/minicom/minirc.dfl /etc/minirc.dfl
 	[ ! -d /opt/cyberchef ] && mkdir -p /tmp/cyberchef && wget "https://gchq.github.io/CyberChef/CyberChef_v10.19.4.zip" -O /tmp/cyberchef/cc.zip && 7z x -o/tmp/cyberchef /tmp/cyberchef/cc.zip && rm /tmp/cyberchef/cc.zip && gunzip /tmp/cyberchef/index.html.gz && sudo mv /tmp/cyberchef /opt/cyberchef
 	make clean

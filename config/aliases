@@ -92,13 +92,7 @@ alias b64e='base64 -w 0'
 alias back-n='sed -u "s/\\\n/\n/g"'
 alias back-t='sed -u "s/\\\t/\t/g"'
 alias cgrep='grep --color=always'
-<<<<<<< HEAD
 alias rgrep='grep -r'
-=======
-alias lgrep='grep --line-buffered'
-alias sortn='sort -V | uniq -c | sort -n'
-alias grephilight='export GREP_COLORS="mt=30;46"'
->>>>>>> upstream/main
 alias cheat='f(){ curl -s "cheat.sh/$1";  unset -f f; }; f'
 alias clean-swap='sudo swapoff -a && sudo swapon -a'
 alias cpy='xclip -selection clipboard'
