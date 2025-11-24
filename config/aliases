@@ -12,6 +12,7 @@ alias ska-sudo-unlock='su -c "faillock --user $USER --reset"'
 alias fastfetch='/usr/bin/fastfetch --logo /opt/skillarch/assets/logo-round-hot.png --logo-width 50'
 alias neofetch='fastfetch'
 alias hifetch='fastfetch'
+alias didi='sudo pacman -Sy discord'
 
 ## Directories, Git, Ide
 alias dl='cd ~/Downloads'
