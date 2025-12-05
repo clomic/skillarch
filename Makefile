@@ -201,8 +201,8 @@ install-hardening: sanity-check ## Install hardening tools
 	make clean
 
 install-clomic: sanity-check ## Install clomic tools
-	yes|sudo pacman -S --noconfirm --needed obsidian minicom sagemath 7zip qsvcd
-	curl -sL $(curl -s https://api.github.com/repos/dathere/qsv/releases/latest | jq -r '.assets[].browser_download_url | select(contains("x86_64-unknown-linux-musl"))') -o /tmp/qsv-latest.zip && 7z x /tmp/qsv-latest.zip -o/tmp qsvlite && mv /tmp/qsvlite ~/.exegol/my-resources/bin/qsv && rm /tmp/qsv-latest.zip
+	yes|sudo pacman -S --noconfirm --needed obsidian minicom sagemath 7zip qsv
+	curl -sL $$(curl -s https://api.github.com/repos/dathere/qsv/releases/latest | jq -r '.assets[].browser_download_url | select(contains("x86_64-unknown-linux-musl"))') -o /tmp/qsv-latest.zip && 7z x /tmp/qsv-latest.zip -o/tmp qsvlite && mv /tmp/qsvlite ~/.exegol/my-resources/bin/qsv && rm /tmp/qsv-latest.zip
 	mise use -g uv@latest
 	sudo ln -sf /opt/skillarch/config/minicom/minirc.dfl /etc/minirc.dfl
 	[ ! -d /opt/cyberchef ] && mkdir -p /tmp/cyberchef && wget "https://gchq.github.io/CyberChef/CyberChef_v10.19.4.zip" -O /tmp/cyberchef/cc.zip && 7z x -o/tmp/cyberchef /tmp/cyberchef/cc.zip && rm /tmp/cyberchef/cc.zip && gunzip /tmp/cyberchef/index.html.gz && sudo mv /tmp/cyberchef /opt/cyberchef
