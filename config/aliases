@@ -45,7 +45,7 @@ alias git-pull-all='find . -maxdepth 2 -name ".git" | cut -d/ -f2 | parallel -j1
 alias gdh='git diff HEAD'
 
 ## File Management
-alias l="exa -ll --group-directories-first $@"
+alias l="eza -ll --group-directories-first $@"
 alias la="l -a $@"
 alias t="l -T $@"
 alias t2="t -L 2 $@"
@@ -95,6 +95,7 @@ alias killit='sudo kill -KILL'
 # Misc Utils
 alias upload='f(){ curl -F"file=@$1" https://0x0.st;  unset -f f; }; f'
 alias usleep='f(){ python3 -c "import time; time.sleep($1)";  unset -f f; }; f'
+alias nosleep='xset s off ; xset -dpms ; xset s noblank'
 alias makeqrcode='qrencode -t ANSI -o -'
 alias b64d='base64 -d'
 alias b64e='base64 -w 0'

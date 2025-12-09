@@ -9,13 +9,14 @@ help: ## Show this help message
 	@awk 'BEGIN {FS = ":.*##"; printf "\n"} /^[a-zA-Z0-9_-]+:.*?##/ { printf "  %-18s %s\n", $$1, $$2 } /^##@/ { printf "\n%s\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 	@echo ''
 
-install: install-base install-cli-tools install-shell install-docker install-gui install-gui-tools install-offensive install-wordlists install-hardening install-clomic clean ## Install SkillArch
+install: install-base install-cli-tools install-shell install-docker install-gui install-gui-tools install-offensive install-wordlists install-hardening clean ## Install SkillArch
 	@echo "You are all set up! Enjoy ! 🌹"
 
 sanity-check:
 	set -x
 	@# Ensure we are in /opt/skillarch or /opt/skillarch-original (maintainer only)
 	@[ "$$(pwd)" != "/opt/skillarch" ] && [ "$$(pwd)" != "/opt/skillarch-original" ] && echo "You must be in /opt/skillarch or /opt/skillarch-original to run this command" && exit 1
+	@xset s off ; xset -dpms ; xset s noblank
 	@sudo -v || (echo "Error: sudo access is required" ; exit 1)
 
 install-base: sanity-check ## Install base packages
@@ -47,11 +48,9 @@ install-base: sanity-check ## Install base packages
 	make clean
 
 install-cli-tools: sanity-check ## Install system packages
-	yes|sudo pacman -S --noconfirm --needed base-devel bison bzip2 ca-certificates cloc cmake dos2unix expect ffmpeg foremost gdb gnupg htop bottom hwinfo icu inotify-tools iproute2 jq llvm lsof ltrace make mlocate mplayer ncurses net-tools ngrep nmap openssh openssl parallel perl-image-exiftool pkgconf python-virtualenv re2c readline ripgrep rlwrap socat sqlite sshpass tmate tor traceroute trash-cli tree unzip vbindiff xclip xz yay zip veracrypt git-delta viu xsv asciinema htmlq neovim glow jless websocat superfile gron exa fastfetch bat sysstat cronie
+	yes|sudo pacman -S --noconfirm --needed base-devel bison bzip2 ca-certificates cloc cmake dos2unix expect ffmpeg foremost gdb gnupg htop bottom hwinfo icu inotify-tools iproute2 jq llvm lsof ltrace make mlocate mplayer ncurses net-tools ngrep nmap openssh openssl parallel perl-image-exiftool pkgconf python-virtualenv re2c readline ripgrep rlwrap socat sqlite sshpass tmate tor traceroute trash-cli tree unzip vbindiff xclip xz yay zip veracrypt git-delta viu qsv asciinema htmlq neovim glow jless websocat superfile gron eza fastfetch bat sysstat cronie
 	sudo ln -sf /usr/bin/bat /usr/local/bin/batcat
 	bash -c "$$(curl -fsSL https://gef.blah.cat/sh)"
-	missing_exa_lib=$$(ldd $$(which exa) | grep -ioP 'libgit2.*not found' | cut -d' ' -f 1)
-	[ ! -z $$missing_exa_lib ] && sudo ln -s /usr/lib/libgit2.so  "/usr/lib/$$missing_exa_lib"
 	# nvim config
 	[ ! -d ~/.config/nvim ] && git clone --depth=1 https://github.com/LazyVim/starter ~/.config/nvim
 	[ -f ~/.config/nvim/init.lua ] && [ ! -L ~/.config/nvim/init.lua ] && mv ~/.config/nvim/init.lua ~/.config/nvim/init.lua.skabak
@@ -198,14 +197,6 @@ install-hardening: sanity-check ## Install hardening tools
 	yes|sudo pacman -S --noconfirm --needed opensnitch
 	# OPT-IN opensnitch as an egress firewall
 	# sudo systemctl enable --now opensnitchd.service
-	make clean
-
-install-clomic: sanity-check ## Install clomic tools
-	yes|sudo pacman -S --noconfirm --needed obsidian minicom sagemath 7zip qsv
-	curl -sL $$(curl -s https://api.github.com/repos/dathere/qsv/releases/latest | jq -r '.assets[].browser_download_url | select(contains("x86_64-unknown-linux-musl"))') -o /tmp/qsv-latest.zip && 7z x /tmp/qsv-latest.zip -o/tmp qsvlite && mv /tmp/qsvlite ~/.exegol/my-resources/bin/qsv && rm /tmp/qsv-latest.zip
-	mise use -g uv@latest
-	sudo ln -sf /opt/skillarch/config/minicom/minirc.dfl /etc/minirc.dfl
-	[ ! -d /opt/cyberchef ] && mkdir -p /tmp/cyberchef && wget "https://gchq.github.io/CyberChef/CyberChef_v10.19.4.zip" -O /tmp/cyberchef/cc.zip && 7z x -o/tmp/cyberchef /tmp/cyberchef/cc.zip && rm /tmp/cyberchef/cc.zip && gunzip /tmp/cyberchef/index.html.gz && sudo mv /tmp/cyberchef /opt/cyberchef
 	make clean
 
 update: sanity-check ## Update SkillArch
