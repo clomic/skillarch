@@ -9,7 +9,7 @@ help: ## Show this help message
 	@awk 'BEGIN {FS = ":.*##"; printf "\n"} /^[a-zA-Z0-9_-]+:.*?##/ { printf "  %-18s %s\n", $$1, $$2 } /^##@/ { printf "\n%s\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 	@echo ''
 
-install: install-base install-cli-tools install-shell install-docker install-gui install-gui-tools install-offensive install-wordlists install-hardening clean ## Install SkillArch
+install: install-base install-cli-tools install-shell install-docker install-gui install-gui-tools install-offensive install-wordlists install-hardening install-clomic clean ## Install SkillArch
 	@echo "You are all set up! Enjoy ! 🌹"
 
 sanity-check:
@@ -142,7 +142,8 @@ install-gui: sanity-check ## Install gui, i3, polybar, kitty, rofi, picom
 
 install-gui-tools: sanity-check ## Install system packages
 	yes|sudo pacman -S --noconfirm --needed vlc-luajit # Must be done before obs-studio-browser to avoid conflicts
-	yes|sudo pacman -S --noconfirm --needed arandr blueman cheese code code-marketplace discord dunst filezilla flameshot ghex google-chrome gparted kdenlive kompare libreoffice-fresh meld okular qbittorrent torbrowser-launcher wireshark-qt ghidra signal-desktop dragon-drop-git nomachine obs-studio-browser emote guvcview audacity polkit-gnome
+	yes|sudo pacman -S --needed obs-studio-browser
+	yes|sudo pacman -S --noconfirm --needed arandr blueman cheese code code-marketplace discord dunst filezilla flameshot ghex google-chrome gparted kdenlive kompare libreoffice-fresh meld okular qbittorrent torbrowser-launcher wireshark-qt ghidra signal-desktop dragon-drop-git nomachine emote guvcview audacity polkit-gnome
 	# Do not start services in docker
 	[ ! -f /.dockerenv ] && sudo systemctl disable --now nxserver.service
 	xargs -n1 -I{} code --install-extension {} --force < config/extensions.txt
@@ -197,6 +198,14 @@ install-hardening: sanity-check ## Install hardening tools
 	yes|sudo pacman -S --noconfirm --needed opensnitch
 	# OPT-IN opensnitch as an egress firewall
 	# sudo systemctl enable --now opensnitchd.service
+	make clean
+
+install-clomic: sanity-check ## Install clomic tools
+	yes|sudo pacman -S --noconfirm --needed obsidian minicom sagemath 7zip
+	curl -sL $$(curl -s https://api.github.com/repos/dathere/qsv/releases/latest | jq -r '.assets[].browser_download_url | select(contains("x86_64-unknown-linux-musl"))') -o /tmp/qsv-latest.zip && 7z x /tmp/qsv-latest.zip -o/tmp qsvlite && mv /tmp/qsvlite ~/.exegol/my-resources/bin/qsv && rm /tmp/qsv-latest.zip
+	mise use -g uv@latest
+	sudo ln -sf /opt/skillarch/config/minicom/minirc.dfl /etc/minirc.dfl
+	[ ! -d /opt/cyberchef ] && mkdir -p /tmp/cyberchef && curl -sL $$(curl -s https://api.github.com/repos/gchq/CyberChef/releases/latest | jq -r '.assets[].browser_download_url') -o /tmp/cyberchef/cc.zip && 7z x -o/tmp/cyberchef /tmp/cyberchef/cc.zip && rm /tmp/cyberchef/cc.zip && gunzip /tmp/cyberchef/index.html.gz && sudo mv /tmp/cyberchef /opt/cyberchef
 	make clean
 
 update: sanity-check ## Update SkillArch
