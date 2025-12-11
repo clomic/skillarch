@@ -16,7 +16,6 @@ sanity-check:
 	set -x
 	@# Ensure we are in /opt/skillarch or /opt/skillarch-original (maintainer only)
 	@[ "$$(pwd)" != "/opt/skillarch" ] && [ "$$(pwd)" != "/opt/skillarch-original" ] && echo "You must be in /opt/skillarch or /opt/skillarch-original to run this command" && exit 1
-	@xset s off ; xset -dpms ; xset s noblank
 	@sudo -v || (echo "Error: sudo access is required" ; exit 1)
 
 install-base: sanity-check ## Install base packages
