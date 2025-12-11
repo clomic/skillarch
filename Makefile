@@ -155,6 +155,7 @@ install-offensive: sanity-check ## Install offensive tools
 	yes|sudo pacman -S --noconfirm --needed metasploit fx lazygit fq gitleaks jdk21-openjdk burpsuite hashcat bettercap
 	sudo sed -i 's#$JAVA_HOME#/usr/lib/jvm/java-21-openjdk#g' /usr/bin/burpsuite
 	yay --noconfirm --needed -S ffuf gau pdtm-bin waybackurls fabric-ai-bin
+	[ -f /usr/bin/pdtm ] && sudo chown "$$USER:$$USER" /usr/bin/pdtm && sudo mv /usr/bin/pdtm ~/.pdtm/go/bin
 
 	# Hide stdout and Keep stderr for CI builds
 	mise exec -- go install github.com/sw33tLie/sns@latest > /dev/null
@@ -163,6 +164,7 @@ install-offensive: sanity-check ## Install offensive tools
 	mise exec -- go install github.com/sensepost/gowitness@latest > /dev/null
 	sleep 30
 	zsh -c "source ~/.zshrc && pdtm -install-all -v"
+	zsh -c "source ~/.zshrc && pdtm -update-all -v"
 	zsh -c "source ~/.zshrc && nuclei -update-templates -update-template-dir ~/.nuclei-templates"
 
 	# Clone custom tools
