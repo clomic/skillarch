@@ -1,0 +1,11 @@
+# Config file dedicated to the user's personal aliases shared between all exegol containers
+alias suc='sort|uniq -c'
+alias suq='sort|uniq'
+alias qs='qsv search'
+alias qsh='qsv headers'
+alias qsl='qsv select'
+alias qsu='qsv sort -u'
+alias cpy='tee >(xsel -i)'
+alias cpyc='tee >(xsel -ib)'
+
+cheat() { curl -s "cheat.sh/$1" }
