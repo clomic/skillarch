@@ -112,6 +112,7 @@ alias mcrypt-dec='mdecrypt'
 alias get-meteo='curl https://wttr.in/'
 alias fab='fabric-ai -s'
 cchef() (set -e;cd /opt/cyberchef && xdg-open index.html >&/dev/null &;)
+ew() { local d="$HOME/.exegol/workspaces/$1"; [[ -d "$d" ]] && cd "$d"|| echo "Error: no $d folder" >&2; }
 
 # Python
 alias pv='f(){ if [ -z "$1" ] ; then echo "Use: pv 3.12" ; else mise use "python@$1" ; mise config set env._.python.venv.path .venv ; mise config set --type list env._.python.venv.uv_create_args -- --seed ; mise config set --type bool env._.python.venv.create true ; mise exec -- which python ; mise exec -- python --version ; fi;  unset -f f; }; f'
@@ -218,3 +219,5 @@ alias dsysdig='dockit --privileged -v /var/run/docker.sock:/host/var/run/docker.
 alias dswagger-editor='dockit -p 127.0.0.1:8000:8080 docker.swagger.io/swaggerapi/swagger-editor'
 alias dcarbonyl='dockit fathyb/carbonyl' # Chrome in Terminal
 alias dphp7='dockit php:7.4' # Arch suffers from "too new libraries" making it hard to build
+
+source ~/.my_aliases
