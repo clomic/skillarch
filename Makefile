@@ -210,6 +210,7 @@ install-clomic: sanity-check ## Install clomic tools
 	sudo ln -sf /opt/skillarch/config/minicom/minirc.dfl /etc/minirc.dfl
 	[ ! -d /opt/cyberchef ] && mkdir -p /tmp/cyberchef && curl -sL $$(curl -s https://api.github.com/repos/gchq/CyberChef/releases/latest | jq -r '.assets[].browser_download_url') -o /tmp/cyberchef/cc.zip && 7z x -o/tmp/cyberchef /tmp/cyberchef/cc.zip && rm /tmp/cyberchef/cc.zip && gunzip /tmp/cyberchef/index.html.gz && sudo mv /tmp/cyberchef /opt/cyberchef
 	install-sysreptor
+	install-vmware
 	make clean
 
 install-sysreptor:  ## Install sysreptor
@@ -246,7 +247,7 @@ install-sysreptor:  ## Install sysreptor
 
 install-vmware:
 	@if [ "$(systemd-detect-virt)" = "vmware" ]; then
-    	echo "VMware detected..."
+		echo "VMware detected..."
 		yes|sudo pacman -S --noconfirm --needed open-vm-tools
 		sudo systemctl enable --now vmtoolsd
 		sudo systemctl enable --now vmware-vmblock-fuse
