@@ -45,7 +45,7 @@ alias git-pull-all='find . -maxdepth 2 -name ".git" | cut -d/ -f2 | parallel -j1
 alias gdh='git diff HEAD'
 
 ## File Management
-alias l="eza -ll --group-directories-first $@"
+alias l="eza -ll --group-directories-first --icons $@"
 alias la="l -a $@"
 alias t="l -T $@"
 alias t2="t -L 2 $@"
@@ -113,6 +113,11 @@ alias get-meteo='curl https://wttr.in/'
 alias fab='fabric-ai -s'
 cchef() (set -e;cd /opt/cyberchef && xdg-open index.html >&/dev/null &;)
 ew() { local d="$HOME/.exegol/workspaces/$1"; [[ -d "$d" ]] && cd "$d"|| echo "Error: no $d folder" >&2; }
+alias exsta='exegol start'
+alias exsto='exegol stop'
+srsta() (set -e;cd /opt/sysreptor/deploy && docker compose up -d && sleep 10 && xdg-open http://127.1:8000 >&/dev/null &;)
+srsto() (set -e;cd /opt/sysreptor/deploy && docker compose down;)
+
 
 # Python
 alias pv='f(){ if [ -z "$1" ] ; then echo "Use: pv 3.12" ; else mise use "python@$1" ; mise config set env._.python.venv.path .venv ; mise config set --type list env._.python.venv.uv_create_args -- --seed ; mise config set --type bool env._.python.venv.create true ; mise exec -- which python ; mise exec -- python --version ; fi;  unset -f f; }; f'
