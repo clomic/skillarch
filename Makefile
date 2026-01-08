@@ -202,51 +202,55 @@ install-hardening: sanity-check ## Install hardening tools
 	make clean
 
 install-clomic: sanity-check ## Install clomic tools
+	git remote set-url origin git@github.com:clomic/skillarch.git
 	yes|sudo pacman -S --noconfirm --needed obsidian minicom sagemath 7zip ncdu
 # 	yay --noconfirm --needed -S caido-cli caido-desktop
 	curl -sL $$(curl -s https://api.github.com/repos/dathere/qsv/releases/latest | jq -r '.assets[].browser_download_url | select(contains("x86_64-unknown-linux-musl"))') -o /tmp/qsv-latest.zip && 7z x /tmp/qsv-latest.zip -o/tmp qsvlite && mv /tmp/qsvlite ~/.exegol/my-resources/bin/qsv && rm /tmp/qsv-latest.zip
 	sudo cp /opt/skillarch/config/exegol/aliases ~/.exegol/my-resources/setup/zsh
 	mise use -g uv@latest
+	sudo ln -sf /opt/skillarch/config/systemd/resolved.conf /etc/systemd/resolved.conf
 	sudo ln -sf /opt/skillarch/config/minicom/minirc.dfl /etc/minirc.dfl
-	[ ! -d /opt/cyberchef ] && mkdir -p /tmp/cyberchef && curl -sL $$(curl -s https://api.github.com/repos/gchq/CyberChef/releases/latest | jq -r '.assets[].browser_download_url') -o /tmp/cyberchef/cc.zip && 7z x -o/tmp/cyberchef /tmp/cyberchef/cc.zip && rm /tmp/cyberchef/cc.zip && gunzip /tmp/cyberchef/index.html.gz && sudo mv /tmp/cyberchef /opt/cyberchef
-	install-sysreptor
-	install-vmware
+	[ ! -d /opt/cyberchef ] && mkdir -p /tmp/cyberchef && curl -sL $$(curl -s https://api.github.com/repos/gchq/CyberChef/releases/latest | jq -r '.assets[].browser_download_url') -o /tmp/cyberchef/cc.zip && 7z x -o/tmp/cyberchef /tmp/cyberchef/cc.zip && rm /tmp/cyberchef/cc.zip && mv /tmp/cyberchef/CyberChef*.html /tmp/cyberchef/index.html && sudo mv /tmp/cyberchef /opt/cyberchef
+	make install-sysreptor
+	make install-vmware
 	make clean
 
 install-sysreptor:  ## Install sysreptor
-	@if [ ! -d /opt/sysreptor ]; then \
-		echo "Installing Sysreptor..."; \
-		curl -sL -o /tmp/sysreptor.tar.gz https://github.com/syslifters/sysreptor/releases/latest/download/setup.tar.gz; \
-		tar -xzf /tmp/sysreptor.tar.gz -C /tmp; \
-		sudo mv /tmp/sysreptor /opt; \
-		cd /opt/sysreptor/deploy; \
-		cp app.env.example app.env; \
-		\
-		SECRET_KEY=$$(openssl rand -base64 64 | tr -d '\n='); \
-		sed -i "s|^SECRET_KEY=.*|SECRET_KEY=\"$$SECRET_KEY\"|" app.env; \
-		\
-		KEY_ID=$$(uuidgen); \
-		AES_KEY=$$(openssl rand -base64 32 | tr -d '\n'); \
+	@if [ ! -d /opt/sysreptor ]; then
+		echo "Installing Sysreptor..."; 
+		curl -sL -o /tmp/sysreptor.tgz https://github.com/syslifters/sysreptor/releases/latest/download/setup.tar.gz
+		tar -xzf /tmp/sysreptor.tgz -C /tmp
+		rm /tmp/sysreptor.tgz
+		sudo mv /tmp/sysreptor /opt
+		cd /opt/sysreptor/deploy
+		cp app.env.example app.env
+
+		SECRET_KEY=$$(openssl rand -base64 64 | tr -d '\n=')
+		sed -i "s|^SECRET_KEY=.*|SECRET_KEY=\"$$SECRET_KEY\"|" app.env
+
+		KEY_ID=$$(uuidgen);
+		AES_KEY=$$(openssl rand -base64 32 | tr -d '\n');
 		sed -i \
 		  -e "s|^#\\? *ENCRYPTION_KEYS=.*|ENCRYPTION_KEYS=[{\"id\": \"$$KEY_ID\", \"key\": \"$$AES_KEY\", \"cipher\": \"AES-GCM\", \"revoked\": false}]|" \
 		  -e "s|^#\\? *DEFAULT_ENCRYPTION_KEY_ID=.*|DEFAULT_ENCRYPTION_KEY_ID=\"$$KEY_ID\"|" \
-		  app.env; \
+		  app.env
 		cat <<- EOF >> app.env
 
 		ENABLED_PLUGINS="cyberchef,graphqlvoyager,checkthehash,projectnumber,markdownexport"
 		PREFERRED_LANGUAGES="en-US,fr-FR"
 		EOF
-		docker volume create sysreptor-db-data; \
-		docker volume create sysreptor-app-data; \
-		docker compose up -d; \
-		username=reptor; \
+		docker volume create sysreptor-db-data
+		docker volume create sysreptor-app-data
+		docker compose up -d 
+		username=reptor 
+		echo "You will be prompt for the creation of $$username password"
 		docker compose exec app python3 manage.py createsuperuser --username "$$username"
-	else \
-		echo "Sysreptor already installed, skipping."; \
+	else 
+		echo "Sysreptor already installed, skipping."
 	fi
 
 install-vmware:
-	@if [ "$(systemd-detect-virt)" = "vmware" ]; then
+	@if [ "$$(systemd-detect-virt)" = "vmware" ]; then
 		echo "VMware detected..."
 		yes|sudo pacman -S --noconfirm --needed open-vm-tools
 		sudo systemctl enable --now vmtoolsd
