@@ -256,7 +256,7 @@ install-vmware:
 
 opti-btrfs:
 	sudo ln -sf /opt/skillarch/config/snapper/root /etc/snapper/configs/root
-	sudo snapper delete $(sudo snapper list | egrep 'pre|post' | awk '{print $1}' | head -n -3 | xargs)
+	sudo snapper delete $$(sudo snapper list | grep -E 'pre|post' | awk '{print $$1}' | head -n -3 | xargs)
 	sudo btrfs balance start -dusage=0 /.snapshots
 	sudo btrfs balance start -dusage=5 /
 
