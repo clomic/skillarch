@@ -45,8 +45,9 @@ alias git-pull-all='find . -maxdepth 2 -name ".git" | cut -d/ -f2 | parallel -j1
 alias gdh='git diff HEAD'
 
 ## File Management
-alias l="eza -ll --group-directories-first --icons $@"
+alias l="eza -l --group-directories-first --icons $@"
 alias la="l -a $@"
+alias laa="l -aa $@"
 alias t="l -T $@"
 alias t2="t -L 2 $@"
 alias t3="t -L 3 $@"
@@ -160,6 +161,7 @@ alias lfu='flfu(){ outfile=fu-$(echo -n "$@" | sed -E "s#[/ ]#_#g").json ; ffuf 
 alias crl='curl -sS --path-as-is -gk -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) snap Chromium/83.0.4103.106 Chrome/83.0.4103.106 Safari/537.36"'
 alias crli='crl -D /dev/stderr'
 alias crlix='crli -x http://127.0.0.1:8080/'
+alias kdo='caido --no-sandbox >&/dev/null &'
 
 # Docker Utils
 alias dockit='docker run --rm -it -v /tmp:/tmp -v "$PWD":/skahost -w /skahost'

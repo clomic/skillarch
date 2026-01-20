@@ -142,7 +142,7 @@ install-gui: sanity-check ## Install gui, i3, polybar, kitty, rofi, picom
 install-gui-tools: sanity-check ## Install system packages
 	yes|sudo pacman -S --noconfirm --needed vlc-luajit # Must be done before obs-studio-browser to avoid conflicts
 	yes|sudo pacman -S --needed obs-studio-browser
-	yes|sudo pacman -S --noconfirm --needed arandr blueman code code-marketplace discord dunst filezilla flameshot ghex google-chrome gparted kdenlive kompare libreoffice-fresh meld okular qbittorrent torbrowser-launcher wireshark-qt ghidra signal-desktop dragon-drop-git nomachine emote guvcview audacity polkit-gnome
+	yes|sudo pacman -S --noconfirm --needed arandr blueman visual-studio-code-bin discord dunst filezilla flameshot ghex google-chrome gparted kdenlive kompare libreoffice-fresh meld okular qbittorrent torbrowser-launcher wireshark-qt ghidra signal-desktop dragon-drop-git nomachine emote guvcview audacity polkit-gnome
 	# Do not start services in docker
 	[ ! -f /.dockerenv ] && sudo systemctl disable --now nxserver.service
 	xargs -n1 -I{} code --install-extension {} --force < config/extensions.txt
@@ -205,12 +205,12 @@ install-clomic: sanity-check ## Install clomic tools
 	git remote set-url origin git@github.com:clomic/skillarch.git
 	yes|sudo pacman -S --noconfirm --needed obsidian minicom sagemath 7zip ncdu
 # 	yay --noconfirm --needed -S caido-cli caido-desktop
-	curl -sL $$(curl -s https://api.github.com/repos/dathere/qsv/releases/latest | jq -r '.assets[].browser_download_url | select(contains("x86_64-unknown-linux-musl"))') -o /tmp/qsv-latest.zip && 7z x /tmp/qsv-latest.zip -o/tmp qsvlite && mv /tmp/qsvlite ~/.exegol/my-resources/bin/qsv && rm /tmp/qsv-latest.zip
+	curl -sL $$(curl -s https://api.github.com/repos/dathere/qsv/releases/latest | jq -r '.assets[].browser_download_url | select(contains("x86_64-unknown-linux-musl"))') -o /tmp/qsv-latest.zip && 7z x -y -o/tmp qsvlite /tmp/qsv-latest.zip >/dev/null&& mv /tmp/qsvlite ~/.exegol/my-resources/bin/qsv && rm /tmp/qsv-latest.zip
 	sudo cp /opt/skillarch/config/exegol/aliases ~/.exegol/my-resources/setup/zsh
 	mise use -g uv@latest
 	sudo ln -sf /opt/skillarch/config/systemd/resolved.conf /etc/systemd/resolved.conf
 	sudo ln -sf /opt/skillarch/config/minicom/minirc.dfl /etc/minirc.dfl
-	[ ! -d /opt/cyberchef ] && mkdir -p /tmp/cyberchef && curl -sL $$(curl -s https://api.github.com/repos/gchq/CyberChef/releases/latest | jq -r '.assets[].browser_download_url') -o /tmp/cyberchef/cc.zip && 7z x -o/tmp/cyberchef /tmp/cyberchef/cc.zip && rm /tmp/cyberchef/cc.zip && mv /tmp/cyberchef/CyberChef*.html /tmp/cyberchef/index.html && sudo mv /tmp/cyberchef /opt/cyberchef
+	[ ! -d /opt/cyberchef ] && mkdir -p /tmp/cyberchef && curl -sL $$(curl -s https://api.github.com/repos/gchq/CyberChef/releases/latest | jq -r '.assets[].browser_download_url') -o /tmp/cyberchef/cc.zip && 7z x -y -o/tmp/cyberchef /tmp/cyberchef/cc.zip >/dev/null && rm /tmp/cyberchef/cc.zip && mv /tmp/cyberchef/CyberChef*.html /tmp/cyberchef/index.html && sudo mv /tmp/cyberchef /opt/cyberchef
 	make install-sysreptor
 	make install-vmware
 	make clean
@@ -263,6 +263,8 @@ opti-btrfs:
 	sudo snapper delete $$(sudo snapper list | grep -E 'pre|post' | awk '{print $$1}' | head -n -3 | xargs)
 	sudo btrfs balance start -dusage=0 /.snapshots
 	sudo btrfs balance start -dusage=5 /
+	sudo btrfs filesystem sync /
+
 
 update: sanity-check ## Update SkillArch
 	@[ -n "$$(git status --porcelain)" ] && echo "Error: git state is dirty, please "git stash" your changes before updating" && exit 1
