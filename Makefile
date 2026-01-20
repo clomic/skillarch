@@ -217,7 +217,7 @@ install-clomic: sanity-check ## Install clomic tools
 
 install-sysreptor:  ## Install sysreptor
 	@if [ ! -d /opt/sysreptor ]; then
-		echo "Installing Sysreptor..."; 
+		echo "Installing Sysreptor..."
 		curl -sL -o /tmp/sysreptor.tgz https://github.com/syslifters/sysreptor/releases/latest/download/setup.tar.gz
 		tar -xzf /tmp/sysreptor.tgz -C /tmp
 		rm /tmp/sysreptor.tgz
@@ -228,8 +228,8 @@ install-sysreptor:  ## Install sysreptor
 		SECRET_KEY=$$(openssl rand -base64 64 | tr -d '\n=')
 		sed -i "s|^SECRET_KEY=.*|SECRET_KEY=\"$$SECRET_KEY\"|" app.env
 
-		KEY_ID=$$(uuidgen);
-		AES_KEY=$$(openssl rand -base64 32 | tr -d '\n');
+		KEY_ID=$$(uuidgen)
+		AES_KEY=$$(openssl rand -base64 32 | tr -d '\n')
 		sed -i \
 		  -e "s|^#\\? *ENCRYPTION_KEYS=.*|ENCRYPTION_KEYS=[{\"id\": \"$$KEY_ID\", \"key\": \"$$AES_KEY\", \"cipher\": \"AES-GCM\", \"revoked\": false}]|" \
 		  -e "s|^#\\? *DEFAULT_ENCRYPTION_KEY_ID=.*|DEFAULT_ENCRYPTION_KEY_ID=\"$$KEY_ID\"|" \
@@ -241,11 +241,11 @@ install-sysreptor:  ## Install sysreptor
 		EOF
 		docker volume create sysreptor-db-data
 		docker volume create sysreptor-app-data
-		docker compose up -d 
-		username=reptor 
+		docker compose up -d
+		username=reptor
 		echo "You will be prompt for the creation of $$username password"
 		docker compose exec app python3 manage.py createsuperuser --username "$$username"
-	else 
+	else
 		echo "Sysreptor already installed, skipping."
 	fi
 
