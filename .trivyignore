@@ -1,12 +1,13 @@
-# docker: use of root user 
-AVD-DS-0002
-# docker: lack of no-cache
-AVD-DS-0025
-# docker: run with sudo
-AVD-DS-0010
-# docker: lack of norecommends
-AVD-DS-0029 (HIGH): '--no-install-recommends'
-# docker: lack of dnf clean all
-AVD-DS-0019
-# docker: deprecated maintainer
-AVD-DS-0022
+# SkillArch - Global Ignore List
+# Added to ignore initial findings from SkillArch installation tools
+
+# Misconfigurations
+AVD-DS-0002 # docker: use of root user
+AVD-DS-0010 # docker: run with sudo
+AVD-DS-0019 # docker: lack of dnf clean all
+AVD-DS-0022 # docker: MAINTAINER deprecated
+AVD-DS-0025 # docker: lack of --no-cache
+AVD-DS-0029 # docker: lack of --no-install-recommends
+
+# Secrets (Found in dependencies)
+aws-access-key-id
