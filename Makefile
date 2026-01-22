@@ -64,8 +64,8 @@ install-cli-tools: sanity-check ## Install system packages
 		pipx install -q "$$package" && pipx inject -q "$$package" setuptools
 		# If this fails, uninstall and reinstall
 		if [ $$? -ne 0 ]; then
-			pipx uninstall "$$package"
-			pipx install -q "$$package" && pipx inject -q "$$package" setuptools
+			# pipx uninstall "$$package"
+			pipx reinstall -q "$$package" && pipx inject -q "$$package" setuptools
 		fi
 	done
 
@@ -213,7 +213,7 @@ install-clomic: sanity-check ## Install clomic tools
 	git remote set-url origin git@github.com:clomic/skillarch.git
 	yes|sudo pacman -S --noconfirm --needed obsidian minicom sagemath 7zip ncdu
 # 	yay --noconfirm --needed -S caido-cli caido-desktop
-	curl -sL $$(curl -s https://api.github.com/repos/dathere/qsv/releases/latest | jq -r '.assets[].browser_download_url | select(contains("x86_64-unknown-linux-musl"))') -o /tmp/qsv-latest.zip && 7z x -y -o/tmp qsvlite /tmp/qsv-latest.zip >/dev/null&& mv /tmp/qsvlite ~/.exegol/my-resources/bin/qsv && rm /tmp/qsv-latest.zip
+	curl -sL $$(curl -s https://api.github.com/repos/dathere/qsv/releases/latest | grep 'browser_download_url.*musl.zip'|grep -o 'https://[^"]*') -o /tmp/qsv-latest.zip && 7z x -y -o/tmp /tmp/qsv-latest.zip qsvlite>/dev/null&& mv /tmp/qsvlite ~/.exegol/my-resources/bin/qsv && rm /tmp/qsv-latest.zip
 	sudo cp /opt/skillarch/config/exegol/aliases ~/.exegol/my-resources/setup/zsh
 	mise use -g uv@latest
 	sudo ln -sf /opt/skillarch/config/systemd/resolved.conf /etc/systemd/resolved.conf
