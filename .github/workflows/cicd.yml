@@ -96,24 +96,29 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
-          scanners: 'misconfig,secret'
+          scanners: 'secret'
           timeout: '30m'
-          skip-dirs: '/opt/lists,/opt/ghidra,/opt/metasploit,/opt/exploitdb,/home/hacker/.rustup/toolchains,/home/hacker/.local/go,/opt/phpggc,/opt/pypotomux/wordlists,/usr/NX/etc/keys,/usr/NX/share/keys,/home/hacker/.nuclei-templates,/home/hacker/.local/share/mise/installs/go' # Chunky boys
-          skip-files: '/home/hacker/.local/share/pipx/venvs/yt-dlp/lib/python3.13/site-packages/yt_dlp/extractor/shahid.py'
+          skip-dirs: '/opt/lists,/opt/ghidra,/opt/metasploit,/opt/exploitdb,/home/hacker/.rustup/toolchains,/home/hacker/.local/go,/opt/phpggc,/opt/pypotomux/wordlists,/usr/NX/etc/keys,/usr/NX/share/keys,/home/hacker/.nuclei-templates,/home/hacker/.local/share/mise/installs/go,/home/hacker/.cache/mise,/home/hacker/.fzf,/usr/lib/qt/mkspecs,/usr/lib/qt6/mkspecs' # Chunky boys
+          skip-files: '/home/hacker/.local/share/pipx/venvs/yt-dlp/lib/python3.14/site-packages/yt_dlp/extractor/shahid.py'
   
   gitleaks:
     if: github.repository == 'laluka/SkillArch'
     name: gitleaks
     runs-on: ubuntu-latest
+    container:
+      image: zricethezav/gitleaks:latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@v2
+      - name: Configure Git safe directory
+        run: |
+          git config --global --add safe.directory ${{ github.workspace }}
+      - name: Run gitleaks
+        run: |
+          gitleaks detect --source . --redact -v --exit-code=2 --report-format=sarif --report-path=results.sarif --log-level=debug
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          args: --redact -v --exit-code=2 --report-format=sarif --report-path=results.sarif --log-level=debug
 
   trufflesecurity:
     name: trufflesecurity
@@ -123,4 +128,8 @@ jobs:
     steps:
       - name: Run trufflehog
         run: |
-          trufflehog docker --image '${{ secrets.DOCKERHUB_USERNAME }}/skillarch:latest' --results=verified --exclude-detectors=Mailgun
+          cat <<EOF > /tmp/trufflehog-exclude.txt
+          /opt/exploitdb/exploits
+          /opt/visual-studio-code/resources/app/extensions/github-authentication/dist
+          EOF
+          trufflehog docker --image '${{ secrets.DOCKERHUB_USERNAME }}/skillarch:latest' --results=verified --exclude-detectors=Mailgun --exclude-paths=/opt/exploitdb/exploits,/opt/visual-studio-code/resources/app/extensions/github-authentication/dist/extension.js

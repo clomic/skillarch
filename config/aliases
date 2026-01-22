@@ -96,7 +96,7 @@ alias killit='sudo kill -KILL'
 # Misc Utils
 alias upload='f(){ curl -F"file=@$1" https://0x0.st;  unset -f f; }; f'
 alias usleep='f(){ python3 -c "import time; time.sleep($1)";  unset -f f; }; f'
-alias nosleep='xset s off ; xset -dpms ; xset s noblank'
+alias nosleep='systemd-inhibit --what sleep:idle sleep 999999'
 alias makeqrcode='qrencode -t ANSI -o -'
 alias b64d='base64 -d'
 alias b64e='base64 -w 0'

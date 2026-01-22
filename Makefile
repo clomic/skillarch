@@ -17,6 +17,7 @@ sanity-check:
 	@# Ensure we are in /opt/skillarch or /opt/skillarch-original (maintainer only)
 	@[ "$$(pwd)" != "/opt/skillarch" ] && [ "$$(pwd)" != "/opt/skillarch-original" ] && echo "You must be in /opt/skillarch or /opt/skillarch-original to run this command" && exit 1
 	@sudo -v || (echo "Error: sudo access is required" ; exit 1)
+	[ ! -f /.dockerenv ] && systemd-inhibit --what sleep:idle sleep 3600 &
 
 install-base: sanity-check ## Install base packages
 	# Clean up, Update, Basics
@@ -59,7 +60,14 @@ install-cli-tools: sanity-check ## Install system packages
 	# Install pipx & tools
 	yay --noconfirm --needed -S python-pipx
 	pipx ensurepath
-	for package in argcomplete bypass-url-parser dirsearch exegol pre-commit sqlmap wafw00f yt-dlp semgrep defaultcreds-cheat-sheet; do pipx install -q "$$package" && pipx inject -q "$$package" setuptools; done
+	for package in argcomplete bypass-url-parser dirsearch exegol pre-commit sqlmap wafw00f yt-dlp semgrep defaultcreds-cheat-sheet; do 
+		pipx install -q "$$package" && pipx inject -q "$$package" setuptools
+		# If this fails, uninstall and reinstall
+		if [ $$? -ne 0 ]; then
+			pipx uninstall "$$package"
+			pipx install -q "$$package" && pipx inject -q "$$package" setuptools
+		fi
+	done
 
 	# Install mise and all php-build dependencies
 	yes|sudo pacman -S --noconfirm --needed mise libedit libffi libjpeg-turbo libpcap libpng libxml2 libzip postgresql-libs php-gd
@@ -140,9 +148,9 @@ install-gui: sanity-check ## Install gui, i3, polybar, kitty, rofi, picom
 	make clean
 
 install-gui-tools: sanity-check ## Install system packages
-	yes|sudo pacman -S --noconfirm --needed vlc-luajit # Must be done before obs-studio-browser to avoid conflicts
-	yes|sudo pacman -S --noconfirm --needed arandr blueman visual-studio-code-bin discord dunst filezilla flameshot ghex google-chrome gparted kdenlive kompare libreoffice-fresh meld okular qbittorrent torbrowser-launcher wireshark-qt ghidra signal-desktop dragon-drop-git nomachine emote guvcview audacity polkit-gnome
-	yes|sudo pacman -S --needed obs-studio-browser
+	yes|sudo pacman -S --noconfirm --needed vlc vlc-plugin-ffmpeg flatpak arandr blueman visual-studio-code-bin discord dunst filezilla flameshot ghex google-chrome gparted kdenlive kompare libreoffice-fresh meld okular qbittorrent torbrowser-launcher wireshark-qt ghidra signal-desktop dragon-drop-git nomachine emote guvcview audacity polkit-gnome
+	flatpak install -y flathub com.obsproject.Studio
+	flatpak install -y flathub org.gnome.Snapshot
 	# Do not start services in docker
 	[ ! -f /.dockerenv ] && sudo systemctl disable --now nxserver.service
 	xargs -n1 -I{} code --install-extension {} --force < config/extensions.txt
