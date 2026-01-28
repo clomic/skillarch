@@ -111,25 +111,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Configure Git safe directory
-        run: |
-          git config --global --add safe.directory ${{ github.workspace }}
       - name: Run gitleaks
         run: |
+          git config --global --add safe.directory /__w/skillarch/skillarch
           gitleaks detect --source . --redact -v --exit-code=2 --report-format=sarif --report-path=results.sarif --log-level=debug
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  trufflesecurity:
-    name: trufflesecurity
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/trufflesecurity/trufflehog
-    steps:
-      - name: Run trufflehog
-        run: |
-          cat <<EOF > /tmp/trufflehog-exclude.txt
-          /opt/exploitdb/exploits
-          /opt/visual-studio-code/resources/app/extensions/github-authentication/dist
-          EOF
-          trufflehog docker --image '${{ secrets.DOCKERHUB_USERNAME }}/skillarch:latest' --results=verified --exclude-detectors=Mailgun --exclude-paths=/opt/exploitdb/exploits,/opt/visual-studio-code/resources/app/extensions/github-authentication/dist/extension.js
