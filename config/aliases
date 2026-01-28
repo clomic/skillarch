@@ -126,7 +126,6 @@ crypt-enc() (set -e;
     openssl enc -aes-256-cbc -pbkdf2 -in "$1.tar.gz" -out "$1.tar.gz.enc" -pass pass:"${PASS%-}"
     rm "$1.tar.gz"; printf "Password: ";printf "${PASS%-}" | cpyc;
     echo "\nEncrypted file: $1.tar.gz.enc")
-
 crypt-dec() (set -e;openssl enc -d -aes-256-cbc -pbkdf2 -in "$1" -out "${1%.enc}";tar xf "${1%.enc}";rm "${1%.enc}")
 
 # Python
@@ -136,7 +135,7 @@ alias pysrv='mkdir -pv /tmp/empty ; python -m http.server -d /tmp/empty'
 alias uvv='uv venv .venv && source .venv/bin/activate'
 alias uvr='uv run'
 alias uva='uv add --script' # to update a script with a lib (mytool.py added_lib) or with requirements.txt (mytool.py -r requirements.txt)
-alias uvpwn='uvx --with pwntools python' 
+alias uvpwn='uvx --with pwntools python'
 
 # Data Generation & Modification
 alias get-badchars='echo -e "\x22\x27<?>][]{}_)(*;/\x5c"'

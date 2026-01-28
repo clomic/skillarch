@@ -56,7 +56,7 @@ install-cli-tools: sanity-check ## Install system packages
 	[ -f ~/.config/nvim/init.lua ] && [ ! -L ~/.config/nvim/init.lua ] && mv ~/.config/nvim/init.lua ~/.config/nvim/init.lua.skabak
 	ln -sf /opt/skillarch/config/nvim/init.lua ~/.config/nvim/init.lua
 	nvim --headless +"Lazy! sync" +qa >/dev/null # Download and update plugins
-	
+
 	# Install mise and all php-build dependencies
 	yes|sudo pacman -S --noconfirm --needed mise libedit libffi libjpeg-turbo libpcap libpng libxml2 libzip postgresql-libs php-gd
 	# mise self-update # Currently broken, wait for upstream fix, pinged on 17/03/2025
@@ -66,7 +66,7 @@ install-cli-tools: sanity-check ## Install system packages
 
 	# Install uv tools
 	uv tool update-shell
-	for package in argcomplete bypass-url-parser dirsearch exegol pre-commit sqlmap wafw00f yt-dlp semgrep defaultcreds-cheat-sheet; do 
+	for package in argcomplete bypass-url-parser dirsearch exegol pre-commit sqlmap wafw00f yt-dlp semgrep defaultcreds-cheat-sheet; do
 		uv tool install -q -w setuptools "$$package"
 		# If this fails, uninstall and reinstall
 		if [ $$? -ne 0 ]; then
