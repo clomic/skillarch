@@ -48,7 +48,7 @@ install-base: sanity-check ## Install base packages
 	make clean
 
 install-cli-tools: sanity-check ## Install system packages
-	yes|sudo pacman -S --noconfirm --needed base-devel bison bzip2 ca-certificates cloc cmake dos2unix expect ffmpeg foremost gdb gnupg htop bottom hwinfo icu inotify-tools iproute2 jq llvm lsof ltrace make mlocate mplayer ncurses net-tools ngrep nmap openssh openssl parallel perl-image-exiftool pkgconf python-virtualenv re2c readline ripgrep rlwrap socat sqlite sshpass tmate tor traceroute trash-cli tree unzip vbindiff xclip xz yay zip veracrypt git-delta viu qsv asciinema htmlq neovim glow jless websocat superfile gron eza fastfetch bat sysstat cronie tree-sitter
+	yes|sudo pacman -S --noconfirm --needed base-devel bison bzip2 ca-certificates cloc cmake dos2unix expect ffmpeg foremost gdb gnupg htop bottom hwinfo icu inotify-tools iproute2 jq llvm lsof ltrace make mlocate mplayer ncurses net-tools ngrep nmap openssh openssl parallel perl-image-exiftool pkgconf python-virtualenv re2c readline ripgrep rlwrap socat sqlite sshpass tmate tor traceroute trash-cli tree unzip vbindiff xsel xz yay zip veracrypt git-delta viu qsv asciinema htmlq neovim glow jless websocat superfile gron eza fastfetch bat sysstat cronie tree-sitter
 	sudo ln -sf /usr/bin/bat /usr/local/bin/batcat
 	bash -c "$$(curl -fsSL https://gef.blah.cat/sh)"
 	# nvim config
@@ -56,25 +56,24 @@ install-cli-tools: sanity-check ## Install system packages
 	[ -f ~/.config/nvim/init.lua ] && [ ! -L ~/.config/nvim/init.lua ] && mv ~/.config/nvim/init.lua ~/.config/nvim/init.lua.skabak
 	ln -sf /opt/skillarch/config/nvim/init.lua ~/.config/nvim/init.lua
 	nvim --headless +"Lazy! sync" +qa >/dev/null # Download and update plugins
-
-	# Install pipx & tools
-	yay --noconfirm --needed -S python-pipx
-	pipx ensurepath
-	for package in argcomplete bypass-url-parser dirsearch exegol pre-commit sqlmap wafw00f yt-dlp semgrep defaultcreds-cheat-sheet; do 
-		pipx install -q "$$package" && pipx inject -q "$$package" setuptools
-		# If this fails, uninstall and reinstall
-		if [ $$? -ne 0 ]; then
-			# pipx uninstall "$$package"
-			pipx reinstall -q "$$package" && pipx inject -q "$$package" setuptools
-		fi
-	done
-
+	
 	# Install mise and all php-build dependencies
 	yes|sudo pacman -S --noconfirm --needed mise libedit libffi libjpeg-turbo libpcap libpng libxml2 libzip postgresql-libs php-gd
 	# mise self-update # Currently broken, wait for upstream fix, pinged on 17/03/2025
 	sleep 30
-	for package in usage pdm rust terraform golang python nodejs; do mise use -g "$$package@latest" ; sleep 10; done
+	for package in usage pdm rust terraform golang python nodejs uv; do mise use -g "$$package@latest" ; sleep 10; done
 	mise exec -- go env -w "GOPATH=/home/$$USER/.local/go"
+
+	# Install uv tools
+	uv tool update-shell
+	for package in argcomplete bypass-url-parser dirsearch exegol pre-commit sqlmap wafw00f yt-dlp semgrep defaultcreds-cheat-sheet; do 
+		uv tool install -q -w setuptools "$$package"
+		# If this fails, uninstall and reinstall
+		if [ $$? -ne 0 ]; then
+			uv tool uninstall "$$package"
+			uv tool install -q -w setuptools "$$package"
+		fi
+	done
 	make clean
 
 install-shell: sanity-check ## Install shell packages
@@ -215,7 +214,6 @@ install-clomic: sanity-check ## Install clomic tools
 # 	yay --noconfirm --needed -S caido-cli caido-desktop
 	curl -sL $$(curl -s https://api.github.com/repos/dathere/qsv/releases/latest | grep 'browser_download_url.*musl.zip'|grep -o 'https://[^"]*') -o /tmp/qsv-latest.zip && 7z x -y -o/tmp /tmp/qsv-latest.zip qsvlite>/dev/null&& mv /tmp/qsvlite ~/.exegol/my-resources/bin/qsv && rm /tmp/qsv-latest.zip
 	sudo cp /opt/skillarch/config/exegol/aliases ~/.exegol/my-resources/setup/zsh
-	mise use -g uv@latest
 	sudo ln -sf /opt/skillarch/config/systemd/resolved.conf /etc/systemd/resolved.conf
 	sudo ln -sf /opt/skillarch/config/minicom/minirc.dfl /etc/minirc.dfl
 	[ ! -d /opt/cyberchef ] && mkdir -p /tmp/cyberchef && curl -sL $$(curl -s https://api.github.com/repos/gchq/CyberChef/releases/latest | jq -r '.assets[].browser_download_url') -o /tmp/cyberchef/cc.zip && 7z x -y -o/tmp/cyberchef /tmp/cyberchef/cc.zip >/dev/null && rm /tmp/cyberchef/cc.zip && mv /tmp/cyberchef/CyberChef*.html /tmp/cyberchef/index.html && sudo mv /tmp/cyberchef /opt/cyberchef

@@ -73,7 +73,7 @@ alias dns-8='echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf'
 alias dns-9='echo "nameserver 9.9.9.9" | sudo tee /etc/resolv.conf'
 alias get-ip='curl -sS ipinfo.io/ip ; echo'
 alias get-ip-cpy='curl -sS ipinfo.io/ip | cpy'
-alias pub='export PUB=$(curl -s ipv4.ident.me|| curl -sS ifconfig.io); echo -n $PUB | cpy; echo $PUB'
+alias pub='export PUB=$(curl -s ipv4.ident.me|| curl -sS ifconfig.io); printf "${PUB%$'\n'}" | cpyc'
 
 # Video, Audio
 alias webcam-guvcview='guvcview'
@@ -109,10 +109,9 @@ alias grephilight='export GREP_COLORS="mt=30;46"'
 alias rgrep='grep -r'
 alias cheat='f(){ curl -s "cheat.sh/$1";  unset -f f; }; f'
 alias clean-swap='sudo swapoff -a && sudo swapon -a'
-alias cpy='xclip -selection clipboard'
-alias paste='xclip -selection clipboard -o'
-alias mcrypt-enc='f(){ PASS=$(cat /dev/urandom | base64 | head -c 20) && echo "$PASS" | xclip -selection c && tar -zcvf "$1.tar.gz" "$1" && echo "$PASS" && mcrypt "$1.tar.gz" && echo "$1.tar.gz $PASS" | xclip -selection c;  unset -f f; }; f'
-alias mcrypt-dec='mdecrypt'
+alias cpy='xsel -ib'
+alias cpyc='tee >(xsel -ib)'
+alias paste='xsel -ob'
 alias get-meteo='curl https://wttr.in/'
 alias fab='fabric-ai -s'
 cchef() (set -e;cd /opt/cyberchef && xdg-open index.html >&/dev/null &;)
@@ -121,23 +120,38 @@ alias exsta='exegol start'
 alias exsto='exegol stop'
 srsta() (set -e;cd /opt/sysreptor/deploy && docker compose up -d && sleep 10 && xdg-open http://127.1:8000 >&/dev/null &;)
 srsto() (set -e;cd /opt/sysreptor/deploy && docker compose down;)
+crypt-enc() (set -e;
+    PASS=$(grep -xP "[a-z]{4,6}" /opt/lists/SecLists/Miscellaneous/lang-english.txt|shuf -n6|tr '\n' '-')
+    tar zcf "$1.tar.gz" "$1";
+    openssl enc -aes-256-cbc -pbkdf2 -in "$1.tar.gz" -out "$1.tar.gz.enc" -pass pass:"${PASS%-}"
+    rm "$1.tar.gz"; printf "Password: ";printf "${PASS%-}" | cpyc;
+    echo "\nEncrypted file: $1.tar.gz.enc")
 
+crypt-dec() (set -e;openssl enc -d -aes-256-cbc -pbkdf2 -in "$1" -out "${1%.enc}";tar xf "${1%.enc}";rm "${1%.enc}")
 
 # Python
 alias pv='f(){ if [ -z "$1" ] ; then echo "Use: pv 3.12" ; else mise use "python@$1" ; mise config set env._.python.venv.path .venv ; mise config set --type list env._.python.venv.uv_create_args -- --seed ; mise config set --type bool env._.python.venv.create true ; mise exec -- which python ; mise exec -- python --version ; fi;  unset -f f; }; f'
 alias pyreq='pip install -r requirements.txt'
 alias pysrv='mkdir -pv /tmp/empty ; python -m http.server -d /tmp/empty'
+alias uvv='uv venv .venv && source .venv/bin/activate'
+alias uvr='uv run'
+alias uva='uv add --script' # to update a script with a lib (mytool.py added_lib) or with requirements.txt (mytool.py -r requirements.txt)
+alias uvpwn='uvx --with pwntools python' 
 
 # Data Generation & Modification
 alias get-badchars='echo -e "\x22\x27<?>][]{}_)(*;/\x5c"'
-alias get-bytes-hex='python3 -c "for i in range(0,256): print(hex(i))"'
-alias get-bytes-raw='python3 -c "for i in range(0,256): print(chr(i))"'
-alias get-bytes-url='python3 -c "for i in range(0,256): print(hex(i).replace(\"0x\", \"%\"))"'
+alias get-bytes-hex='for i in {0..255}; do printf "%b\n" "$(printf '0x%02x' "$i")"; done'
+alias get-bytes-raw='for i in {0..255}; do  printf "\\$(printf '%03o' "$i")\n";done'
+alias get-bytes-url='for i in {0..255}; do printf "%%%.2x\n" "$i";done'
 alias nocolor='sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g"'
-alias nonullbyte='sed "s/\x00//g"'
-alias urldec='python3 -c "import sys; from urllib.parse import unquote; print(unquote(sys.argv[1]))"'
+alias nonullbyte='tr -d "\0"'
+urldec() {
+    sed 's/%\([0-9A-Fa-f]\{2\}\)/\\\x\1/g' <<< "$*" | xargs -0 printf "%b"
+}
 alias urlenc='python3 -c "import sys; from urllib.parse import quote; print(quote(sys.argv[1], safe=str()))"'
-alias urlencall='f(){ echo -n "$1" | xxd -p -c 1000000 | sed "s#..#%&#g"; unset -f f; }; f'
+urlencall() {
+    echo -n "$*"|xxd -p|tr -d '\n'|sed "s#..#%&#g"
+}
 alias urld="perl -MURI::Escape -ne 'print uri_unescape(\$_);'" # url decode stdin stream
 
 # Web Based Recon
@@ -149,7 +163,7 @@ alias getinfo-virustotal='f(){ xdg-open "https://www.virustotal.com/gui/domain/$
 alias getinfo-crtsh='f(){ curl -sk "https://crt.sh/json?q=$1" | jq . ; unset -f f; }; f'
 alias getinfo-wayback='f(){ curl -sk "https://web.archive.org/cdx/search/cdx?fl=original&collapse=urlkey&url=*.$1" ; unset -f f; }; f'
 alias getinfo-leakix='f(){ curl -sk "https://leakix.net/api/graph/hostname/$1?v[]=hostname&v[]=ip&d=auto&l=auto" | jq | grep -ioP "hostname/[^\"]+" | cut -d/ -f2 | sort -uV ; unset -f f; }; f'
-unalias gau # gau real tool instead of omz git alias
+unalias gau 2>/dev/null # gau real tool instead of omz git alias
 
 # Web Fuzzing
 alias probe-urls='f(){ while read url; do curl -sk "$url" -o /dev/null -w "%{http_code}:%{size_download}:%{url_effective}\n" ; done < "$@" ; ; unset -f f; }; f'
