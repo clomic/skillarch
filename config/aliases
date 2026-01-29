@@ -22,6 +22,8 @@ alias neofetch='fastfetch'
 alias hifetch='fastfetch'
 alias didi='sudo pacman -Sy discord'
 
+args_to_stdin() { [ $# -gt 0 ] && printf "%s" "$*" || cat -; }
+
 ## Directories, Git, Ide
 alias dl='cd ~/Downloads'
 alias da='cd /DATA'
@@ -98,15 +100,10 @@ alias upload='f(){ curl -F"file=@$1" https://0x0.st;  unset -f f; }; f'
 alias usleep='f(){ python3 -c "import time; time.sleep($1)";  unset -f f; }; f'
 alias nosleep='systemd-inhibit --what sleep:idle sleep 999999'
 alias makeqrcode='qrencode -t ANSI -o -'
-alias b64d='base64 -d'
-alias b64e='base64 -w 0'
-alias back-n='sed -u "s/\\\n/\n/g"'
-alias back-t='sed -u "s/\\\t/\t/g"'
 alias cgrep='grep --color=always'
 alias lgrep='grep --line-buffered'
 alias sortn='sort -V | uniq -c | sort -n'
 alias grephilight='export GREP_COLORS="mt=30;46"'
-alias rgrep='grep -r'
 alias cheat='f(){ curl -s "cheat.sh/$1";  unset -f f; }; f'
 alias clean-swap='sudo swapoff -a && sudo swapon -a'
 alias cpy='xsel -ib'
@@ -120,11 +117,12 @@ alias exsta='exegol start'
 alias exsto='exegol stop'
 srsta() (set -e;cd /opt/sysreptor/deploy && docker compose up -d && sleep 10 && xdg-open http://127.1:8000 >&/dev/null &;)
 srsto() (set -e;cd /opt/sysreptor/deploy && docker compose down;)
+gen_pass() { grep -xP "[a-z]{4,6}" /opt/lists/SecLists/Miscellaneous/lang-english.txt|shuf -n6|tr '\n' '-'|sed 's/-$//'; }
 crypt-enc() (set -e;
-    PASS=$(grep -xP "[a-z]{4,6}" /opt/lists/SecLists/Miscellaneous/lang-english.txt|shuf -n6|tr '\n' '-')
+    PASS=$(gen_pass)
     tar zcf "$1.tar.gz" "$1";
-    openssl enc -aes-256-cbc -pbkdf2 -in "$1.tar.gz" -out "$1.tar.gz.enc" -pass pass:"${PASS%-}"
-    rm "$1.tar.gz"; printf "Password: ";printf "${PASS%-}" | cpyc;
+    openssl enc -aes-256-cbc -pbkdf2 -in "$1.tar.gz" -out "$1.tar.gz.enc" -pass pass:"${PASS}"
+    rm "$1.tar.gz"; printf "Password: ";printf "${PASS}" | cpyc;
     echo "\nEncrypted file: $1.tar.gz.enc")
 crypt-dec() (set -e;openssl enc -d -aes-256-cbc -pbkdf2 -in "$1" -out "${1%.enc}";tar xf "${1%.enc}";rm "${1%.enc}")
 
@@ -143,15 +141,38 @@ alias get-bytes-hex='for i in {0..255}; do printf "%b\n" "$(printf '0x%02x' "$i"
 alias get-bytes-raw='for i in {0..255}; do  printf "\\$(printf '%03o' "$i")\n";done'
 alias get-bytes-url='for i in {0..255}; do printf "%%%.2x\n" "$i";done'
 alias nocolor='sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g"'
-alias nonullbyte='tr -d "\0"'
-urldec() {
-    sed 's/%\([0-9A-Fa-f]\{2\}\)/\\\x\1/g' <<< "$*" | xargs -0 printf "%b"
+alias b64d='base64 -d'
+b64url() { args_to_stdin "$@"|base64 -w0|tr -d '='|tr '/+' '_-'; }
+alias b64e='base64 -w0'
+b64urld() { args_to_stdin "$@"|tr -d ' \t\r\n'|tr '_-' '/+'|base64 -d; }
+toDecimal() { args_to_stdin "$@"| while IFS= read -ku0 c; do printf "%d " "'$c";done |sed 's/^ //;s/ $//'; }
+alias toDec='toDecimal'
+fromDecimal() { args_to_stdin "$@"|tr ' ' '\n'| while read -r n; do printf "\\$(printf '%03o' "$n")";done; }
+alias fromDec='fromDecimal'
+toHex() { args_to_stdin "$@"|xxd -p | tr -d '\n'; }
+fromHex() { args_to_stdin "$@"|xxd -r -p; }
+10to16() { args_to_stdin "$@" | bc <<< "obase=16; ibase=10; $(cat)" | tr -d '\\\n'; }
+16to10() { args_to_stdin "$@" | bc <<< "obase=10; ibase=16; $(cat)" | tr -d '\\\n'; }
+10to2()  { args_to_stdin "$@" | bc <<< "obase=2;  ibase=10; $(cat)" | tr -d '\\\n'; }
+2to10()  { args_to_stdin "$@" | bc <<< "obase=10; ibase=2;  $(cat)" | tr -d '\\\n'; }
+alias back-n='sed -u "s/\\\n/\n/g"'
+alias back-t='sed -u "s/\\\t/\t/g"'
+nonullbyte() { args_to_stdin "$@"|tr -d "\0"; }
+alias nnb='nonullbyte'
+urldec() { args_to_stdin "$@"|sed 's/%\([0-9A-Fa-f]\{2\}\)/\\\x\1/g'|xargs -0 printf "%b"; }
+alias urld='urldec'
+urlenc() { args_to_stdin "$@"|python3 -c "import sys; from urllib.parse import quote; import fileinput; print(quote(sys.stdin.read(), safe=str()))"; }
+alias urle="urlenc"
+urlencall() { args_to_stdin "$@"|xxd -p|tr -d '\n'|sed "s#..#%&#g"; }
+unescape() {
+    args_to_stdin "$@"|sed -u \
+        -e 's/\\n/\n/g' \
+        -e 's/\\t/\t/g' \
+        -e 's/\\r/\r/g' \
+        -e 's/\\\\/\\/g' \
+        -e 's/\\0/\0/g'
 }
-alias urlenc='python3 -c "import sys; from urllib.parse import quote; print(quote(sys.argv[1], safe=str()))"'
-urlencall() {
-    echo -n "$*"|xxd -p|tr -d '\n'|sed "s#..#%&#g"
-}
-alias urld="perl -MURI::Escape -ne 'print uri_unescape(\$_);'" # url decode stdin stream
+# alias urld="perl -MURI::Escape -ne 'print uri_unescape(\$_);'" # url decode stdin stream
 
 # Web Based Recon
 alias getinfo-known-creds='f(){ xdg-open "https://cirt.net/passwords?criteria=$@" ;  unset -f f; }; f'
@@ -242,5 +263,8 @@ alias dsysdig='dockit --privileged -v /var/run/docker.sock:/host/var/run/docker.
 alias dswagger-editor='dockit -p 127.0.0.1:8000:8080 docker.swagger.io/swaggerapi/swagger-editor'
 alias dcarbonyl='dockit fathyb/carbonyl' # Chrome in Terminal
 alias dphp7='dockit php:7.4' # Arch suffers from "too new libraries" making it hard to build
+
+## Openssl
+alias read-crt='openssl x509 -text -noout -in'
 
 source ~/.my_aliases
