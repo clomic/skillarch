@@ -22,7 +22,7 @@ alias neofetch='fastfetch'
 alias hifetch='fastfetch'
 alias didi='sudo pacman -Sy discord'
 
-args_to_stdin() { [ $# -gt 0 ] && printf "%s" "$*" || cat -; }
+args_to_stdin() { printf "%s" "${*:-$(cat)}"; }
 
 ## Directories, Git, Ide
 alias dl='cd ~/Downloads'
@@ -140,6 +140,9 @@ alias get-badchars='echo -e "\x22\x27<?>][]{}_)(*;/\x5c"'
 alias get-bytes-hex='for i in {0..255}; do printf "%b\n" "$(printf '0x%02x' "$i")"; done'
 alias get-bytes-raw='for i in {0..255}; do  printf "\\$(printf '%03o' "$i")\n";done'
 alias get-bytes-url='for i in {0..255}; do printf "%%%.2x\n" "$i";done'
+alias get-chars='for c in {32..126}; do printf "\\$(printf '%03o' $c)\n"; done'
+alias get-alpha='for c in {65..90} {97..122}; do printf "\\$(printf '%03o' $c)\n"; done'
+alias get-alphanum='for c in {48..57} {65..90} {97..122}; do printf "\\$(printf '%03o' $c)\n"; done'
 alias nocolor='sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g"'
 alias b64d='base64 -d'
 b64url() { args_to_stdin "$@"|base64 -w0|tr -d '='|tr '/+' '_-'; }
@@ -150,29 +153,64 @@ alias toDec='toDecimal'
 fromDecimal() { args_to_stdin "$@"|tr ' ' '\n'| while read -r n; do printf "\\$(printf '%03o' "$n")";done; }
 alias fromDec='fromDecimal'
 toHex() { args_to_stdin "$@"|xxd -p | tr -d '\n'; }
-fromHex() { args_to_stdin "$@"|xxd -r -p; }
-10to16() { args_to_stdin "$@" | bc <<< "obase=16; ibase=10; $(cat)" | tr -d '\\\n'; }
-16to10() { args_to_stdin "$@" | bc <<< "obase=10; ibase=16; $(cat)" | tr -d '\\\n'; }
-10to2()  { args_to_stdin "$@" | bc <<< "obase=2;  ibase=10; $(cat)" | tr -d '\\\n'; }
-2to10()  { args_to_stdin "$@" | bc <<< "obase=10; ibase=2;  $(cat)" | tr -d '\\\n'; }
+alias hexencode='toHex'
+alias hexd='toHex'
+fromHex() { args_to_stdin "$@"|tr -d '\\x'|xxd -r -p; }
+alias hexdecode='fromHex'
+alias hexd='fromHex'
+
+base10to16() { args_to_stdin "$@" | bc <<< "obase=16; ibase=10; $(cat)" | tr -d '\\\n'; }
+alias 10to16='base10to16'
+base16to10() { args_to_stdin "$@" | bc <<< "obase=10; ibase=16; $(cat)" | tr -d '\\\n'; }
+alias 16to10='base16to10'
+base10to2()  { args_to_stdin "$@" | bc <<< "obase=2;  ibase=10; $(cat)" | tr -d '\\\n'; }
+alias 10to2='base10to2'
+base2to10()  { args_to_stdin "$@" | bc <<< "obase=10; ibase=2;  $(cat)" | tr -d '\\\n'; }
+alias 2to10='base2to10'
+
 alias back-n='sed -u "s/\\\n/\n/g"'
 alias back-t='sed -u "s/\\\t/\t/g"'
 nonullbyte() { args_to_stdin "$@"|tr -d "\0"; }
 alias nnb='nonullbyte'
-urldec() { args_to_stdin "$@"|sed 's/%\([0-9A-Fa-f]\{2\}\)/\\\x\1/g'|xargs -0 printf "%b"; }
-alias urld='urldec'
-urlenc() { args_to_stdin "$@"|python3 -c "import sys; from urllib.parse import quote; import fileinput; print(quote(sys.stdin.read(), safe=str()))"; }
-alias urle="urlenc"
-urlencall() { args_to_stdin "$@"|xxd -p|tr -d '\n'|sed "s#..#%&#g"; }
-unescape() {
-    args_to_stdin "$@"|sed -u \
-        -e 's/\\n/\n/g' \
-        -e 's/\\t/\t/g' \
-        -e 's/\\r/\r/g' \
-        -e 's/\\\\/\\/g' \
-        -e 's/\\0/\0/g'
-}
+
+utf8toLatin() { args_to_stdin "$@" | iconv -f UTF-8 -t ISO-8859-1//TRANSLIT; }
+latinToUtf8() { args_to_stdin "$@" | iconv -f ISO-8859-1 -t UTF-8//TRANSLIT; }
+utf16to8() { args_to_stdin "$@" | iconv -f UTF-16LE -t UTF-8; }
+utf16le() { args_to_stdin "$@" | iconv -f UTF-8 -t UTF-16LE; }
+alias utf16='utf16le'
+utf16be() { args_to_stdin "$@" | iconv -f UTF-8 -t UTF-16BE; }
+
+urldecode() { args_to_stdin "$@" | tr '+' ' '|sed -E 's/%([0-9A-Fa-f]{2})/\\x\1/g'|xargs -0 echo -en; }
+alias urld='urldecode'
+urlencode() { args_to_stdin "$@"|python3 -c "import sys; from urllib.parse import quote; import fileinput; print(quote(sys.stdin.read(), safe=str()))"; }
+alias urle="urlencode"
+urlencodeall() { args_to_stdin "$@"|xxd -p|tr -d '\n'|sed "s#..#%&#g"; }
+alias urleall="urlencodeall"
+
+htmlencode() { args_to_stdin "$@" | sed -u -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g' -e 's/"/\&quot;/g' -e "s/'/\&apos;/g"; }
+htmlunescape() { args_to_stdin "$@" | perl -pe 's/&lt;/</g; s/&gt;/>/g; s/&quot;/"/g; s/&apos;/'"'"'/g; s/&amp;/&/g; s/&#(\d+);/chr($1)/ge; s/&#x([0-9a-fA-F]+);/chr(hex($1))/ge'; }
+
+jsonescape() { args_to_stdin "$@" | perl -pe 's/\\/\\\\/g; s/"/\\"/g; s/\x08/\\b/g; s/\f/\\f/g; s/\n/\\n/g; s/\r/\\r/g; s/\t/\\t/g'; }
+jsonunescape() { args_to_stdin "$@" | perl -pe 's/\\b/\x08/g; s/\\f/\f/g; s/\\n/\n/g; s/\\r/\r/g; s/\\t/\t/g; s/\\"/"/g; s/\\\\/\\/g'; }
+
+unicodeencodeall() { args_to_stdin "$@" | perl -CSD -ne 'use utf8; print map { sprintf "\\u%04x", ord($_) } split //'; }
+unicodedecode() { args_to_stdin "$@" | perl -CS -pe 's/\\u([0-9a-fA-F]{4})/chr(hex($1))/ge'; }
+
+xmlescape() { args_to_stdin "$@" | sed -u -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g' -e 's/"/\&quot;/g' -e "s/'/\&apos;/g"; }
+xmlunescape() { args_to_stdin "$@" | sed -u -e 's/&lt;/</g' -e 's/&gt;/>/g' -e 's/&quot;/"/g' -e "s/&apos;/'/g" -e 's/&amp;/\&/g'; }
+
+
 # alias urld="perl -MURI::Escape -ne 'print uri_unescape(\$_);'" # url decode stdin stream
+# xor "my_key" "my_string" ---  echo "my_string" | xor "my_key"
+xor() { local k="$1" i r j;[[ $# -eq 2 ]]&&i="$2"||i="$(cat)";for ((j=0; j<${#i}; j++));do r+=$(printf "%02x" $(( $(printf "%d" "'${i:$j:1}") ^ $(printf "%d" "'${k:$((j % ${#k})):1}") )));done;fromHex "$r"; }
+# xorh "key_in_hex" "hex_string" ---  echo "hex_string" | xorh "key_in_hex"
+xorh() { local k=$(fromHex "$1") i r j;[[ $# -eq 2 ]]&&i="$2"||i="$(tr -d '\n')";i=$(fromHex "$i");for ((j=0;j<${#i};j++));do r+=$(printf "%02x" $(( $(printf "%d" "'${i:$j:1}") ^ $(printf "%d" "'${k:$((j % ${#k})):1}") )));done;printf "$r"; }
+md5() { args_to_stdin "$@" | md5sum | awk '{print$1}'; }
+sha1() { args_to_stdin "$@" | sha1sum | awk '{print$1}'; }
+sha256() { args_to_stdin "$@" | sha256sum | awk '{print$1}'; }
+toUpper() { args_to_stdin "$@" | perl -C -pe '$_=uc'; } # args_to_stdin "$@"|LC_ALL=C.UTF-8 awk '{print toupper($0)}'
+toLower() { args_to_stdin "$@" | perl -C -pe '$_=lc'; }
+
 
 # Web Based Recon
 alias getinfo-known-creds='f(){ xdg-open "https://cirt.net/passwords?criteria=$@" ;  unset -f f; }; f'
