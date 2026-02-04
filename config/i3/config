@@ -209,15 +209,17 @@ client.unfocused_inactive #000000 #000000 #000000 #000000   #000000
 client.urgent           #000000 #000000 #000000 #000000   #000000
 
 # Make help windows float by default
-for_window [title="^Help: SkillArch Bindings$"] floating enable
-for_window [title="^Help: SkillArch Aliases$"] floating enable
-for_window [title="^Help: SkillArch packages$"] floating enable
+for_window [title="^Help: SkillArch .*$"] floating enable
+# Floating and small window for whisper
+for_window [title="^Whisper .*$"] floating enable
 for_window [title="^Settings$"] floating enable
 for_window [title="^Bluetooth Devices$"] floating enable
 for_window [title="^Volume Control$"] floating enable
 
 # Add new rules for floating windows
-for_window [floating] resize set 1536 864, resize set 1536 864, move position 192 108
+for_window [floating] resize set 1536 864, move position 192 108
+# Whisper windows: prompt-style (wide but not tall, centered)
+for_window [title="^Whisper .*$"] resize set 1000 250, move position center
 # Fix for floating i3 popups in burpsuite
 for_window [class="install4j-burp-StartBurp" title="^win[0-9]+$"] kill
 
@@ -225,3 +227,6 @@ for_window [class="install4j-burp-StartBurp" title="^win[0-9]+$"] kill
 bindsym $mod+h exec kitty --title "Help: SkillArch Bindings" zsh -ic "ska-help-bindings"
 bindsym $mod+Shift+h exec kitty --title "Help: SkillArch Aliases" zsh -ic "ska-help-aliases"
 bindsym $mod+Control+h exec kitty --title "Help: SkillArch packages" zsh -ic "ska-help-packages"
+
+bindsym $mod+Shift+w exec kitty --title "Whisper FR" bash /opt/skillarch/config/translate.sh fr
+bindsym $mod+Control+w exec kitty --title "Whisper EN" bash /opt/skillarch/config/translate.sh en

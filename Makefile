@@ -62,6 +62,7 @@ install-cli-tools: sanity-check ## Install system packages
 	# mise self-update # Currently broken, wait for upstream fix, pinged on 17/03/2025
 	sleep 30
 	for package in usage pdm rust terraform golang python nodejs uv; do mise use -g "$$package@latest" ; sleep 10; done
+	mise exec -- pip install --user openai-whisper # Super slow in pipx, therefore fallback to mise
 	mise exec -- go env -w "GOPATH=/home/$$USER/.local/go"
 
 	# Install uv tools
