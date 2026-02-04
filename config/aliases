@@ -9,13 +9,33 @@ alias ska-update-advanced='echo "# SAVE your changes on your repo" ; echo "git a
 alias ska-vbox-install-guestutils='sudo pacman -S virtualbox-guest-utils && sudo usermod -aG vboxsf "$USER"'
 alias ska-vbox-install='sudo pacman -S virtualbox virtualbox-host-dkms && echo -e "\n\n\nNow reboot to load the vbox drivers"'
 alias ska-sudo-unlock='su -c "faillock --user $USER --reset"'
-alias ska1='echo "# SAVE your changes on your repo \n  git add foo && git commit -m i-added-foo && git push"'
-alias ska2='echo "# Then, from a CLEAN git state \n  ska && git status" ; ska && git status'
-alias ska3='echo "# PULL & CHECKOUT upstream changes \n  git fetch upstream && git checkout main" ; git fetch upstream && git checkout main'
-alias ska4='echo "# MERGE upstream changes \n  git merge upstream/main" ; git merge upstream/main'
-alias ska5='echo "# SAVE your new current state \n  git push origin main" ; git push origin main'
-alias ska6='echo "# Check & Compare your current drift from upstream \n  git diff upstream/main" ; git diff upstream/main'
-alias ska7='echo "# Reapply with latest changes \n  ska-update-simple" ; ska-update-simple'
+skau() {
+    case "${1:-1}" in
+        1)  echo "# SAVE your changes on your repo 
+              git add foo && git commit -m i-added-foo && git push";;
+        2)  echo "# Then, from a CLEAN git state
+              ska && git status"
+            ska && git status;;
+        3)  echo "# PULL & CHECKOUT upstream changes
+              git fetch upstream && git checkout main"
+            git fetch upstream && git checkout main;;
+        4)  echo "# MERGE upstream changes
+              git merge upstream/main"
+            git merge upstream/main;;
+        5)  echo "# SAVE your new current state
+              git push origin main"
+            git push origin main;;
+        6)  echo "# Check & Compare your current drift from upstream
+              git diff upstream/main"
+            git diff upstream/main;;
+        7)  echo "# Reapply with latest changes
+              ska-update-simple"
+            ska-update-simple;;
+        *)  ;;
+    esac
+}
+
+
 
 alias fastfetch='/usr/bin/fastfetch --logo /opt/skillarch/assets/logo-round-hot.png --logo-width 50'
 alias neofetch='fastfetch'
@@ -38,7 +58,7 @@ alias k='cursor'
 alias K='cursor .'
 alias p='python'
 alias cdtmp='pushd $(mktemp -d)'
-alias ff='f(){ find . -iname "*$1*" 2>/dev/null; unset -f f; }; f'
+ff() { find . -iname "*$1*" 2>/dev/null; }
 
 # Git stuff
 alias git-clone-all-github='curl -sk -H "Authorization: token ${GITHUB_READ_TOKEN}" "https://api.github.com/search/repositories?q=user:$GITHUB_USER" | jq -r ".items[].ssh_url" | parallel -j10 "git clone {}"'
@@ -47,12 +67,12 @@ alias git-pull-all='find . -maxdepth 2 -name ".git" | cut -d/ -f2 | parallel -j1
 alias gdh='git diff HEAD'
 
 ## File Management
-alias l="eza -l --group-directories-first --icons $@"
-alias la="l -a $@"
-alias laa="l -aa $@"
-alias t="l -T $@"
-alias t2="t -L 2 $@"
-alias t3="t -L 3 $@"
+alias l="eza -l --group-directories-first --icons"
+alias la="l -a"
+alias laa="l -aa"
+alias t="l -T"
+alias t2="t -L 2"
+alias t3="t -L 3"
 alias rm='trash-put'
 alias te='trash-empty'
 alias cp='cp -i'
@@ -66,7 +86,7 @@ alias ncl='ncat -lnvp'
 alias ssh-yolo='ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
 alias wifi-nmtui='nmtui'
 alias wget-yolo="wget --no-check-certificate"
-alias digall='f(){ dig +answer +multiline "$1" any @8.8.8.8;  unset -f f; }; f'
+digall() { dig +answer +multiline "$1" any @8.8.8.8; }
 alias ipv6-disable='sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1; sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1; sudo sysctl -w net.ipv6.conf.lo.disable_ipv6=1'
 alias ipv6-enable='sudo sysctl -w net.ipv6.conf.all.disable_ipv6=0; sudo sysctl -w net.ipv6.conf.default.disable_ipv6=0; sudo sysctl -w net.ipv6.conf.lo.disable_ipv6=0'
 alias dns-127='echo "nameserver 127.0.0.1" | sudo tee /etc/resolv.conf'
@@ -75,8 +95,7 @@ alias dns-8='echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf'
 alias dns-9='echo "nameserver 9.9.9.9" | sudo tee /etc/resolv.conf'
 alias get-ip='curl -sS ipinfo.io/ip ; echo'
 alias get-ip-cpy='curl -sS ipinfo.io/ip | cpy'
-alias pub='export PUB=$(curl -s ipv4.ident.me|| curl -sS ifconfig.io); printf "${PUB%$'\n'}" | cpyc'
-
+alias pub='export PUB=$(curl -s ipv14.ident.me || curl -sS ifconfig.io); printf "%s" "${PUB%$'\''\n'\''}" | cpyc'
 # Video, Audio
 alias webcam-guvcview='guvcview'
 alias yt-dlp-likes='yt-dlp --cookies-from-browser chrome -x --audio-format mp3  :ytfav'
@@ -90,44 +109,45 @@ alias show-open-ports="sudo ss -latepun | grep -i listen"
 alias sop='show-open-ports'
 alias get-du='du -ch -d 1'
 alias get-pid-click='xprop _NET_WM_PID | cut -d" " -f3'
-alias get-pid-ps='ps fauxw | fzf | awk "{ print \$2}"'
+get-pid-ps() { ps fauxw | fzf | awk '{ print$2}'; }
 alias get-shell-size='echo "stty rows $LINES cols $COLUMNS"'
 alias dirmon='inotifywait -rm -e create -e moved_to -e modify -e access -e attrib -e close_write -e moved_from'
 alias killit='sudo kill -KILL'
 
 # Misc Utils
-alias upload='f(){ curl -F"file=@$1" https://0x0.st;  unset -f f; }; f'
-alias usleep='f(){ python3 -c "import time; time.sleep($1)";  unset -f f; }; f'
+upload() { curl -F"file=@$1" https://0x0.st; }
+usleep() { python3 -c "import time; time.sleep($1)"; }
 alias nosleep='systemd-inhibit --what sleep:idle sleep 999999'
 alias makeqrcode='qrencode -t ANSI -o -'
 alias cgrep='grep --color=always'
 alias lgrep='grep --line-buffered'
 alias sortn='sort -V | uniq -c | sort -n'
 alias grephilight='export GREP_COLORS="mt=30;46"'
-alias cheat='f(){ curl -s "cheat.sh/$1";  unset -f f; }; f'
+cheat() { curl -s "cheat.sh/$1"; }
 alias clean-swap='sudo swapoff -a && sudo swapon -a'
 alias cpy='xsel -ib'
 alias cpyc='tee >(xsel -ib)'
 alias paste='xsel -ob'
 alias get-meteo='curl https://wttr.in/'
+alias gl='glow -w0'
 alias fab='fabric-ai -s'
-cchef() (set -e;cd /opt/cyberchef && xdg-open index.html >&/dev/null &;)
+cchef() (set -e;cd /opt/cyberchef && xdg-open index.html >&/dev/null &)
 ew() { local d="$HOME/.exegol/workspaces/$1"; [[ -d "$d" ]] && cd "$d"|| echo "Error: no $d folder" >&2; }
 alias exsta='exegol start'
 alias exsto='exegol stop'
-srsta() (set -e;cd /opt/sysreptor/deploy && docker compose up -d && sleep 10 && xdg-open http://127.1:8000 >&/dev/null &;)
+srsta() (set -e;cd /opt/sysreptor/deploy && docker compose up -d && sleep 10 && xdg-open http://127.1:8000 >&/dev/null &)
 srsto() (set -e;cd /opt/sysreptor/deploy && docker compose down;)
 gen_pass() { grep -xP "[a-z]{4,6}" /opt/lists/SecLists/Miscellaneous/lang-english.txt|shuf -n6|tr '\n' '-'|sed 's/-$//'; }
 crypt-enc() (set -e;
     PASS=$(gen_pass)
     tar zcf "$1.tar.gz" "$1";
     openssl enc -aes-256-cbc -pbkdf2 -in "$1.tar.gz" -out "$1.tar.gz.enc" -pass pass:"${PASS}"
-    rm "$1.tar.gz"; printf "Password: ";printf "${PASS}" | cpyc;
-    echo "\nEncrypted file: $1.tar.gz.enc")
+    rm "$1.tar.gz"; printf "Password: %s" "${PASS}" | cpyc;
+    echo -e "\nEncrypted file: $1.tar.gz.enc")
 crypt-dec() (set -e;openssl enc -d -aes-256-cbc -pbkdf2 -in "$1" -out "${1%.enc}";tar xf "${1%.enc}";rm "${1%.enc}")
 
 # Python
-alias pv='f(){ if [ -z "$1" ] ; then echo "Use: pv 3.12" ; else mise use "python@$1" ; mise config set env._.python.venv.path .venv ; mise config set --type list env._.python.venv.uv_create_args -- --seed ; mise config set --type bool env._.python.venv.create true ; mise exec -- which python ; mise exec -- python --version ; fi;  unset -f f; }; f'
+pv() { if [ -z "$1" ] ; then echo "Use: pv 3.12" ; else mise use "python@$1" ; mise config set env._.python.venv.path .venv ; mise config set --type list env._.python.venv.uv_create_args -- --seed ; mise config set --type bool env._.python.venv.create true ; mise exec -- which python ; mise exec -- python --version ; fi; }
 alias pyreq='pip install -r requirements.txt'
 alias pysrv='mkdir -pv /tmp/empty ; python -m http.server -d /tmp/empty'
 alias uvv='uv venv .venv && source .venv/bin/activate'
@@ -148,9 +168,9 @@ alias b64d='base64 -d'
 b64url() { args_to_stdin "$@"|base64 -w0|tr -d '='|tr '/+' '_-'; }
 alias b64e='base64 -w0'
 b64urld() { args_to_stdin "$@"|tr -d ' \t\r\n'|tr '_-' '/+'|base64 -d; }
-toDecimal() { args_to_stdin "$@"| while IFS= read -ku0 c; do printf "%d " "'$c";done |sed 's/^ //;s/ $//'; }
+toDecimal() { args_to_stdin "$@"| while IFS= read -rku0 c; do printf "%d " "'$c";done |sed 's/^ //;s/ $//'; }
 alias toDec='toDecimal'
-fromDecimal() { args_to_stdin "$@"|tr ' ' '\n'| while read -r n; do printf "\\$(printf '%03o' "$n")";done; }
+fromDecimal() { args_to_stdin "$@"|tr ' ' '\n'| while read -r n; do printf "\\%s" "$(printf '%03o' "$n")";done; }
 alias fromDec='fromDecimal'
 toHex() { args_to_stdin "$@"|xxd -p | tr -d '\n'; }
 alias hexencode='toHex'
@@ -158,6 +178,10 @@ alias hexd='toHex'
 fromHex() { args_to_stdin "$@"|tr -d '\\x'|xxd -r -p; }
 alias hexdecode='fromHex'
 alias hexd='fromHex'
+hex2py() { args_to_stdin "$@" | sed -u -E "s/([0-9a-fA-F]{2})/0x\1, /g" | sed -E 's/^/[/; s/, $/]/'; }
+hex2c() { args_to_stdin "$@" | sed -u -E 's/([0-9a-fA-F]{2})/\\x\1/g'; }
+
+
 
 base10to16() { args_to_stdin "$@" | bc <<< "obase=16; ibase=10; $(cat)" | tr -d '\\\n'; }
 alias 10to16='base10to16'
@@ -204,7 +228,7 @@ xmlunescape() { args_to_stdin "$@" | sed -u -e 's/&lt;/</g' -e 's/&gt;/>/g' -e '
 # xor "my_key" "my_string" ---  echo "my_string" | xor "my_key"
 xor() { local k="$1" i r j;[[ $# -eq 2 ]]&&i="$2"||i="$(cat)";for ((j=0; j<${#i}; j++));do r+=$(printf "%02x" $(( $(printf "%d" "'${i:$j:1}") ^ $(printf "%d" "'${k:$((j % ${#k})):1}") )));done;fromHex "$r"; }
 # xorh "key_in_hex" "hex_string" ---  echo "hex_string" | xorh "key_in_hex"
-xorh() { local k=$(fromHex "$1") i r j;[[ $# -eq 2 ]]&&i="$2"||i="$(tr -d '\n')";i=$(fromHex "$i");for ((j=0;j<${#i};j++));do r+=$(printf "%02x" $(( $(printf "%d" "'${i:$j:1}") ^ $(printf "%d" "'${k:$((j % ${#k})):1}") )));done;printf "$r"; }
+xorh() { local k i r j;k=$(fromHex "$1")||return 1;[[ $# -eq 2 ]]&&i="$2"||i="$(tr -d '\n')";i=$(fromHex "$i")||return 1;for ((j=0;j<${#i};j++));do r+=$(printf "%02x" $(( $(printf "%d" "'${i:$j:1}") ^ $(printf "%d" "'${k:$((j % ${#k})):1}") )));done;printf "%s" "$r"; }
 md5() { args_to_stdin "$@" | md5sum | awk '{print$1}'; }
 sha1() { args_to_stdin "$@" | sha1sum | awk '{print$1}'; }
 sha256() { args_to_stdin "$@" | sha256sum | awk '{print$1}'; }
@@ -213,23 +237,23 @@ toLower() { args_to_stdin "$@" | perl -C -pe '$_=lc'; }
 
 
 # Web Based Recon
-alias getinfo-known-creds='f(){ xdg-open "https://cirt.net/passwords?criteria=$@" ;  unset -f f; }; f'
-alias getinfo-known-port='f(){ xdg-open "https://www.speedguide.net/port.php?port=$@" ;  unset -f f; }; f'
-alias getinfo-bookhacktricks='f(){ xdg-open "https://book.hacktricks.wiki/en/index.html?search=$@" ;  unset -f f; }; f'
-alias getinfo-certspotter='f(){ curl -sS "https://api.certspotter.com/v1/issuances?domain=$1&include_subdomains=true&expand=dns_names&expand=issuer&expand=cert" | jq ;  unset -f f; }; f'
-alias getinfo-virustotal='f(){ xdg-open "https://www.virustotal.com/gui/domain/$1" ;  unset -f f; }; f'
-alias getinfo-crtsh='f(){ curl -sk "https://crt.sh/json?q=$1" | jq . ; unset -f f; }; f'
-alias getinfo-wayback='f(){ curl -sk "https://web.archive.org/cdx/search/cdx?fl=original&collapse=urlkey&url=*.$1" ; unset -f f; }; f'
-alias getinfo-leakix='f(){ curl -sk "https://leakix.net/api/graph/hostname/$1?v[]=hostname&v[]=ip&d=auto&l=auto" | jq | grep -ioP "hostname/[^\"]+" | cut -d/ -f2 | sort -uV ; unset -f f; }; f'
+getinfo-known-creds() { xdg-open "https://cirt.net/passwords?criteria=${*// /+}" ; }
+getinfo-known-port() { xdg-open "https://www.speedguide.net/port.php?port=$1" ; }
+getinfo-bookhacktricks() { xdg-open "https://book.hacktricks.wiki/en/index.html?search=${*// /+}" ; }
+getinfo-certspotter() { curl -sS "https://api.certspotter.com/v1/issuances?domain=$1&include_subdomains=true&expand=dns_names&expand=issuer&expand=cert" | jq ; }
+getinfo-virustotal() { xdg-open "https://www.virustotal.com/gui/domain/$1" ; }
+getinfo-crtsh() { curl -sk "https://crt.sh/json?q=$1" | jq . ; }
+getinfo-wayback() { curl -sk "https://web.archive.org/cdx/search/cdx?fl=original&collapse=urlkey&url=*.$1" ; }
+getinfo-leakix() { curl -sk "https://leakix.net/api/graph/hostname/$1?v[]=hostname&v[]=ip&d=auto&l=auto" | jq | grep -ioP "hostname/[^\"]+" | cut -d/ -f2 | sort -uV ; }
 unalias gau 2>/dev/null # gau real tool instead of omz git alias
 
 # Web Fuzzing
-alias probe-urls='f(){ while read url; do curl -sk "$url" -o /dev/null -w "%{http_code}:%{size_download}:%{url_effective}\n" ; done < "$@" ; ; unset -f f; }; f'
+probe-urls() { while read -r url; do curl -sk "$url" -o /dev/null -w "%{http_code}:%{size_download}:%{url_effective}\n" ; done < "${1?}" ; }
 alias fu='ffuf --of json -mc all -t 2 -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"'
-alias cfu='f(){ jq -r ".results[]|[.status,.length,.lines,.words,.url]|@tsv" "$@"|sort -uV; unset -f f; }; f'
-alias cfu-clean='f(){ cfu $@ | cut -d "|" -f1,3- | awk -F/ "!_[\$1]++" | sort -u -t: -k1,1 ;  unset -f f; }; f'
-alias cfu-clean-url='f(){ cfu-clean $@ | cut -d"|" -f4- ;  unset -f f; }; f'
-alias lfu='flfu(){ outfile=fu-$(echo -n "$@" | sed -E "s#[/ ]#_#g").json ; ffuf --of json -o "$outfile" -mc all -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36" $@ ; cfu-clean "$outfile" ; unset -f flfu; }; flfu'
+cfu() { jq -r ".results[]|[.status,.length,.lines,.words,.url]|@tsv" "$@"|sort -uV; }
+cfu-clean() { cfu "$@" | cut -d "|" -f1,3- | awk -F/ "!_[\$1]++" | sort -u -t: -k1,1 ; }
+cfu-clean-url() { cfu-clean "$@" | cut -d"|" -f4- ; }
+lfu() { outfile=fu-$(echo -n "$@" | sed -E "s#[/ ]#_#g").json ; ffuf --of json -o "$outfile" -mc all -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36" "$@" ; cfu-clean "$outfile" ; }
 alias crl='curl -sS --path-as-is -gk -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) snap Chromium/83.0.4103.106 Chrome/83.0.4103.106 Safari/537.36"'
 alias crli='crl -D /dev/stderr'
 alias crlix='crli -x http://127.0.0.1:8080/'
@@ -260,13 +284,14 @@ alias dgitleaks="dockit zricethezav/gitleaks"
 ## Recon
 alias drecon-amass='dockit caffix/amass'
 alias drecon-findomain='dockit edu4rdshl/findomain -t'
-alias drecon-wappa='dockit wappalyzer/cli -r -D 2 -P -a "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) snap Chromium/83.0.4103.106 Chrome/83.0.4103.106 Safari/537.36" $@'
+alias drecon-wappa='dockit wappalyzer/cli -r -D 2 -P -a "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) snap Chromium/83.0.4103.106 Chrome/83.0.4103.106 Safari/537.36"'
 nmap-i() {
     sudo -v && mkdir -p nmap || return
-    local t=$1
-    local p=($(nmap -p- --min-rate=1000 -T4 -Pn $1|awk '/^[0-9]/{print $1}'|cut -d/ -f1))
-    echo "Ports: $p"
-    sudo nmap -sC -sV -vv --version-all -oA nmap/tcp -p${(j:,:)p} $1 & sudo nmap -sU -T4 -oA nmap/udp $1 &
+    local ip="$1"
+    local -a p
+    mapfile -t p < <(nmap -p- --min-rate=1000 -T4 -Pn "$ip"|awk '/^[0-9]/{print $1}'|cut -d/ -f1)
+    printf 'Ports: %s\n' "${p[*]}"
+    sudo nmap -sC -sV -vv --version-all -oA nmap/tcp -p"${p[(j:,:)]}" "$ip" & sudo nmap -sU -T4 -oA nmap/udp "$ip" &
 }
 
 ## Fuzz & Crawl
@@ -275,7 +300,7 @@ alias drustscan='dockit rustscan/rustscan' # web path enum
 alias doneforall='dockit -w /OneForAll -v /tmp/results:/OneForAll/results shmilylty/oneforall' # noisy recon
 alias getfuzz='echo "AA<fuzz1>\"fuzz2'"'"'fuzz3\`%}})fuzz4\${{fuzz5\\"BB'
 alias getcan='f(){ echo "skanary$(date +%s%N)"; unset -f f; }; f'
-alias getcaninfo='f(){ date -d "@${1:0:-9}" "+%Y-%m-%d %H:%M:%S.${1: -9}"; unset -f f; }; f'
+getcaninfo() { date -d "@${1:0:-9}" "+%Y-%m-%d %H:%M:%S.${1: -9}"; }
 
 ## Compliance
 alias dssh-audit="dockit positronsecurity/ssh-audit"
