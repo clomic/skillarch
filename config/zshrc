@@ -110,6 +110,7 @@ export BROWSER=/usr/bin/google-chrome-stable
 export EDITOR=/usr/bin/vim
 export PAGER=/usr/bin/bat
 export TERMINAL=/usr/bin/kitty
+export TERM=xterm-256color
 export VISUAL=/usr/bin/vim
 source $ZSH/oh-my-zsh.sh
 source /opt/skillarch/config/aliases
