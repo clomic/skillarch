@@ -11,7 +11,7 @@ alias ska-vbox-install='sudo pacman -S virtualbox virtualbox-host-dkms && echo -
 alias ska-sudo-unlock='su -c "faillock --user $USER --reset"'
 skau() {
     case "${1:-1}" in
-        1)  echo "# SAVE your changes on your repo 
+        1)  echo "# SAVE your changes on your repo
               git add foo && git commit -m i-added-foo && git push";;
         2)  echo "# Then, from a CLEAN git state
               ska && git status"
