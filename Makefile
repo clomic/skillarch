@@ -5,7 +5,7 @@ SHELL := /bin/bash
 
 # -- Colors & UX Helpers --
 C_RST   := \033[0m
-C_OK	:= \033[1;32m
+C_OK    := \033[1;32m
 C_INFO  := \033[1;34m
 C_WARN  := \033[1;33m
 C_ERR   := \033[1;31m
@@ -42,7 +42,7 @@ install: ## Install SkillArch (full)
 	curStep=1
 	numSteps=12
 	$(call STEP,$$((curStep++)),$$numSteps,Installing base packages)
-# 	$(MAKE) install-base
+ 	$(MAKE) install-base
 	$(call STEP,$$((curStep++)),$$numSteps,Installing CLI tools & runtimes)
 	$(MAKE) install-cli-tools
 	$(call STEP,$$((curStep++)),$$numSteps,Installing shell & dotfiles)
@@ -65,7 +65,6 @@ install: ## Install SkillArch (full)
 	$(MAKE) install-sysreptor
 	$(call STEP,$$((curStep++)),$$numSteps,Optimizing BTRFS)
 	$(MAKE) opti-btrfs
-	
 	$(MAKE) clean
 	$(MAKE) test
 	$(call DONE,You are all set up! Enjoy SkillArch! <3)
@@ -163,7 +162,7 @@ install-shell: sanity-check ## Install shell, zsh, oh-my-zsh, fzf, tmux
 	# Set the default user shell to zsh
 	sudo chsh -s /usr/bin/zsh "$$USER" # Logout required to be applied
 	$(call DONE,Shell & dotfiles installed!)
-	
+
 install-docker: sanity-check ## Install Docker & Docker Compose
 	$(call INFO,Installing Docker...)
 	$(PACMAN_INSTALL) docker docker-compose
