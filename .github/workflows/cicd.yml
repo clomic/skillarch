@@ -21,10 +21,17 @@ jobs:
           remove_haskell: true
           remove_tool_cache: true
           remove_swap: true
-          remove_packages: "azure-cli google-cloud-cli microsoft-edge-stable google-chrome-stable firefox postgresql* temurin-* *llvm* mysql* dotnet-sdk-*"
+          remove_packages: "azure-cli google-cloud-cli microsoft-edge-stable google-chrome-stable firefox postgresql* temurin-* *llvm* mysql* dotnet-sdk-* aspnetcore-* mono-* libmono-* php*-* r-base-core snapd"
           remove_packages_one_command: true
-          remove_folders: "/usr/share/swift /usr/share/miniconda /usr/share/az* /usr/share/glade* /usr/local/lib/node_modules /usr/local/share/chromium /usr/local/share/powershell"
+          remove_folders: "/usr/share/swift /usr/share/miniconda /usr/share/az* /usr/share/glade* /usr/local/lib/node_modules /usr/local/share/chromium /usr/local/share/powershell /usr/share/dotnet /usr/share/kotlinc /usr/share/gradle* /usr/share/sbt /usr/share/ri /opt/hostedtoolcache /imagegeneration"
           testing: false
+
+      - name: Extra Disk Cleanup
+        run: |
+          sudo docker system prune -af || true
+          sudo apt-get autoremove -y || true
+          sudo apt-get clean || true
+          df -h /
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -45,6 +52,8 @@ jobs:
           context: .
           file: ./Dockerfile-lite
           push: ${{ github.ref == 'refs/heads/main' }}
+          secrets: |
+            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/skillarch:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/skillarch:lite
@@ -115,5 +124,3 @@ jobs:
         run: |
           git config --global --add safe.directory /__w/skillarch/skillarch
           gitleaks detect --source . --redact -v --exit-code=2 --report-format=sarif --report-path=results.sarif --log-level=debug
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

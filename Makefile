@@ -5,20 +5,20 @@ SHELL := /bin/bash
 
 # -- Colors & UX Helpers --
 C_RST   := \033[0m
-C_OK    := \033[1;32m
+C_OK	:= \033[1;32m
 C_INFO  := \033[1;34m
 C_WARN  := \033[1;33m
 C_ERR   := \033[1;31m
 C_BOLD  := \033[1m
 SKA_LOG := /var/tmp/skillarch-install.log
 
-BOLD  = @echo -e "$(C_BOLD)$(1)$(C_RST)"
-OK    = @echo -e "$(C_OK)✔  $(1)$(C_RST)"
-INFO  = @echo -e "$(C_INFO)→  $(1)$(C_RST)"
-WARN  = @echo -e "$(C_WARN)⚠  $(1)$(C_RST)"
-ERR   = @echo -e "$(C_ERR)✖  $(1)$(C_RST)" >&2
-STEP  = @echo -e "$(C_BOLD)$(C_INFO)==>  [$(1)/$(2)]$(C_RST) $(C_INFO)$(3)...$(C_RST)"
-DONE  = @echo -e "\n$(C_OK)✓ Done - $(1)$(C_RST)\n"
+BOLD = @echo -e "$(C_BOLD)$(1)$(C_RST)"
+OK	 = @echo -e "$(C_OK)✔  $(1)$(C_RST)"
+INFO = @echo -e "$(C_INFO)→  $(1)$(C_RST)"
+WARN = @echo -e "$(C_WARN)⚠  $(1)$(C_RST)"
+ERR	 = @echo -e "$(C_ERR)✖  $(1)$(C_RST)" >&2
+STEP = @echo -e "$(C_BOLD)$(C_INFO)==>  [$(1)/$(2)]$(C_RST) $(C_INFO)$(3)...$(C_RST)"
+DONE = @echo -e "\n$(C_OK)✓ Done - $(1)$(C_RST)\n"
 
 define ska-link
 	# Backup existing file (if not already a symlink) and create symlink

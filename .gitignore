@@ -1,2 +1,7 @@
 *.skabak
 .vscode
+.env
+.env.*
+*.secret
+*.key
+*.pem

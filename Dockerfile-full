@@ -2,16 +2,21 @@ FROM thelaluka/skillarch:lite
 
 USER root
 RUN echo "hacker ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/hacker
+COPY . /opt/skillarch
+RUN chown -R hacker:hacker /opt/skillarch
 
 USER hacker
+ENV LC_ALL=C
 WORKDIR /opt/skillarch
 
-# Install skillarch
-RUN make install-docker
-RUN make install-gui
-RUN make install-gui-tools
-RUN make install-wordlists
-RUN make install-hardening
+# Install all targets in a single layer so clean reclaims space within the same layer
+RUN make install-docker && \
+    make install-gui && \
+    make install-gui-tools && \
+    make install-wordlists && \
+    make install-hardening && \
+    make clean && \
+    make test-full
 
 # Remove NOPASSWD capability after installation
 USER root

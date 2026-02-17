@@ -290,6 +290,9 @@ usage pdm rust terraform golang python nodejs
 # Mise golang tools
 sw33tLie/sns glitchedgitz/cook x90skysn3k/brutespray sensepost/gowitness
 
+# GitHub binary releases
+slicingmelon/gobypass403 Chocapikk/wpprobe
+
 # Pdtm tools
 aix alterx asnmap cdncheck chaos-client cloudlist cvemap dnsx httpx interactsh-client interactsh-server katana mapcidr naabu notify nuclei proxify shuffledns simplehttpserver subfinder tldfinder tlsx tunnelx uncover urlfinder
 

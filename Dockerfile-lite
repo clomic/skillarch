@@ -12,6 +12,7 @@ RUN chown -R hacker:hacker /opt/skillarch
 USER hacker
 ENV USER=hacker
 ENV TZ=UTC
+ENV LC_ALL=C
 WORKDIR /opt/skillarch
 
 # Install skillarch
@@ -19,6 +20,8 @@ RUN make install-base
 RUN make install-cli-tools
 RUN make install-shell
 RUN make install-offensive
+RUN make test-lite
+RUN make clean
 
 # Remove NOPASSWD capability after installation
 USER root
