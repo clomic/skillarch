@@ -42,7 +42,7 @@ install: ## Install SkillArch (full)
 	curStep=1
 	numSteps=12
 	$(call STEP,$$((curStep++)),$$numSteps,Installing base packages)
- 	$(MAKE) install-base
+	$(MAKE) install-base
 	$(call STEP,$$((curStep++)),$$numSteps,Installing CLI tools & runtimes)
 	$(MAKE) install-cli-tools
 	$(call STEP,$$((curStep++)),$$numSteps,Installing shell & dotfiles)
