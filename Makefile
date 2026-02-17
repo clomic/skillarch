@@ -108,7 +108,6 @@ install-base: sanity-check ## Install base packages
 	$(call DONE,Base packages installed!)
 
 install-cli-tools: sanity-check ## Install CLI tools & runtimes
-	set -x
 	$(call INFO,Installing CLI tools & runtimes...)
 	$(PACMAN_INSTALL) base-devel bison bzip2 ca-certificates cloc cmake dos2unix expect ffmpeg foremost gdb gnupg htop bottom hwinfo icu inotify-tools iproute2 jq llvm lsof ltrace make mlocate mplayer ncurses net-tools ngrep nmap openssh openssl parallel perl-image-exiftool pkgconf python-virtualenv re2c readline ripgrep rlwrap socat sqlite sshpass tmate tor traceroute trash-cli tree unzip vbindiff xsel xz yay zip veracrypt git-delta viu qsv asciinema htmlq neovim glow jless websocat superfile gron eza fastfetch bat sysstat cronie tree-sitter bc
 	sudo ln -sf /usr/bin/bat /usr/local/bin/batcat
@@ -132,7 +131,7 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 	done
 	mise exec -- go env -w "GOPATH=/home/$$USER/.local/go"
 
-	# Install pipx & tools
+	# Install uv tools
 	uv tool update-shell
 	for package in argcomplete bypass-url-parser dirsearch exegol pre-commit sqlmap wafw00f yt-dlp semgrep defaultcreds-cheat-sheet; do
 		uv tool install -w setuptools "$$package" || {
@@ -352,7 +351,7 @@ opti-btrfs: ## Limit the space used by BTRFS
 	$(call DONE,BTRFS Optimization done!)
 
 update: sanity-check ## Update SkillArch (pull & prompt reinstall)
-	@[ -n "$$(git status --porcelain)" ]] && echo "Error: git state is dirty, please \"git stash\" your changes before updating" && exit 1 || true
+	@[[ -n "$$(git status --porcelain)" ]] && echo "Error: git state is dirty, please \"git stash\" your changes before updating" && exit 1 || true
 	[[ "$$(git rev-parse --abbrev-ref HEAD)" != "main" ]] && echo "Error: current branch is not main, please switch to main before updating" && exit 1 || true
 	git pull
 	$(call DONE,SkillArch updated, please run make install to apply changes)
