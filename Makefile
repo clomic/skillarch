@@ -344,8 +344,6 @@ install-sysreptor:  sanity-check ## Install sysreptor
 
 install-vmware: sanity-check ## Install VMTools for VMWare
 	if [[ "$$(systemd-detect-virt)" = "vmware" ]]; then
-		$(call INFO,VMware detected$(comma) installing VMTools...)
-		exit
 		$(PACMAN_INSTALL) open-vm-tools
 		sudo systemctl enable --now vmtoolsd
 		sudo systemctl enable --now vmware-vmblock-fuse

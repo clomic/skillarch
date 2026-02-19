@@ -112,9 +112,9 @@ export PAGER=/usr/bin/bat
 export TERMINAL=/usr/bin/kitty
 export TERM=xterm-256color
 export VISUAL=/usr/bin/vim
+[[ -f ~/.my_aliases ]] && source ~/.my_aliases
 source $ZSH/oh-my-zsh.sh
 source /opt/skillarch/config/aliases
-[[ -f ~/.my_aliases ]] && source ~/.my_aliases
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 eval "$(register-python-argcomplete --no-defaults exegol)"
 
