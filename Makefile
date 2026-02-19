@@ -241,7 +241,7 @@ install-offensive: sanity-check ## Install offensive & security tools
 		&& wpprobe update-db ) || true
 
 	# pdtm hits GitHub API rate limits (60 req/h unauthenticated) -- retry after reset (~4min)
-	[[ -f /usr/bin/pdtm ]] && { mkdir -p ~/.pdtm/go/bin; sudo chown "$$USER:$$USER" /usr/bin/pdtm; sudo mv /usr/bin/pdtm ~/.pdtm/go/bin; ~/.pdtm/go/bin/pdtm -u pdtm } || true
+	[[ -f /usr/bin/pdtm ]] && { mkdir -p ~/.pdtm/go/bin; sudo chown "$$USER:$$USER" /usr/bin/pdtm; sudo mv /usr/bin/pdtm ~/.pdtm/go/bin; ~/.pdtm/go/bin/pdtm -u pdtm; } || true
 	for attempt in 1 2 3 4 5; do \
 		zsh -c "source ~/.zshrc && pdtm -install-all -v" && break || { \
 			$(call WARN,pdtm install failed (attempt $$attempt/5)$(comma) likely rate-limited. Waiting 4m for reset...) ; \
@@ -249,6 +249,7 @@ install-offensive: sanity-check ## Install offensive & security tools
 		} ; \
 	done || true
 	zsh -c "source ~/.zshrc && nuclei -update-templates -update-template-dir ~/.nuclei-templates" || true
+	rm -rf /tmp/nuclei[0-9]*
 
 	# Clone custom tools -- run in parallel
 	ska_clone() { local pkg=$${1##*/}; [[ ! -d "/opt/$$pkg" ]] && git clone --depth=1 "$$1" "/tmp/$$pkg" && sudo mv "/tmp/$$pkg" "/opt/$$pkg" || true ; }
@@ -268,7 +269,7 @@ install-wordlists: sanity-check ## Install wordlists (SecLists, rockyou, etc.)
 	$(call INFO,Installing wordlists...)
 	[[ ! -d /opt/lists ]] && sudo mkdir -p /opt/lists && sudo chown "$$USER:$$USER" /opt/lists || true
 	# Download all wordlists in parallel
-	ska_clone_list() { local pkg=$${1##*/}; [[ ! -d "/opt/lists/$$pkg" ]] && git clone --depth=1 "$$1" "/tmp/$$pkg" && sudo mv "/tmp/$$pkg" "/opt/lists/$$pkg" || true ; }
+	ska_clone_list() { local pkg=$${1##*/}; [[ ! -d "/opt/lists/$$pkg" ]] && git clone --depth=1 "$$1" "/var/tmp/$$pkg" && sudo mv "/var/tmp/$$pkg" "/opt/lists/$$pkg" || true ; }
 	( [[ ! -f /opt/lists/rockyou.txt ]] && curl -L https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt -o /opt/lists/rockyou.txt || true ) &
 	ska_clone_list https://github.com/swisskyrepo/PayloadsAllTheThings &
 	ska_clone_list https://github.com/1N3/BruteX &
@@ -302,7 +303,7 @@ install-clomic: sanity-check ## Install clomic tools
 	$(call ska-link,/opt/skillarch/config/clomic.zsh-theme,$$HOME/.oh-my-zsh/themes/clomic.zsh-theme)
 	sudo ln -sf /opt/skillarch/config/systemd/resolved.conf /etc/systemd/resolved.conf
 	sudo ln -sf /opt/skillarch/config/minicom/minirc.dfl /etc/minirc.dfl
-	[[ ! -d /opt/cyberchef ]] && mkdir -p /tmp/cyberchef && curl -sL $$(curl -s https://api.github.com/repos/gchq/CyberChef/releases/latest | jq -r '.assets[].browser_download_url') -o /tmp/cyberchef/cc.zip && 7z x -y -o/tmp/cyberchef /tmp/cyberchef/cc.zip >/dev/null && rm /tmp/cyberchef/cc.zip && mv /tmp/cyberchef/CyberChef*.html /tmp/cyberchef/index.html && sudo mv /tmp/cyberchef /opt/cyberchef
+	[[ ! -d /opt/cyberchef ]] && { mkdir -p /tmp/cyberchef; curl -sL $$(curl -s https://api.github.com/repos/gchq/CyberChef/releases/latest | jq -r '.assets[].browser_download_url') -o /tmp/cyberchef/cc.zip; 7z x -y -o/tmp/cyberchef /tmp/cyberchef/cc.zip >/dev/null; rm /tmp/cyberchef/cc.zip /tmp/cyberchef/index.html.* || true; mv /tmp/cyberchef/CyberChef*.html /tmp/cyberchef/index.html; sudo mv /tmp/cyberchef /opt/cyberchef; }
 	$(call DONE,Clomic tools installed!)
 
 install-sysreptor:  sanity-check ## Install sysreptor
@@ -397,7 +398,7 @@ test: ## Validate installation (smoke tests)
 	for bin in nmap ffuf msfconsole hashcat bettercap gobypass403 wpprobe; do
 		ska_check "$$bin" "which $$bin"
 	done
-	ska_check "sqlmap"      "which sqlmap || uv tool list 2>/dev/null | grep -q sqlmap"
+	ska_check "sqlmap"      "which sqlmap || [[ -f ~/.local/bin/sqlmap ]]"
 	ska_check "nuclei"      "which nuclei || [[ -f ~/.pdtm/go/bin/nuclei ]]"
 	ska_check "httpx"       "which httpx || [[ -f ~/.pdtm/go/bin/httpx ]]"
 	ska_check "subfinder"   "which subfinder || [[ -f ~/.pdtm/go/bin/subfinder ]]"
@@ -562,6 +563,7 @@ list-tools: ## List installed offensive tools & versions
 		VER=$$(eval "$$2" 2>/dev/null | head -1 || echo "not found")
 		printf "  %-20s %s\n" "$$1" "$$VER"
 	}
+	PATH=$$PATH:~/.local/bin:~/.pdtm/go/bin
 	$(call BOLD,--- Core ---)
 	ska_ver "git"       "git --version"
 	ska_ver "zsh"       "zsh --version"
@@ -588,10 +590,11 @@ list-tools: ## List installed offensive tools & versions
 	ska_ver "ghidra"     "cat /opt/ghidra/bom.json| jq -r '.components[].version'|head -1" ## "echo 'installed (GUI)'"
 	ska_ver "wireshark"  "wireshark --version 2>&1 | head -1"
 	$(call BOLD,\n--- uv Tools ---)
-	uv tool list 2>/dev/null | grep -v '-' || echo "  uv not available"
+	eval "$$(mise activate bash)" || true
+	uv tool list 2>/dev/null | grep -v '-' | pr -o2 -t || echo "  uv not available"
 	$(call BOLD,\n--- Pdtm Tools ---)
 	## ls ~/.pdtm/go/bin/ 2>/dev/null | while read -r tool; do echo "  %$$tool"; echo "$$($$tool --version 2>&1|tail -1)"; done || echo "  pdtm not installed"
-	for tool in $(ls ~/.pdtm/go/bin/);do echo -n "  $$tool ";{ "$$tool" --version 2>&1 || "$$tool" version  2>&1 }|grep -i version|grep -oP '\d+(?:\.\d+)+';done || echo "  pdtm not installed"
+	pdtm 2>&1 | awk '/^[0-9]+\./ {gsub(/\033\[[0-9;]*[mK]/, ""); sub(/^[0-9]+\./, " "); print}'  || echo "  pdtm not installed"
 	echo ""
 
 backup: ## Backup current configs before overwriting
