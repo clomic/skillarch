@@ -22,7 +22,7 @@
 - Then open `Console` and install SkillArch 🥂
 
 ```bash
-git clone https://github.com/laluka/skillarch
+git clone https://github.com/clomic/skillarch
 sudo mv skillarch /opt/skillarch && cd /opt/skillarch
 make install # Then reboot && pick i3 at login
 

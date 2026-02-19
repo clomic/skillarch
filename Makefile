@@ -40,7 +40,7 @@ install: ## Install SkillArch (full)
 	echo "" > $(SKA_LOG)
 	exec > >(tee -a $(SKA_LOG)) 2>&1
 	curStep=1
-	numSteps=12
+	numSteps=13
 	$(call STEP,$$((curStep++)),$$numSteps,Installing base packages)
 	$(MAKE) install-base
 	$(call STEP,$$((curStep++)),$$numSteps,Installing CLI tools & runtimes)
@@ -63,6 +63,8 @@ install: ## Install SkillArch (full)
 	$(MAKE) install-clomic
 	$(call STEP,$$((curStep++)),$$numSteps,Installing Sysreptor)
 	$(MAKE) install-sysreptor
+	$(call STEP,$$((curStep++)),$$numSteps,Installing VMTools)
+	$(MAKE) install-vmware
 	$(call STEP,$$((curStep++)),$$numSteps,Optimizing BTRFS)
 	$(MAKE) opti-btrfs
 	$(MAKE) clean
@@ -121,7 +123,7 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 	# Install mise and all php-build dependencies
 	$(PACMAN_INSTALL) mise libedit libffi libjpeg-turbo libpcap libpng libxml2 libzip postgresql-libs php-gd
 	# mise self-update # Currently broken, wait for upstream fix, pinged on 17/03/2025
-	for package in usage pdm rust terraform golang python nodejs uv; do \
+	for package in uv usage pdm rust terraform golang python nodejs; do \
 		for attempt in 1 2 3; do \
 			mise use -g "$$package@latest" && break || { \
 				$(call WARN,mise install $$package failed (attempt $$attempt/3), retrying in 5s...) ; \
@@ -130,9 +132,9 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 		done ; \
 	done
 	mise exec -- go env -w "GOPATH=/home/$$USER/.local/go"
+	eval "$$(mise activate bash)" || true
 
 	# Install uv tools
-	uv tool update-shell
 	for package in argcomplete bypass-url-parser dirsearch exegol pre-commit sqlmap wafw00f yt-dlp semgrep defaultcreds-cheat-sheet; do
 		uv tool install -w setuptools "$$package" || {
 			$(call WARN,Retrying $$package install...)
@@ -224,19 +226,26 @@ install-offensive: sanity-check ## Install offensive & security tools
 	$(PACMAN_INSTALL) metasploit fx lazygit fq gitleaks jdk21-openjdk burpsuite hashcat bettercap
 	sudo sed -i 's#$$JAVA_HOME#/usr/lib/jvm/java-21-openjdk#g' /usr/bin/burpsuite
 	for pkg in ffuf gau pdtm-bin waybackurls fabric-ai-bin; do yay --noconfirm --needed -S "$$pkg" || $(call WARN,Failed to install $$pkg, continuing...); done
-	[[ -f /usr/bin/pdtm ]] && sudo chown "$$USER:$$USER" /usr/bin/pdtm && sudo mv /usr/bin/pdtm ~/.pdtm/go/bin || true
-
 	# Hide stdout and Keep stderr for CI builds -- run go installs in parallel
 	mise exec -- go install github.com/sw33tLie/sns@latest > /dev/null &
 	mise exec -- go install github.com/glitchedgitz/cook/v2/cmd/cook@latest > /dev/null &
 	mise exec -- go install github.com/x90skysn3k/brutespray@latest > /dev/null &
 	mise exec -- go install github.com/sensepost/gowitness@latest > /dev/null &
 	wait
-	# pdtm hits GitHub API rate limits (60 req/h unauthenticated) -- retry after rate limit reset
-	for attempt in 1 2 3; do \
+
+	# Install GitHub binary releases -- gobypass403 & wpprobe (sequential to save API budget for pdtm)
+	( wget -q "$$(curl -sL https://api.github.com/repos/slicingmelon/gobypass403/releases/latest | jq -r '.assets[] | select(.name | contains("linux_adm64")) | .browser_download_url')" -O /tmp/gobypass403 \
+		&& chmod +x /tmp/gobypass403 && sudo mv /tmp/gobypass403 /usr/local/bin/gobypass403 ) || true
+	( wget -q "$$(curl -sL https://api.github.com/repos/Chocapikk/wpprobe/releases/latest | jq -r '.assets[] | select(.name | test("linux_amd64")) | .browser_download_url')" -O /tmp/wpprobe \
+		&& chmod +x /tmp/wpprobe && sudo mv /tmp/wpprobe /usr/local/bin/wpprobe \
+		&& wpprobe update-db ) || true
+
+	# pdtm hits GitHub API rate limits (60 req/h unauthenticated) -- retry after reset (~4min)
+	[[ -f /usr/bin/pdtm ]] && { mkdir -p ~/.pdtm/go/bin; sudo chown "$$USER:$$USER" /usr/bin/pdtm; sudo mv /usr/bin/pdtm ~/.pdtm/go/bin; ~/.pdtm/go/bin/pdtm -u pdtm } || true
+	for attempt in 1 2 3 4 5; do \
 		zsh -c "source ~/.zshrc && pdtm -install-all -v" && break || { \
-			$(call WARN,pdtm install failed (attempt $$attempt/3), likely rate-limited. Waiting 15m for reset...) ; \
-			sleep 900 ; \
+			$(call WARN,pdtm install failed (attempt $$attempt/5) - likely rate-limited. Waiting 4m for reset...) ; \
+			sleep 240 ; \
 		} ; \
 	done || true
 	zsh -c "source ~/.zshrc && nuclei -update-templates -update-template-dir ~/.nuclei-templates" || true
@@ -259,7 +268,7 @@ install-wordlists: sanity-check ## Install wordlists (SecLists, rockyou, etc.)
 	$(call INFO,Installing wordlists...)
 	[[ ! -d /opt/lists ]] && sudo mkdir -p /opt/lists && sudo chown "$$USER:$$USER" /opt/lists || true
 	# Download all wordlists in parallel
-	ska_clone_list() { local pkg=$${1##*/} [[ ! -d "/opt/list/$$pkg" ]] && git clone --depth=1 "$$1" "/tmp/$$pkg" && sudo mv "/tmp/$$pkg" "/opt/list/$$pkg" || true ; }
+	ska_clone_list() { local pkg=$${1##*/}; [[ ! -d "/opt/lists/$$pkg" ]] && git clone --depth=1 "$$1" "/tmp/$$pkg" && sudo mv "/tmp/$$pkg" "/opt/lists/$$pkg" || true ; }
 	( [[ ! -f /opt/lists/rockyou.txt ]] && curl -L https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt -o /opt/lists/rockyou.txt || true ) &
 	ska_clone_list https://github.com/swisskyrepo/PayloadsAllTheThings &
 	ska_clone_list https://github.com/1N3/BruteX &
@@ -286,8 +295,10 @@ install-clomic: sanity-check ## Install clomic tools
 	git remote set-url origin git@github.com:clomic/skillarch.git
 	$(PACMAN_INSTALL) obsidian minicom sagemath 7zip ncdu
 # 	yay --noconfirm --needed -S caido-cli caido-desktop
-	curl -sL $$(curl -s https://api.github.com/repos/dathere/qsv/releases/latest | grep 'browser_download_url.*musl.zip'|grep -o 'https://[^"]*') -o /tmp/qsv-latest.zip && 7z x -y -o/tmp /tmp/qsv-latest.zip qsvlite>/dev/null&& mv /tmp/qsvlite ~/.exegol/my-resources/bin/qsv && rm /tmp/qsv-latest.zip
-	sudo cp /opt/skillarch/config/exegol/aliases ~/.exegol/my-resources/setup/zsh
+	[[ -d ~/.exegol/my-resources ]] && {
+		curl -sL $$(curl -s https://api.github.com/repos/dathere/qsv/releases/latest | grep 'browser_download_url.*musl.zip'|grep -o 'https://[^"]*') -o /tmp/qsv-latest.zip && 7z x -y -o/tmp /tmp/qsv-latest.zip qsvlite>/dev/null&& mv /tmp/qsvlite ~/.exegol/my-resources/bin/qsv && rm /tmp/qsv-latest.zip
+		sudo cp /opt/skillarch/config/exegol/aliases ~/.exegol/my-resources/setup/zsh
+	}
 	$(call ska-link,/opt/skillarch/config/clomic.zsh-theme,$$HOME/.oh-my-zsh/themes/clomic.zsh-theme)
 	sudo ln -sf /opt/skillarch/config/systemd/resolved.conf /etc/systemd/resolved.conf
 	sudo ln -sf /opt/skillarch/config/minicom/minirc.dfl /etc/minirc.dfl
@@ -318,12 +329,13 @@ install-sysreptor:  sanity-check ## Install sysreptor
 		ENABLED_PLUGINS="cyberchef,graphqlvoyager,checkthehash,projectnumber,markdownexport"
 		PREFERRED_LANGUAGES="en-US,fr-FR"
 		EOF
-		docker volume create sysreptor-db-data
-		docker volume create sysreptor-app-data
-		docker compose up -d
+
+		sudo docker volume create sysreptor-db-data
+		sudo docker volume create sysreptor-app-data
+		sudo docker compose up -d
 		username=reptor
 		$(call INFO,You will be prompt for the creation of $$username password)
-		docker compose exec app python3 manage.py createsuperuser --username "$$username"
+		sudo docker compose exec app python3 manage.py createsuperuser --username "$$username"
 		$(call DONE,Sysreptor installed!)
 	else
 		$(call INFO,Sysreptor already installed, skipping...)
@@ -376,31 +388,19 @@ test: ## Validate installation (smoke tests)
 		fi || true
 	}
 	$(call BOLD,\n--- Critical Binaries ---)
-	ska_check "zsh"        "which zsh"
-	$(call BOLD,\n--- Critical Binaries ---)
-	ska_check "git"        "which git"
-	ska_check "nvim"       "which nvim"
-	ska_check "tmux"       "which tmux"
-	ska_check "nmap"       "which nmap"
-	ska_check "curl"       "which curl"
-	ska_check "wget"       "which wget"
-	ska_check "jq"         "which jq"
-	ska_check "ripgrep"    "which rg"
-	ska_check "bat"        "which bat"
-	ska_check "eza"        "which eza"
+	for bin in zsh git nvim tmux nmap curl wget jq rg bat eza trash-put; do
+		ska_check "$$bin" "which $$bin"
+	done
 	ska_check "fzf"        "which fzf || [[ -f ~/.fzf/bin/fzf ]]"
-	ska_check "trash-put"  "which trash-put"
 	$(call BOLD,\n--- Offensive Tools ---)
-	ska_check "nmap"       "which nmap"
-	ska_check "ffuf"       "which ffuf"
-	ska_check "sqlmap"     "which sqlmap || pipx list 2>/dev/null | grep -q sqlmap"
-	ska_check "nuclei"     "which nuclei || [[ -f ~/.pdtm/go/bin/nuclei ]]"
-	ska_check "httpx"      "which httpx || [[ -f ~/.pdtm/go/bin/httpx ]]"
-	ska_check "subfinder"  "which subfinder || [[ -f ~/.pdtm/go/bin/subfinder ]]"
-	ska_check "gef"        "[[ -f ~/.gdbinit-gef.py ]]"
-	ska_check "metasploit" "which msfconsole"
-	ska_check "hashcat"    "which hashcat"
-	ska_check "bettercap"  "which bettercap"
+	for bin in nmap ffuf msfconsole hashcat bettercap gobypass403 wpprobe; do
+		ska_check "$$bin" "which $$bin"
+	done
+	ska_check "sqlmap"      "which sqlmap || pipx list 2>/dev/null | grep -q sqlmap"
+	ska_check "nuclei"      "which nuclei || [[ -f ~/.pdtm/go/bin/nuclei ]]"
+	ska_check "httpx"       "which httpx || [[ -f ~/.pdtm/go/bin/httpx ]]"
+	ska_check "subfinder"   "which subfinder || [[ -f ~/.pdtm/go/bin/subfinder ]]"
+	ska_check "gef"         "[[ -f ~/.gdbinit-gef.py ]]"
 	$(call BOLD,\n--- Shell & Config ---)
 	ska_check "oh-my-zsh"  "[[ -d ~/.oh-my-zsh ]]"
 	ska_check "zshrc link" "[[ -L ~/.zshrc ]]"
@@ -444,7 +444,7 @@ test-lite: ## Validate lite Docker image install
 		ska_check "$$bin" "which $$bin"
 	done
 	$(call BOLD,\n--- Offensive Tools ---)
-	for bin in ffuf hashcat bettercap msfconsole; do
+	for bin in ffuf hashcat bettercap msfconsole gobypass403 wpprobe; do
 		ska_check "$$bin" "which $$bin"
 	done
 	ska_check "nuclei"    "which nuclei || [[ -f ~/.pdtm/go/bin/nuclei ]]"
@@ -482,12 +482,9 @@ test-full: test ## Validate full Docker image install (runs test + extras)
 		fi || true
 	}
 	$(call BOLD,\n--- GUI Binaries ---)
-	ska_check "i3"       "which i3"
-	ska_check "kitty"    "which kitty"
-	ska_check "polybar"  "which polybar"
-	ska_check "rofi"     "which rofi"
-	ska_check "picom"    "which picom"
-	ska_check "code"     "which code"
+	for bin in i3 kitty polybar rofi picom code; do
+		ska_check "$$bin" "which $$bin"
+	done
 	$(call BOLD,\n--- GUI Config Symlinks ---)
 	ska_check "i3 config"      "[[ -L ~/.config/i3/config ]]"
 	ska_check "polybar config" "[[ -L ~/.config/polybar/config.ini ]]"
@@ -579,20 +576,21 @@ list-tools: ## List installed offensive tools & versions
 	ska_ver "nmap"       "nmap --version | head -1"
 	ska_ver "ffuf"       "ffuf -V 2>&1 | head -1"
 	ska_ver "nuclei"     "nuclei -version 2>&1 | head -1"
-	ska_ver "httpx"      "httpx -version 2>&1 | head -1"
+	ska_ver "httpx"      "httpx -version 2>&1 | tail -1"
 	ska_ver "subfinder"  "subfinder -version 2>&1 | head -1"
 	ska_ver "sqlmap"     "sqlmap --version 2>&1 | head -1"
 	ska_ver "msfconsole" "msfconsole --version 2>&1 | head -1"
 	ska_ver "hashcat"    "hashcat --version 2>&1 | head -1"
-	ska_ver "bettercap"  "bettercap -eval 'quit' 2>&1 | grep -i version | head -1"
+	ska_ver "bettercap"  "bettercap -version"
 	ska_ver "gitleaks"   "gitleaks version 2>&1"
-	ska_ver "burpsuite"  "echo 'installed (GUI)'"
-	ska_ver "ghidra"     "echo 'installed (GUI)'"
+	ska_ver "burpsuite"  "burpsuite --version" ## "echo 'installed (GUI)'"
+	ska_ver "ghidra"     "cat /opt/ghidra/bom.json| jq -r '.components[].version'|head -1" ## "echo 'installed (GUI)'"
 	ska_ver "wireshark"  "wireshark --version 2>&1 | head -1"
 	$(call BOLD,\n--- uv Tools ---)
-	uv tool list 2>/dev/null || echo "  uv not available"
+	uv tool list 2>/dev/null | grep -v '-' || echo "  uv not available"
 	$(call BOLD,\n--- Pdtm Tools ---)
-	ls ~/.pdtm/go/bin/ 2>/dev/null | while read -r tool; do echo "  $$tool"; done || echo "  pdtm not installed"
+	## ls ~/.pdtm/go/bin/ 2>/dev/null | while read -r tool; do echo "  %$$tool"; echo "$$($$tool --version 2>&1|tail -1)"; done || echo "  pdtm not installed"
+	for tool in $(ls ~/.pdtm/go/bin/);do echo -n "  $$tool ";{ "$$tool" --version 2>&1 || "$$tool" version  2>&1 }|grep -i version|grep -oP '\d+(?:\.\d+)+';done || echo "  pdtm not installed"
 	echo ""
 
 backup: ## Backup current configs before overwriting

@@ -352,4 +352,3 @@ alias dphp7='dockit php:7.4' # Arch suffers from "too new libraries" making it h
 ## Openssl certificates
 alias read-crt='openssl x509 -text -noout -in'
 
-source ~/.my_aliases
