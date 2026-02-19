@@ -396,7 +396,7 @@ test: ## Validate installation (smoke tests)
 	for bin in nmap ffuf msfconsole hashcat bettercap gobypass403 wpprobe; do
 		ska_check "$$bin" "which $$bin"
 	done
-	ska_check "sqlmap"      "which sqlmap || pipx list 2>/dev/null | grep -q sqlmap"
+	ska_check "sqlmap"      "which sqlmap || uv tool list 2>/dev/null | grep -q sqlmap"
 	ska_check "nuclei"      "which nuclei || [[ -f ~/.pdtm/go/bin/nuclei ]]"
 	ska_check "httpx"       "which httpx || [[ -f ~/.pdtm/go/bin/httpx ]]"
 	ska_check "subfinder"   "which subfinder || [[ -f ~/.pdtm/go/bin/subfinder ]]"
