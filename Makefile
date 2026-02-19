@@ -11,6 +11,7 @@ C_WARN  := \033[1;33m
 C_ERR   := \033[1;31m
 C_BOLD  := \033[1m
 SKA_LOG := /var/tmp/skillarch-install.log
+comma   := ,
 
 BOLD = @echo -e "$(C_BOLD)$(1)$(C_RST)"
 OK	 = @echo -e "$(C_OK)✔  $(1)$(C_RST)"
@@ -110,7 +111,6 @@ install-base: sanity-check ## Install base packages
 	$(call DONE,Base packages installed!)
 
 install-cli-tools: sanity-check ## Install CLI tools & runtimes
-	$(call INFO,Installing CLI tools & runtimes...)
 	$(PACMAN_INSTALL) base-devel bison bzip2 ca-certificates cloc cmake dos2unix expect ffmpeg foremost gdb gnupg htop bottom hwinfo icu inotify-tools iproute2 jq llvm lsof ltrace make mlocate mplayer ncurses net-tools ngrep nmap openssh openssl parallel perl-image-exiftool pkgconf python-virtualenv re2c readline ripgrep rlwrap socat sqlite sshpass tmate tor traceroute trash-cli tree unzip vbindiff xsel xz yay zip veracrypt git-delta viu qsv asciinema htmlq neovim glow jless websocat superfile gron eza fastfetch bat sysstat cronie tree-sitter bc
 	sudo ln -sf /usr/bin/bat /usr/local/bin/batcat
 	bash -c "$$(curl -fsSL https://gef.blah.cat/sh)" || true
@@ -126,7 +126,7 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 	for package in uv usage pdm rust terraform golang python nodejs; do \
 		for attempt in 1 2 3; do \
 			mise use -g "$$package@latest" && break || { \
-				$(call WARN,mise install $$package failed (attempt $$attempt/3), retrying in 5s...) ; \
+				$(call WARN,mise install $$package failed (attempt $$attempt/3)$(comma) retrying in 5s...) ; \
 				sleep 5 ; \
 			} ; \
 		done ; \
@@ -217,7 +217,7 @@ install-gui-tools: sanity-check ## Install GUI apps (Chrome, VSCode, Ghidra, etc
 	# Do not start services in docker
 	[[ ! -f /.dockerenv ]] && sudo systemctl disable --now nxserver.service || true
 	xargs -n1 -I{} code --install-extension {} --force < config/extensions.txt
-	for pkg in fswebcam cursor-bin; do yay --noconfirm --needed -S "$$pkg" || $(call WARN,Failed to install $$pkg, continuing...); done
+	for pkg in fswebcam cursor-bin; do yay --noconfirm --needed -S "$$pkg" || $(call WARN,Failed to install $$pkg$(comma) continuing...); done
 	sudo ln -sf /usr/bin/google-chrome-stable /usr/local/bin/gog
 	$(call DONE,GUI applications installed!)
 
@@ -225,7 +225,7 @@ install-offensive: sanity-check ## Install offensive & security tools
 	$(call INFO,Installing offensive tools...)
 	$(PACMAN_INSTALL) metasploit fx lazygit fq gitleaks jdk21-openjdk burpsuite hashcat bettercap
 	sudo sed -i 's#$$JAVA_HOME#/usr/lib/jvm/java-21-openjdk#g' /usr/bin/burpsuite
-	for pkg in ffuf gau pdtm-bin waybackurls fabric-ai-bin; do yay --noconfirm --needed -S "$$pkg" || $(call WARN,Failed to install $$pkg, continuing...); done
+	for pkg in ffuf gau pdtm-bin waybackurls fabric-ai-bin; do yay --noconfirm --needed -S "$$pkg" || $(call WARN,Failed to install $$pkg$(comma) continuing...); done
 	# Hide stdout and Keep stderr for CI builds -- run go installs in parallel
 	mise exec -- go install github.com/sw33tLie/sns@latest > /dev/null &
 	mise exec -- go install github.com/glitchedgitz/cook/v2/cmd/cook@latest > /dev/null &
@@ -244,7 +244,7 @@ install-offensive: sanity-check ## Install offensive & security tools
 	[[ -f /usr/bin/pdtm ]] && { mkdir -p ~/.pdtm/go/bin; sudo chown "$$USER:$$USER" /usr/bin/pdtm; sudo mv /usr/bin/pdtm ~/.pdtm/go/bin; ~/.pdtm/go/bin/pdtm -u pdtm } || true
 	for attempt in 1 2 3 4 5; do \
 		zsh -c "source ~/.zshrc && pdtm -install-all -v" && break || { \
-			$(call WARN,pdtm install failed (attempt $$attempt/5) - likely rate-limited. Waiting 4m for reset...) ; \
+			$(call WARN,pdtm install failed (attempt $$attempt/5)$(comma) likely rate-limited. Waiting 4m for reset...) ; \
 			sleep 240 ; \
 		} ; \
 	done || true
@@ -338,19 +338,20 @@ install-sysreptor:  sanity-check ## Install sysreptor
 		sudo docker compose exec app python3 manage.py createsuperuser --username "$$username"
 		$(call DONE,Sysreptor installed!)
 	else
-		$(call INFO,Sysreptor already installed, skipping...)
+		$(call INFO,Sysreptor already installed$(comma) skipping...)
 	fi
 
 install-vmware: sanity-check ## Install VMTools for VMWare
 	if [[ "$$(systemd-detect-virt)" = "vmware" ]]; then
-		$(call INFO,VMware detected, installing VMTools...)
+		$(call INFO,VMware detected$(comma) installing VMTools...)
+		exit
 		$(PACMAN_INSTALL) open-vm-tools
 		sudo systemctl enable --now vmtoolsd
 		sudo systemctl enable --now vmware-vmblock-fuse
 		grep -q "vmhgfs" /etc/fstab || { echo ".host:/    /mnt/hgfs    fuse.vmhgfs-fuse    allow_other,defaults    0 0"|sudo tee -a /etc/fstab >/dev/null; }
 		$(call DONE,VMTools installed!)
 	else
-		$(call INFO,Not in VMware, skipping...)
+		$(call INFO,Not in VMware$(comma) skipping...)
 	fi
 
 opti-btrfs: ## Limit the space used by BTRFS
@@ -366,7 +367,7 @@ update: sanity-check ## Update SkillArch (pull & prompt reinstall)
 	@[[ -n "$$(git status --porcelain)" ]] && echo "Error: git state is dirty, please \"git stash\" your changes before updating" && exit 1 || true
 	[[ "$$(git rev-parse --abbrev-ref HEAD)" != "main" ]] && echo "Error: current branch is not main, please switch to main before updating" && exit 1 || true
 	git pull
-	$(call DONE,SkillArch updated, please run make install to apply changes)
+	$(call DONE,SkillArch updated$(comma) please run make install to apply changes)
 
 # ============================================================
 # Smoke Tests
@@ -420,8 +421,8 @@ test: ## Validate installation (smoke tests)
 	if [[ "$$FAIL" -eq 0 ]]; then
 		$(call OK,$(C_BOLD) All $$TOTAL tests passed!)
 	else
-		$(call WARN,$(C_BOLD) $$PASS/$$TOTAL passed, $$FAIL failed)
-		$(call INFO,Some failures may be expected if you ran a partial install (e.g., lite only))
+		$(call WARN,$(C_BOLD) $$PASS/$$TOTAL passed$(comma) $$FAIL failed)
+		$(call INFO,Some failures may be expected if you ran a partial install (e.g.$(comma) lite only))
 	fi
 
 test-lite: ## Validate lite Docker image install
@@ -462,7 +463,7 @@ test-lite: ## Validate lite Docker image install
 	if [[ "$$FAIL" -eq 0 ]]; then
 		$(call OK,$(C_BOLD) All $$TOTAL lite tests passed!)
 	else
-		$(call ERR,$(C_BOLD) $$PASS/$$TOTAL passed, $$FAIL failed)
+		$(call ERR,$(C_BOLD) $$PASS/$$TOTAL passed$(comma) $$FAIL failed)
 		exit 1
 	fi
 
@@ -501,7 +502,7 @@ test-full: test ## Validate full Docker image install (runs test + extras)
 	if [[ "$$FAIL" -eq 0 ]]; then
 		$(call OK,$(C_BOLD) All $$TOTAL full tests passed!)
 	else
-		$(call ERR,$(C_BOLD) $$PASS/$$TOTAL passed, $$FAIL failed)
+		$(call ERR,$(C_BOLD) $$PASS/$$TOTAL passed$(comma) $$FAIL failed)
 		exit 1
 	fi
 
