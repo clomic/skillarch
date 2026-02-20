@@ -1,7 +1,7 @@
 .ONESHELL:
 SHELL := /bin/bash
 .SHELLFLAGS := -eu -c
-.PHONY: help install sanity-check install-base install-cli-tools install-shell install-docker install-gui install-gui-tools install-offensive install-wordlists install-hardening update docker-build docker-build-full docker-run docker-run-full clean test test-lite test-full doctor list-tools backup
+.PHONY: help install sanity-check install-base install-cli-tools install-shell install-docker install-gui install-gui-tools install-offensive install-wordlists install-hardening install-clomic install-vmware install-sysreptor opti-btrfs update docker-build docker-build-full docker-run docker-run-full clean test test-lite test-full doctor list-tools backup
 
 # -- Colors & UX Helpers --
 C_RST   := \033[0m
@@ -10,7 +10,7 @@ C_INFO  := \033[1;34m
 C_WARN  := \033[1;33m
 C_ERR   := \033[1;31m
 C_BOLD  := \033[1m
-SKA_LOG := /var/tmp/skillarch-install.log
+SKA_LOG := /var/tmp/skillarch-install_$$(date +%Y%m%d_%H%M%S).log
 comma   := ,
 
 BOLD = @echo -e "$(C_BOLD)$(1)$(C_RST)"
