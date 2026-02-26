@@ -11,7 +11,8 @@ C_WARN  := \033[1;33m
 C_ERR   := \033[1;31m
 C_BOLD  := \033[1m
 SKA_LOG := /var/tmp/skillarch-install_$$(date +%Y%m%d_%H%M%S).log
-comma   := ,  ## Use the variable $(comma) instead of ',' to prevent it from being used as a parameter separator.
+## Use the variable $(comma) instead of ',' to prevent it from being used as a parameter separator.
+comma   := ,
 
 BOLD = echo -e "$(C_BOLD)$(1)$(C_RST)"
 OK   = echo -e "$(C_OK)✔  $(1)$(C_RST)"
@@ -307,7 +308,15 @@ install-clomic: sanity-check ## Install clomic tools
 	$(call ska-link,/opt/skillarch/config/clomic.zsh-theme,$$HOME/.oh-my-zsh/themes/clomic.zsh-theme)
 	sudo ln -sf /opt/skillarch/config/systemd/resolved.conf /etc/systemd/resolved.conf
 	sudo ln -sf /opt/skillarch/config/minicom/minirc.dfl /etc/minirc.dfl
-	[[ ! -d /opt/cyberchef ]] && { mkdir -p /tmp/cyberchef; curl -sL $$(curl -s https://api.github.com/repos/gchq/CyberChef/releases/latest | jq -r '.assets[].browser_download_url') -o /tmp/cyberchef/cc.zip; 7z x -y -o/tmp/cyberchef /tmp/cyberchef/cc.zip >/dev/null; rm /tmp/cyberchef/cc.zip /tmp/cyberchef/index.html.* || true; mv /tmp/cyberchef/CyberChef*.html /tmp/cyberchef/index.html; sudo mv /tmp/cyberchef /opt/cyberchef; }
+	[[ ! -d /opt/cyberchef || $$(grep -oP "CyberChef \Kv[0-9]+(\.[0-9]+)+" /opt/cyberchef/index.html) != $$(curl -s https://api.github.com/repos/gchq/CyberChef/releases/latest | jq -r '.tag_name') ]] && { 
+		$(call INFO, Install or upgrade Cyberchef);
+		mkdir -p /tmp/cyberchef;
+		curl -sL $$(curl -s https://api.github.com/repos/gchq/CyberChef/releases/latest | jq -r '.assets[].browser_download_url') -o /tmp/cyberchef/cc.zip;
+		7z x -y -o/tmp/cyberchef /tmp/cyberchef/cc.zip >/dev/null;
+		rm /tmp/cyberchef/cc.zip /tmp/cyberchef/index.html.* || true;
+		mv /tmp/cyberchef/CyberChef*.html /tmp/cyberchef/index.html;
+		sudo mv /tmp/cyberchef /opt/cyberchef;
+	}
 	$(call DONE,Clomic tools installed!)
 
 install-sysreptor:  sanity-check ## Install sysreptor
@@ -320,27 +329,30 @@ install-sysreptor:  sanity-check ## Install sysreptor
 		cd /opt/sysreptor/deploy
 		cp app.env.example app.env
 
-		SECRET_KEY=$$(openssl rand -base64 64 | tr -d '\n=')
-		sed -i "s|^SECRET_KEY=.*|SECRET_KEY=\"$$SECRET_KEY\"|" app.env
-
+		secret_key="SECRET_KEY=\"$$(openssl rand -base64 64 | tr -d '\n=')\""
 		KEY_ID=$$(uuidgen)
-		AES_KEY=$$(openssl rand -base64 32 | tr -d '\n')
-		sed -i \
-		  -e "s|^#\\? *ENCRYPTION_KEYS=.*|ENCRYPTION_KEYS=[{\"id\": \"$$KEY_ID\", \"key\": \"$$AES_KEY\", \"cipher\": \"AES-GCM\", \"revoked\": false}]|" \
-		  -e "s|^#\\? *DEFAULT_ENCRYPTION_KEY_ID=.*|DEFAULT_ENCRYPTION_KEY_ID=\"$$KEY_ID\"|" \
+		encryption_keys="ENCRYPTION_KEYS=[{\"id\": \"$${KEY_ID}\", \"key\": \"$$(openssl rand -base64 32)\", \"cipher\": \"AES-GCM\", \"revoked\": false}]"
+		default_encryption_key_id="DEFAULT_ENCRYPTION_KEY_ID=\"$${KEY_ID}\""
+		sed -i'' \
+		  -e "s#.*SECRET_KEY=.*#$$secret_key#" \
+		  -e "s#.*ENCRYPTION_KEYS=.*#$$encryption_keys#" \
+		  -e "s#.*DEFAULT_ENCRYPTION_KEY_ID=.*#$$default_encryption_key_id#" \
+		  -e 's\^# ENABLED_PLUGINS=.*\ENABLED_PLUGINS="cyberchef,graphqlvoyager,checkthehash,projectnumber,markdownexport"\' \
+		  -e '$$a\PREFERRED_LANGUAGES="en-US,fr-FR"' \
 		  app.env
-		cat <<- EOF >> app.env
 
-		ENABLED_PLUGINS="cyberchef,graphqlvoyager,checkthehash,projectnumber,markdownexport"
-		PREFERRED_LANGUAGES="en-US,fr-FR"
-		EOF
-
-		sudo docker volume create sysreptor-db-data
-		sudo docker volume create sysreptor-app-data
-		sudo docker compose up -d
+		docker compose ls|grep -qE "sysreptor" && { $(call INFO,  Shutdown previous running sysreptor); docker compose down 2>/dev/null; }
+		docker volume ls|grep -qE "(sysreptor-app-data|sysreptor-db-data)" && { $(call INFO,  Remove previous sysreptor's volumes); docker volume rm sysreptor-db-data sysreptor-app-data >/dev/null; }
+		docker volume create sysreptor-db-data
+		docker volume create sysreptor-app-data
+		docker compose up -d
+		$(call INFO,  Waiting for database setup...)
+		while (sleep 1 && ! echo '' | docker compose exec --no-TTY app python3 manage.py migrate --check 1>/dev/null 2>&1); do
+	 		true;
+		done;
 		username=reptor
-		$(call INFO,You will be prompt for the creation of $$username password)
-		sudo docker compose exec app python3 manage.py createsuperuser --username "$$username"
+		$(call INFO,  Now$(comma) you will be prompt for the creation of $$username password...)
+		docker compose exec app python3 manage.py createsuperuser --username "$$username"
 		$(call DONE,Sysreptor installed!)
 	else
 		$(call INFO,Sysreptor already installed$(comma) skipping...)
@@ -634,7 +646,7 @@ docker-run-full: ## Run full Docker image locally
 
 clean: ## Clean up system and remove unnecessary files
 	set +e # Cleanup should be best-effort, never fail the build
-	[[ ! -f /.dockerenv ]] && exit 0
+	[[ ! -f /.dockerenv ]] || exit 0
 	sudo pacman --noconfirm -Scc || true
 	sudo pacman --noconfirm -Sc || true
 	sudo pacman -Rns $$(pacman -Qtdq) 2>/dev/null || true
