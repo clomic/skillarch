@@ -315,6 +315,7 @@ install-clomic: sanity-check ## Install clomic tools
 		7z x -y -o/tmp/cyberchef /tmp/cyberchef/cc.zip >/dev/null;
 		rm /tmp/cyberchef/cc.zip /tmp/cyberchef/index.html.* || true;
 		mv /tmp/cyberchef/CyberChef*.html /tmp/cyberchef/index.html;
+		[[ -d /opt/cyberchef ]] && sudo rm -rf /opt/cyberchef
 		sudo mv /tmp/cyberchef /opt/cyberchef;
 	}
 	$(call DONE,Clomic tools installed!)
