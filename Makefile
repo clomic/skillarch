@@ -13,13 +13,13 @@ C_BOLD  := \033[1m
 SKA_LOG := /var/tmp/skillarch-install_$$(date +%Y%m%d_%H%M%S).log
 comma   := ,  ## Use the variable $(comma) instead of ',' to prevent it from being used as a parameter separator.
 
-BOLD = @echo -e "$(C_BOLD)$(1)$(C_RST)"
-OK	 = @echo -e "$(C_OK)✔  $(1)$(C_RST)"
-INFO = @echo -e "$(C_INFO)→  $(1)$(C_RST)"
-WARN = @echo -e "$(C_WARN)⚠  $(1)$(C_RST)"
-ERR	 = @echo -e "$(C_ERR)✖  $(1)$(C_RST)" >&2
-STEP = @echo -e "$(C_BOLD)$(C_INFO)==>  [$(1)/$(2)]$(C_RST) $(C_INFO)$(3)...$(C_RST)"
-DONE = @echo -e "\n$(C_OK)✓ Done - $(1)$(C_RST)\n"
+BOLD = echo -e "$(C_BOLD)$(1)$(C_RST)"
+OK   = echo -e "$(C_OK)✔  $(1)$(C_RST)"
+INFO = echo -e "$(C_INFO)→  $(1)$(C_RST)"
+WARN = echo -e "$(C_WARN)⚠  $(1)$(C_RST)"
+ERR  = echo -e "$(C_ERR)✖  $(1)$(C_RST)" >&2
+STEP = echo -e "$(C_BOLD)$(C_INFO)==>  [$(1)/$(2)]$(C_RST) $(C_INFO)$(3)...$(C_RST)"
+DONE = echo -e "\n$(C_OK)✓ Done - $(1)$(C_RST)\n"
 
 define ska-link
 	# Backup existing file (if not already a symlink) and create symlink
@@ -86,23 +86,25 @@ install-base: sanity-check ## Install base packages
 	sudo sed -e "s#.*ParallelDownloads.*#ParallelDownloads = 10#g" -i /etc/pacman.conf
 	echo 'BUILDDIR="/dev/shm/makepkg"' | sudo tee /etc/makepkg.conf.d/00-skillarch.conf
 	[[ ! -f /.dockerenv ]] && sudo cachyos-rate-mirrors || true # Increase install speed & Update repos (skip in Docker)
-	sudo pacman-key --init
-	sudo pacman-key --populate archlinux cachyos
-	sudo pacman --noconfirm -Scc
+
+	# Init keyring only if needed
+	[[ ! -d /etc/pacman.d/gnupg ]] && sudo pacman-key --init || true
+	sudo pacman --noconfirm -Sc
 	sudo pacman --noconfirm -Syu
 	$(PACMAN_INSTALL) git vim tmux wget curl archlinux-keyring
-	# Re-populate after archlinux-keyring update to pick up any new packager keys
-	sudo pacman-key --populate archlinux
 
-	# Add chaotic-aur to pacman
-	curl -sS "https://keyserver.ubuntu.com/pks/lookup?op=get&options=mr&search=0x3056513887B78AEB" | sudo pacman-key --add -
-	sudo pacman-key --lsign-key 3056513887B78AEB
-	sudo pacman --noconfirm -U 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
-	sudo pacman --noconfirm -U 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
+	# Add chaotic-aur: download keyring+mirrorlist in parallel, install locally (avoids slow HKP keyserver)
+	wget -qP /tmp/ 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' &
+	wget -qP /tmp/ 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst' &
+	wait
+	sudo pacman --noconfirm -U /tmp/chaotic-keyring.pkg.tar.zst /tmp/chaotic-mirrorlist.pkg.tar.zst
 
 	# Ensure chaotic-aur is present in /etc/pacman.conf
 	grep -vP '\[chaotic-aur\]|Include = /etc/pacman.d/chaotic-mirrorlist' /etc/pacman.conf | sudo tee /etc/pacman.conf > /dev/null
 	echo -e '[chaotic-aur]\nInclude = /etc/pacman.d/chaotic-mirrorlist' | sudo tee -a /etc/pacman.conf > /dev/null
+
+	# Single populate + sync with all repos now configured
+	sudo pacman-key --populate archlinux cachyos chaotic
 	sudo pacman --noconfirm -Syu
 
 	# Long Lived DATA & trash-cli Setup
@@ -136,13 +138,13 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 	eval "$$(mise activate bash)" || true
 
 	# Install uv tools
-	for package in argcomplete bypass-url-parser dirsearch exegol pre-commit sqlmap wafw00f yt-dlp semgrep defaultcreds-cheat-sheet; do
-		uv tool install -w setuptools "$$package" || {
+	for package in argcomplete bypass-url-parser exegol pre-commit sqlmap wafw00f yt-dlp semgrep defaultcreds-cheat-sheet; do
+		uv tool install "$$package" || {
 			$(call WARN,Retrying $$package install...)
-			uv tool uninstall "$$package" || true
-			uv tool install -q -w setuptools "$$package"
+			uv tool install -q "$$package"
 		}
 	done
+	uv tool upgrade --all || true
 	$(call DONE,CLI tools & runtimes installed!)
 
 install-shell: sanity-check ## Install shell, zsh, oh-my-zsh, fzf, tmux
@@ -245,7 +247,7 @@ install-offensive: sanity-check ## Install offensive & security tools
 	# pdtm hits GitHub API rate limits (60 req/h unauthenticated) -- retry after reset (~4min)
 	[[ -f /usr/bin/pdtm ]] && { mkdir -p ~/.pdtm/go/bin; sudo chown "$$USER:$$USER" /usr/bin/pdtm; sudo mv /usr/bin/pdtm ~/.pdtm/go/bin; ~/.pdtm/go/bin/pdtm -u pdtm; } || true
 	for attempt in 1 2 3 4 5; do \
-		zsh -c "source ~/.zshrc && pdtm -install-all -v" && break || { \
+		zsh -c "source ~/.zshrc && PATH=\$$PATH:\$$HOME/.pdtm/go/bin && pdtm -install-all -v" && break || { \
 			$(call WARN,pdtm install failed (attempt $$attempt/5)$(comma) likely rate-limited. Waiting 4m for reset...) ; \
 			sleep 240 ; \
 		} ; \
