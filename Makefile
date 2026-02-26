@@ -646,7 +646,7 @@ docker-run-full: ## Run full Docker image locally
 
 clean: ## Clean up system and remove unnecessary files
 	set +e # Cleanup should be best-effort, never fail the build
-	[[ ! -f /.dockerenv ]] || exit 0
+	[[ ! -f /.dockerenv ]] && exit 0
 	sudo pacman --noconfirm -Scc || true
 	sudo pacman --noconfirm -Sc || true
 	sudo pacman -Rns $$(pacman -Qtdq) 2>/dev/null || true
