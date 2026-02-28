@@ -300,7 +300,37 @@ install-clomic: sanity-check ## Install clomic tools
 	$(call INFO,Installing clomic tools...)
 	git remote set-url origin git@github.com:clomic/skillarch.git
 	$(PACMAN_INSTALL) obsidian minicom sagemath 7zip ncdu
-# 	yay --noconfirm --needed -S caido-cli caido-desktop
+	caido_json=$$(curl -s 'https://api.caido.io/releases/latest')
+	CAIDO_LATEST=$$(echo "$$caido_json" | jq -r '.version')
+	install_caido() {
+		TMP_CAIDO_DIR="/tmp/caido_$${CAIDO_LATEST}"
+		mkdir "$${TMP_CAIDO_DIR}"
+		cd "$${TMP_CAIDO_DIR}"
+		wget -q $$(echo "$$caido_json" | grep -o '"link":"[^"]*"' | cut -d'"' -f4 | grep "caido-cli-v.*-linux-x86_64.tar.gz$$")
+		tar xzf caido-cli*.tar.gz
+		rm caido-cli*.tar.gz
+		wget -q $$(echo "$$caido_json" | grep -o '"link":"[^"]*"' | cut -d'"' -f4 | grep "caido-desktop-v.*-linux-x86_64.AppImage$$")
+		chmod +x caido-desktop-v*-linux-x86_64.AppImage
+		echo "CAIDO_VERSION=$${CAIDO_LATEST}" > version
+		cd ..
+		sudo mv "$${TMP_CAIDO_DIR}" /opt/caido
+		$(call ska-link,/opt/caido/caido-cli,$$HOME/.local/bin/caido-cli)
+		$(call ska-link,/opt/caido/caido-desktop-v$${CAIDO_LATEST}-linux-x86_64.AppImage,$$HOME/.local/bin/caido);
+	}
+	[[ ! -d /opt/caido ]] && {
+		$(call INFO,  Install Caido);
+		install_caido
+		$(call DONE,  Caido installed!)
+	} || { 
+		source /opt/caido/version
+		[[ $${CAIDO_VERSION} != $${CAIDO_LATEST} ]] && {
+			sudo rm -rf /opt/caido
+			$(call INFO,  Upgrade Caido);
+			install_caido
+			$(call DONE,  Caido upgraded!)
+		} || $(call INFO,  Caido already installed with the latest version$(comma) skipping...);
+	}
+
 	[[ -d ~/.exegol/my-resources ]] && {
 		curl -sL $$(curl -s https://api.github.com/repos/dathere/qsv/releases/latest | grep 'browser_download_url.*musl.zip'|grep -o 'https://[^"]*') -o /tmp/qsv-latest.zip && 7z x -y -o/tmp /tmp/qsv-latest.zip qsvlite>/dev/null&& mv /tmp/qsvlite ~/.exegol/my-resources/bin/qsv && rm /tmp/qsv-latest.zip
 		sudo cp /opt/skillarch/config/exegol/aliases ~/.exegol/my-resources/setup/zsh
@@ -357,8 +387,7 @@ install-sysreptor:  sanity-check ## Install sysreptor
 		docker compose ls|grep -qE "sysreptor" && { $(call INFO,  Shutdown previous running sysreptor); docker compose down 2>/dev/null; }
 		docker volume ls|grep -qE "(sysreptor-app-data|sysreptor-db-data)" && { $(call INFO,  Remove previous sysreptor's volumes); docker volume rm sysreptor-db-data sysreptor-app-data >/dev/null; }
 		docker volume create sysreptor-db-data
-		docker volume create sysreptor-app-data
- 		
+
 		conf_caddy
 
 		docker compose up -d
@@ -374,7 +403,7 @@ install-sysreptor:  sanity-check ## Install sysreptor
 		source /opt/sysreptor/deploy/.env
 		CURRENT_VERSION="$$SYSREPTOR_VERSION"
 		LATEST_VERSION=$$(curl -sL https://docs.sysreptor.com/latest.version)
-		[[ $${LATEST_VERSION} == $${CURRENT_VERSION} ]] && $(call INFO,Sysreptor already installed with the latest version$(comma) skipping...) || {
+		[[ $${LATEST_VERSION} != $${CURRENT_VERSION} ]] && {
 			$(call INFO,Sysreptor is being upgraded...)
 			cd /opt/sysreptor/deploy
 			docker compose down
@@ -394,7 +423,7 @@ install-sysreptor:  sanity-check ## Install sysreptor
 			docker rmi "syslifters/sysreptor-languagetool:$${CURRENT_VERSION}" 2>/dev/null || true
 
 			$(call DONE,Sysreptor upgraded!)
-		}
+		} || $(call INFO,Sysreptor already installed with the latest version$(comma) skipping...)
 	fi
 
 install-vmware: sanity-check ## Install VMTools for VMWare
