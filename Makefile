@@ -91,6 +91,7 @@ install-base: sanity-check ## Install base packages
 	# Init keyring only if needed
 	[[ ! -d /etc/pacman.d/gnupg ]] && sudo pacman-key --init || true
 	sudo pacman --noconfirm -Sc
+	sudo rm -rf /var/cache/pacman/pkg/download-*
 	sudo pacman --noconfirm -Syu
 	$(PACMAN_INSTALL) git vim tmux wget curl archlinux-keyring
 
@@ -321,7 +322,7 @@ install-clomic: sanity-check ## Install clomic tools
 		$(call INFO,  Install Caido);
 		install_caido
 		$(call DONE,  Caido installed!)
-	} || { 
+	} || {
 		source /opt/caido/version
 		[[ $${CAIDO_VERSION} != $${CAIDO_LATEST} ]] && {
 			sudo rm -rf /opt/caido
@@ -334,6 +335,8 @@ install-clomic: sanity-check ## Install clomic tools
 	[[ -d ~/.exegol/my-resources ]] && {
 		curl -sL $$(curl -s https://api.github.com/repos/dathere/qsv/releases/latest | grep 'browser_download_url.*musl.zip'|grep -o 'https://[^"]*') -o /tmp/qsv-latest.zip && 7z x -y -o/tmp /tmp/qsv-latest.zip qsvlite>/dev/null&& mv /tmp/qsvlite ~/.exegol/my-resources/bin/qsv && rm /tmp/qsv-latest.zip
 		sudo cp /opt/skillarch/config/exegol/aliases ~/.exegol/my-resources/setup/zsh
+		sudo cp /opt/skillarch/config/tmux.conf ~/.exegol/my-resources/setup/tmux/.tmux.conf
+		sudo cp /opt/skillarch/config/exegol/load_user_setup.sh ~/.exegol/my-resources/setup/
 	}
 	$(call ska-link,/opt/skillarch/config/clomic.zsh-theme,$$HOME/.oh-my-zsh/themes/clomic.zsh-theme)
 	sudo ln -sf /opt/skillarch/config/systemd/resolved.conf /etc/systemd/resolved.conf
