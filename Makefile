@@ -390,6 +390,7 @@ install-sysreptor:  sanity-check ## Install sysreptor
 		docker compose ls|grep -qE "sysreptor" && { $(call INFO,  Shutdown previous running sysreptor); docker compose down 2>/dev/null; }
 		docker volume ls|grep -qE "(sysreptor-app-data|sysreptor-db-data)" && { $(call INFO,  Remove previous sysreptor's volumes); docker volume rm sysreptor-db-data sysreptor-app-data >/dev/null; }
 		docker volume create sysreptor-db-data
+		docker volume create sysreptor-app-data
 
 		conf_caddy
 
@@ -443,7 +444,7 @@ install-vmware: sanity-check ## Install VMTools for VMWare
 opti-btrfs: ## Limit the space used by BTRFS
 	$(call INFO,BTRFS optimization...)
 	sudo ln -sf /opt/skillarch/config/snapper/root /etc/snapper/configs/root
-	sudo snapper delete $$(sudo snapper list | grep -E 'pre|post' | awk '{print $$1}' | head -n -3 | xargs)
+	sudo snapper delete $$(sudo snapper list | grep -E 'pre|post' | awk '{print $$1}' | head -n -3 | xargs) 2>/dev/null || true
 	sudo btrfs balance start -dusage=0 /.snapshots
 	sudo btrfs balance start -dusage=5 /
 	sudo btrfs filesystem sync /
