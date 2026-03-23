@@ -15,31 +15,7 @@ alias ska-update-advanced='echo "# SAVE your changes on your repo" ; echo "git a
 alias ska-vbox-install-guestutils='sudo pacman -S virtualbox-guest-utils && sudo usermod -aG vboxsf "$USER"'
 alias ska-vbox-install='sudo pacman -S virtualbox virtualbox-host-dkms && echo -e "\n\n\nNow reboot to load the vbox drivers"'
 alias ska-sudo-unlock='su -c "faillock --user $USER --reset"'
-skau() {
-    case "${1:-1}" in
-        1)  echo "# SAVE your changes on your repo
-              git add foo && git commit -m i-added-foo && git push";;
-        2)  echo "# Then, from a CLEAN git state
-              ska && git status"
-            ska && git status;;
-        3)  echo "# PULL & CHECKOUT upstream changes
-              git fetch upstream && git checkout main"
-            git fetch upstream && git checkout main;;
-        4)  echo "# MERGE upstream changes
-              git merge upstream/main"
-            git merge upstream/main;;
-        5)  echo "# SAVE your new current state
-              git push origin main"
-            git push origin main;;
-        6)  echo "# Check & Compare your current drift from upstream
-              git diff upstream/main"
-            git diff upstream/main;;
-        7)  echo "# Reapply with latest changes
-              ska-update-simple"
-            ska-update-simple;;
-        *)  ;;
-    esac
-}
+alias ska-vnc='vncserver -kill :1 2>/dev/null; rm /tmp/.X11-unix/X1 /tmp/.X1-lock; vncserver :1 -geometry 1920x1080 -depth 24 -websocketPort 8443 -FrameRate 30 -interface 127.0.0.1 -DisableBasicAuth -cert ~/.vnc/self.pem -key ~/.vnc/self.key && echo "KasmVNC running on https://127.0.0.1:8443 (no auth)"'
 alias fastfetch='/usr/bin/fastfetch --logo /opt/skillarch/assets/logo-round-hot.png --logo-width 50'
 alias neofetch='fastfetch'
 alias hifetch='fastfetch'
@@ -59,8 +35,6 @@ alias batall='find . -type f | xargs bat'
 alias v='nvim'
 alias c='code'
 alias C='code .'
-alias k='cursor'
-alias K='cursor .'
 alias p='python'
 alias cdtmp='pushd $(mktemp -d)'
 ff() { find . -iname "*$1*" 2>/dev/null; }

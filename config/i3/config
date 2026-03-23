@@ -32,7 +32,8 @@ exec_always --no-startup-id pgrep --exact VBoxService &> /dev/null && killall VB
 exec_always --no-startup-id bash -c "killall -q picom ; grep -qF hypervisor /proc/cpuinfo || picom"
 exec_always --no-startup-id i3-battery-popup
 exec_always --no-startup-id /usr/bin/spice-vdagent
-exec_always --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+exec_always --no-startup-id /usr/lib/polkit-kde-authentication-agent-1
+exec --no-startup-id dunst
 # The combination of xss-lock, nm-applet and pactl is a popular choice, so
 # they are included here as an example. Modify as you see fit.
 # xss-lock grabs a logind suspend inhibit lock and will use i3lock to lock the
@@ -182,15 +183,14 @@ gaps outer 0
 
 bindsym $mod+p exec flameshot gui
 bindsym $mod+Shift+p exec flameshot full -p ~/Pictures/
-bindsym $mod+s exec pavucontrol
-bindsym $mod+shift+s exec XDG_CURRENT_DESKTOP=GNOME gnome-control-center
+bindsym $mod+s exec systemsettings kcm_pulseaudio
+bindsym $mod+shift+s exec pavucontrol
 bindsym $mod+e exec emote
 bindsym $mod+b exec blueman-manager
-bindsym $mod+w exec XDG_CURRENT_DESKTOP=GNOME gnome-control-center wifi
-bindsym $mod+n exec nautilus
+bindsym $mod+w exec systemsettings kcm_networkmanagement
+bindsym $mod+n exec dolphin
 bindsym $mod+v exec vlc
 bindsym $mod+c exec code
-bindsym $mod+k exec cursor
 bindsym $mod+o exec obsidian
 bindsym $mod+BackSpace split toggle
 bindsym $mod+m exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
@@ -216,8 +216,7 @@ for_window [title="^Volume Control$"] floating enable
 
 # Add new rules for floating windows
 for_window [floating] resize set 1536 864, move position 192 108
-# Fix for floating i3 popups in burpsuite
-for_window [class="install4j-burp-StartBurp" title="^win[0-9]+$"] kill
+
 
 # HELP
 bindsym $mod+h exec kitty --title "Help: SkillArch Bindings" zsh -ic "ska-help-bindings"

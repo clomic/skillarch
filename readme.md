@@ -18,7 +18,7 @@
 [![](https://img.youtube.com/vi/HB1hxJgGoDo/0.jpg)](https://youtu.be/HB1hxJgGoDo)
 
 - First, download the `Desktop Edition` at https://cachyos.org/download/
-- Install it, pick the `Gnome` flavor
+- Install it, pick the `Plasma` flavor
 - Then open `Console` and install SkillArch 🥂
 
 ```bash
@@ -87,12 +87,13 @@ make help
 #   install-cli-tools   Install system packages
 #   install-shell       Install shell packages
 #   install-docker      Install docker
-#   install-gui         Install gui, i3, polybar, kitty, rofi, picom
-#   install-gui-tools   Install system packages
+#   install-gui         Install i3, polybar, kitty, rofi, picom, KDE Plasma
+#   install-gui-tools   Install GUI apps (Chrome, VSCode, Ghidra, etc.)
 #   install-offensive   Install offensive tools
 #   install-wordlists   Install wordlists
 #   install-hardening   Install hardening tools
 #   update              Update SkillArch
+#   cloud               (Standalone) Install KasmVNC for cloud/remote desktop
 #   docker-build        Build lite docker image locally
 #   docker-build-full   Build full docker image locally
 #   docker-run          Run lite docker image locally
@@ -114,6 +115,7 @@ make help
 | `ska-sudo-unlock` | Unlock current user after 3 sudo fails |
 | `ska-update-simple` | Update SkillArch repo & starts install |
 | `ska-update-advanced` | Helper to Pull Upstream & merge |
+| `ska-vnc` | Start KDE Plasma desktop via KasmVNC (browser at https://127.0.0.1:8443) |
 
 ### MISC Gotchas
 
@@ -124,12 +126,11 @@ make help
 - The docker `full` image contains GUI stuff and wordlists
 - Why `sleep` in `Makefile`? Building TOO fast was triggering github limit-rate
 - No [CachyOs on ARM](https://discuss.cachyos.org/t/arm-future-for-cachyos/727), therefore no SkillArch on ARM.
-- Extensions are installed for VsCode. Cursor packaging is weird, so while it's open: `ctrl+shift+p` > `Import VsCode Extensions`
 - Chrome extensions are not installed by default. Have a look to [/config/chrome-extensions.lst](/config/chrome-extensions.lst)
 
 ### VM & VirtualBox Stuff
 
-> I've had tons of issues with VirtualBox laterly, and things worked PERFECTLY on Gnome Boxes (from `qemu-full` and `gnome-extra`), I strongly suggest using it instead, see the install guide above.
+> I've had tons of issues with VirtualBox laterly, and things worked PERFECTLY on `virt-manager` (from `qemu-full` and `virt-manager`), I strongly suggest using it instead, see the install guide above.
 
 - The `ska-vbox-install-guestutils` alias will auto-install `virtualbox-guest-utils`
 - In `VirtualBox`, when i3 starts it will run `VBoxClient-all` for clipboard & goodies
@@ -259,15 +260,14 @@ bindsym $mod+a scratchpad show
 # Custom Apps & Settings
 bindsym $mod+p exec flameshot gui
 bindsym $mod+Shift+p exec flameshot full -p ~/Pictures/
-bindsym $mod+s exec pavucontrol
-bindsym $mod+shift+s exec XDG_CURRENT_DESKTOP=GNOME gnome-control-center
+bindsym $mod+s exec systemsettings kcm_pulseaudio
+bindsym $mod+shift+s exec pavucontrol
 bindsym $mod+e exec emote
 bindsym $mod+b exec blueman-manager
-bindsym $mod+w exec XDG_CURRENT_DESKTOP=GNOME gnome-control-center wifi
-bindsym $mod+n exec nautilus
+bindsym $mod+w exec systemsettings kcm_networkmanagement
+bindsym $mod+n exec dolphin
 bindsym $mod+v exec vlc
 bindsym $mod+c exec code
-bindsym $mod+k exec cursor
 ```
 
 ### Installed Packages, Plugins, Tools
@@ -276,16 +276,19 @@ bindsym $mod+k exec cursor
 
 ```bash
 # Pacman Packages
-arandr asciinema base-devel bat bettercap bison blueman bottom brightnessctl burpsuite bzip2 ca-certificates cloc cmake visual-studio-code-bin curl discord dmenu docker docker-compose dos2unix dragon-drop-git dunst emote eza expect fastfetch feh ffmpeg filezilla flameshot foremost fq fx gdb ghex ghidra git git-delta gitleaks glow gnupg google-chrome gparted gron guvcview hashcat htmlq htop hwinfo xorg-server i3-gaps i3blocks i3lock i3lock-fancy-git i3status icu inotify-tools iproute2 jless jq kdenlive kitty kompare lazygit libedit libffi libjpeg-turbo libpcap libpng libreoffice-fresh libxml2 libzip llvm lsof ltrace make meld metasploit mise mlocate mplayer ncurses neovim net-tools ngrep nm-connection-editor nmap nomachine okular opensnitch openssh openssl parallel perl-image-exiftool php-gd picom pkgconf polybar postgresql-libs python-virtualenv qbittorrent re2c readline ripgrep rlwrap rofi signal-desktop socat sqlite sshpass superfile sysstat tmate tmux tor torbrowser-launcher traceroute trash-cli tree unzip vbindiff veracrypt vim viu vlc vlc-plugin-ffmpeg flatpak websocat wget wireshark-qt xclip qsv xz yay zip zsh zsh-autosuggestions zsh-completions zsh-history-substring-search zsh-syntax-highlighting zsh-theme-powerlevel10k cronie tree-sitter audacity xorg-xhost archlinux-keyring jdk21-openjdk polkit-gnome
+arandr asciinema base-devel bat bettercap bison blueman bottom brightnessctl bzip2 ca-certificates cloc cmake visual-studio-code-bin curl discord dmenu docker docker-compose dos2unix dragon-drop-git dunst emote eza expect fastfetch feh ffmpeg filezilla flameshot foremost fq fx gdb ghex ghidra git git-delta gitleaks glow gnupg google-chrome gparted gron guvcview hashcat htmlq htop hwinfo xorg-server i3-gaps i3blocks i3lock i3lock-fancy-git i3status icu inotify-tools iproute2 jless jq kdenlive kitty kompare lazygit libedit libffi libjpeg-turbo libpcap libpng libreoffice-fresh libxml2 libzip llvm lsof ltrace make meld metasploit mise mlocate mplayer ncurses neovim net-tools ngrep nm-connection-editor nmap okular opensnitch openssh openssl parallel perl-image-exiftool php-gd picom pkgconf polybar postgresql-libs python-virtualenv qbittorrent re2c readline ripgrep rlwrap rofi signal-desktop socat sqlite sshpass superfile sysstat tmate tmux tor torbrowser-launcher traceroute trash-cli tree unzip vbindiff veracrypt vim viu vlc vlc-plugin-ffmpeg flatpak websocat wget wireshark-qt xclip qsv xz yay zip zsh zsh-autosuggestions zsh-completions zsh-history-substring-search zsh-syntax-highlighting zsh-theme-powerlevel10k cronie tree-sitter audacity xorg-xhost archlinux-keyring jdk21-openjdk polkit-kde-agent dolphin kamoso plasma-desktop plasma-x11-session kwin-x11 konsole alacritty
 
 # Yay packages
-ffuf gau pdtm-bin waybackurls cursor-bin fswebcam i3-battery-popup-git rofi-power-menu fabric-ai-bin
+ffuf gau pdtm-bin waybackurls fswebcam caido-desktop caido-cli i3-battery-popup-git rofi-power-menu fabric-ai-bin
+
+# Yay packages (cloud target only — not part of make install)
+openssl-1.1 kasmvncserver-bin
 
 # Flatpak packages
-com.obsproject.Studio org.gnome.Snapshot
+com.obsproject.Studio
 
 # Mise tools
-uv usage pdm rust terraform golang python nodejs
+uv usage pdm rust terraform golang python nodejs opencode
 
 # Mise golang tools
 sw33tLie/sns glitchedgitz/cook x90skysn3k/brutespray sensepost/gowitness
@@ -348,9 +351,45 @@ https://github.com/tarraschk/richelieu
 https://github.com/p0dalirius/webapp-wordlists
 ```
 
+### Services
+
+The following systemd services are installed but **disabled and stopped by default**. Enable only what you need:
+
+| Service | Package | Start | Enable at Boot | Purpose |
+|---------|---------|-------|---------------|---------|
+| `docker` | `docker` | auto-started on install (bare metal) | yes (bare metal) | Container runtime |
+| `opensnitchd` | `opensnitch` | `sudo systemctl start opensnitchd` | `sudo systemctl enable opensnitchd` | Egress firewall (opt-in) |
+### Cloud Target (standalone -- `make cloud`)
+
+> **Not part of `make install`** -- this is a standalone target for cloud/remote desktop VMs.
+
+Installs KasmVNC + cloud-init + SSH. KDE Plasma is installed by `make install-gui`. After `make cloud`, the `ska-vnc` alias starts a full KDE Plasma desktop accessible from a browser.
+
+| Service | Package | Start | Purpose |
+|---------|---------|-------|---------|
+| *(user-level)* | `kasmvncserver-bin` | `ska-vnc` | KDE Plasma desktop via browser (VNC over websocket) |
+| `sshd` | `openssh` | auto-enabled | SSH access |
+| `cloud-init` | `cloud-init` | auto-enabled | VM auto-config (network, SSH keys, hostname) |
+
+**Quick start:**
+
+```bash
+ska-vnc
+# KasmVNC running on https://127.0.0.1:8443 (no auth)
+
+# From your local machine, SSH port-forward then open in browser:
+ssh -L 8443:localhost:8443 user@host
+# Access: https://localhost:8443
+
+# Stop:
+vncserver -kill :1
+```
+
+**How it works:** KasmVNC's Xvnc has no GLX extension, so KDE Plasma 6 can't use OpenGL. The `vnc-xstartup` script sets `QT_QUICK_BACKEND=software` to force Qt's software rasterizer. kwin runs without compositing but still manages windows and decorations. See `kasm-pls.md` for the full workaround details.
+
 ### Security
 
-- `opensnitch` is here to help you block outgoing packets and connections
+- `opensnitch` is here to help you block outgoing packets and connections (opt-in, start manually)
 - `ufw` is here to help you block incoming packets and requests
 - Be careful though, [docker iptables shenanigans bypass ufw rules](https://richincapie.medium.com/docker-ufw-and-iptables-a-security-flaw-you-need-to-solve-now-40c85587b563)
 
@@ -362,7 +401,7 @@ https://github.com/p0dalirius/webapp-wordlists
 |------|-----------|-----------|
 | OS | Ubuntu | Arch |
 | Install time | 60mn | 20mn |
-| Terminal | Gnome | Kitty |
+| Terminal | Gnome Terminal | Kitty |
 | i3 config | regolith | homemade |
 | Install tool | ansible | Makefile |
 | Img builds | packer | docker |
