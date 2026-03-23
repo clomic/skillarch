@@ -363,7 +363,7 @@ install-sysreptor:  sanity-check ## Install sysreptor
 	}
 	conf_caddy() {
 		grep -q "^  - caddy/docker-compose.yml" docker-compose.yml || sed -i "s#include:#include:\n  - caddy/docker-compose.yml#" docker-compose.yml
-		sed -i "s/8000/8008/g" sysreptor/docker-compose.yml
+		sed -i "s/8000/8008/" sysreptor/docker-compose.yml
 		cat > caddy/Caddyfile <<- EOF
 		:8081
 		reverse_proxy http://127.0.0.1:8008
