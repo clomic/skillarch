@@ -80,7 +80,7 @@ alias dns-8='echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf'
 alias dns-9='echo "nameserver 9.9.9.9" | sudo tee /etc/resolv.conf'
 alias get-ip='curl -sS ipinfo.io/ip ; echo'
 alias get-ip-cpy='curl -sS ipinfo.io/ip | cpy'
-alias pub='export PUB=$(curl -s ipv14.ident.me || curl -sS ifconfig.io); printf "%s" "${PUB%$'\''\n'\''}" | cpyc'
+alias pub='export PUB=$(curl -s ipv4.ident.me || curl -sS ifconfig.io); printf "%s" "${PUB%$'\''\n'\''}" | cpyc'
 
 # ────────────────────────────────────────
 #  Video, Audio & Screenshots
@@ -129,7 +129,7 @@ alias exsta='exegol start'
 alias exsto='exegol stop'
 srsta() (set -e;cd /opt/sysreptor/deploy && docker compose up -d && sleep 10 && xdg-open http://127.1:8000 >&/dev/null &)
 srsto() (set -e;cd /opt/sysreptor/deploy && docker compose down;)
-gen_pass() { grep -xP "[a-z]{4,6}" /opt/lists/SecLists/Miscellaneous/lang-english.txt|shuf -n6|tr '\n' '-'|sed 's/-$//'; }
+gen_pass() { grep -hxP "[a-z]{4,6}" /opt/lists/SecLists/Miscellaneous/lang-{english,french-full}.txt|shuf -n6|tr '\n' '-'|sed 's/-$//'; }
 crypt-enc() (set -e;
     PASS=$(gen_pass)
     tar zcf "$1.tar.gz" "$1";
