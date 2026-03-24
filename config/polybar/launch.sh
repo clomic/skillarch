@@ -12,6 +12,8 @@ MONITOR_EXTRA=$(echo "$MONITORS" | grep -v "primary" | cut -d":" -f1 || true)
 
 # Start main polybar with tray
 MONITOR=${MONITOR_PRIMARY:-${MONITOR_EXTRA%% *}} MOD_RIGHT="systray microphone pulseaudio memory cpu filesystem battery wlan eth date" polybar main &
-for m in $MONITOR_EXTRA; do
+[[ $(wc -l <<<"$MONITORS") > 1 ]] && {
+  for m in $MONITOR_EXTRA; do
     MONITOR=$m MOD_RIGHT="microphone pulseaudio memory cpu filesystem battery wlan eth date" polybar main &
-done
+  done
+}
