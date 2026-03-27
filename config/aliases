@@ -153,7 +153,7 @@ alias exsta='exegol start'
 alias exsto='exegol stop'
 srsta() (set -e;cd /opt/sysreptor/deploy && docker compose up -d && sleep 10 && xdg-open http://127.1:8000 >&/dev/null &)
 srsto() (set -e;cd /opt/sysreptor/deploy && docker compose down;)
-gen_pass() { grep -hxP "[a-z]{4,6}" /opt/lists/SecLists/Miscellaneous/lang-{english,french-full}.txt|shuf -n6|tr '\n' '-'|sed 's/-$//'; }
+gen_pass() { grep -hxP "[a-z]{4,6}" /opt/lists/SecLists/Miscellaneous/lang-{english,french-full}.txt|sort -u|shuf -n6|tr '\n' '-'|sed 's/-$//'; }
 crypt-enc() (set -e;
     PASS=$(gen_pass)
     tar zcf "$1.tar.gz" "$1";

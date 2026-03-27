@@ -34,6 +34,7 @@ exec_always --no-startup-id i3-battery-popup
 exec_always --no-startup-id /usr/bin/spice-vdagent
 exec_always --no-startup-id /usr/lib/polkit-kde-authentication-agent-1
 exec --no-startup-id dunst
+exec --no-startup-id numlockx on
 # The combination of xss-lock, nm-applet and pactl is a popular choice, so
 # they are included here as an example. Modify as you see fit.
 # xss-lock grabs a logind suspend inhibit lock and will use i3lock to lock the

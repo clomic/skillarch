@@ -322,7 +322,7 @@ install-hardening: sanity-check ## Install hardening tools (opensnitch)
 install-clomic: sanity-check ## Install clomic tools
 	$(call INFO,Installing clomic tools...)
 	git remote set-url origin git@github.com:clomic/skillarch.git
-	$(PACMAN_INSTALL) obsidian minicom sagemath 7zip ncdu
+	$(PACMAN_INSTALL) obsidian minicom sagemath 7zip ncdu numlockx
 	caido_json=$$(curl -s 'https://api.caido.io/releases/latest')
 	CAIDO_LATEST=$$(echo "$$caido_json" | jq -r '.version')
 	install_caido() {
@@ -391,65 +391,69 @@ install-sysreptor:  sanity-check ## Install sysreptor
 		reverse_proxy http://127.0.0.1:8008
 		EOF
 	}
-	if [[ ! -d /opt/sysreptor ]]; then
-		$(call INFO,Installing Sysreptor...)
-		get_sysreptor
-
-		cp app.env.example app.env
-
-		secret_key="SECRET_KEY=\"$$(openssl rand -base64 64 | tr -d '\n=')\""
-		KEY_ID=$$(uuidgen)
-		encryption_keys="ENCRYPTION_KEYS=[{\"id\": \"$${KEY_ID}\", \"key\": \"$$(openssl rand -base64 32)\", \"cipher\": \"AES-GCM\", \"revoked\": false}]"
-		default_encryption_key_id="DEFAULT_ENCRYPTION_KEY_ID=\"$${KEY_ID}\""
-		sed -i'' \
-		  -e "s#.*SECRET_KEY=.*#$$secret_key#" \
-		  -e "s#.*ENCRYPTION_KEYS=.*#$$encryption_keys#" \
-		  -e "s#.*DEFAULT_ENCRYPTION_KEY_ID=.*#$$default_encryption_key_id#" \
-		  -e 's\^# ENABLED_PLUGINS=.*\ENABLED_PLUGINS="cyberchef,graphqlvoyager,checkthehash,projectnumber,markdownexport"\' \
-		  -e '$$a\PREFERRED_LANGUAGES="en-US,fr-FR"' \
-		  app.env
-
-		docker compose ls|grep -qE "sysreptor" && { $(call INFO,  Shutdown previous running sysreptor); docker compose down 2>/dev/null; }
-		docker volume ls|grep -qE "(sysreptor-app-data|sysreptor-db-data)" && { $(call INFO,  Remove previous sysreptor's volumes); docker volume rm sysreptor-db-data sysreptor-app-data >/dev/null; }
-		docker volume create sysreptor-db-data
-		docker volume create sysreptor-app-data
-
-		conf_caddy
-
-		docker compose up -d
-		$(call INFO,  Waiting for database setup...)
-		while (sleep 1 && ! echo '' | docker compose exec --no-TTY app python3 manage.py migrate --check 1>/dev/null 2>&1); do
-			true;
-		done;
-		username=reptor
-		$(call INFO,  Now$(comma) you will be prompt for the creation of $$username password...)
-		docker compose exec app python3 manage.py createsuperuser --username "$$username"
-		$(call DONE,Sysreptor installed!)
-	else
-		source /opt/sysreptor/deploy/.env
-		CURRENT_VERSION="$$SYSREPTOR_VERSION"
-		LATEST_VERSION=$$(curl -sL https://docs.sysreptor.com/latest.version)
-		[[ $${LATEST_VERSION} != $${CURRENT_VERSION} ]] && {
-			$(call INFO,Sysreptor is being upgraded...)
-			cd /opt/sysreptor/deploy
-			docker compose down
-			backup="/tmp/sysreptor_backup_$$(date +%Y%m%d_%H%M%S)"
-			sudo mv /opt/sysreptor "$${backup}"
+	@if groups|grep -q '\bdocker\b'; then   ## Skip at 1st install (don't want to use sudo...)
+		if [[ ! -d /opt/sysreptor ]]; then
+			$(call INFO,Installing Sysreptor...)
 			get_sysreptor
 
-			cp "$${backup}/deploy/app.env" app.env
+			cp app.env.example app.env
 
-			sed -i "s/^SYSREPTOR_VERSION.*/SYSREPTOR_VERSION=$${LATEST_VERSION}/" .env
+			secret_key="SECRET_KEY=\"$$(openssl rand -base64 64 | tr -d '\n=')\""
+			KEY_ID=$$(uuidgen)
+			encryption_keys="ENCRYPTION_KEYS=[{\"id\": \"$${KEY_ID}\", \"key\": \"$$(openssl rand -base64 32)\", \"cipher\": \"AES-GCM\", \"revoked\": false}]"
+			default_encryption_key_id="DEFAULT_ENCRYPTION_KEY_ID=\"$${KEY_ID}\""
+			sed -i'' \
+			-e "s#.*SECRET_KEY=.*#$$secret_key#" \
+			-e "s#.*ENCRYPTION_KEYS=.*#$$encryption_keys#" \
+			-e "s#.*DEFAULT_ENCRYPTION_KEY_ID=.*#$$default_encryption_key_id#" \
+			-e 's\^# ENABLED_PLUGINS=.*\ENABLED_PLUGINS="cyberchef,graphqlvoyager,checkthehash,projectnumber,markdownexport"\' \
+			-e '$$a\PREFERRED_LANGUAGES="en-US,fr-FR"' \
+			app.env
+
+			docker compose ls|grep -qE "sysreptor" && { $(call INFO,  Shutdown previous running sysreptor); docker compose down 2>/dev/null; }
+			docker volume ls|grep -qE "(sysreptor-app-data|sysreptor-db-data)" && { $(call INFO,  Remove previous sysreptor's volumes); docker volume rm sysreptor-db-data sysreptor-app-data >/dev/null; }
+			docker volume create sysreptor-db-data
+			docker volume create sysreptor-app-data
 
 			conf_caddy
-			docker compose up -d
-			# Cleanup
-			sudo rm -rf "$${backup}"
-			docker rmi "syslifters/sysreptor:$${CURRENT_VERSION}" 2>/dev/null || true
-			docker rmi "syslifters/sysreptor-languagetool:$${CURRENT_VERSION}" 2>/dev/null || true
 
-			$(call DONE,Sysreptor upgraded!)
-		} || $(call INFO,Sysreptor already installed with the latest version$(comma) skipping...)
+			docker compose up -d
+			$(call INFO,  Waiting for database setup...)
+			while (sleep 1 && ! echo '' | docker compose exec --no-TTY app python3 manage.py migrate --check 1>/dev/null 2>&1); do
+				true;
+			done;
+			username=reptor
+			$(call INFO,  Now$(comma) you will be prompt for the creation of $$username password...)
+			docker compose exec app python3 manage.py createsuperuser --username "$$username"
+			$(call DONE,Sysreptor installed!)
+		else
+			source /opt/sysreptor/deploy/.env
+			CURRENT_VERSION="$$SYSREPTOR_VERSION"
+			LATEST_VERSION=$$(curl -sL https://docs.sysreptor.com/latest.version)
+			[[ $${LATEST_VERSION} != $${CURRENT_VERSION} ]] && {
+				$(call INFO,Sysreptor is being upgraded...)
+				cd /opt/sysreptor/deploy
+				docker compose down
+				backup="/tmp/sysreptor_backup_$$(date +%Y%m%d_%H%M%S)"
+				sudo mv /opt/sysreptor "$${backup}"
+				get_sysreptor
+
+				cp "$${backup}/deploy/app.env" app.env
+
+				sed -i "s/^SYSREPTOR_VERSION.*/SYSREPTOR_VERSION=$${LATEST_VERSION}/" .env
+
+				conf_caddy
+				docker compose up -d
+				# Cleanup
+				sudo rm -rf "$${backup}"
+				docker rmi "syslifters/sysreptor:$${CURRENT_VERSION}" 2>/dev/null || true
+				docker rmi "syslifters/sysreptor-languagetool:$${CURRENT_VERSION}" 2>/dev/null || true
+
+				$(call DONE,Sysreptor upgraded!)
+			} || $(call INFO,Sysreptor already installed with the latest version$(comma) skipping...)
+		fi
+	else
+		$(call INFO,Sysreptor will be installed after reboot$(comma) when user \"$(USER)\" will have docker permissions)
 	fi
 
 install-vmware: sanity-check ## Install VMTools for VMWare
