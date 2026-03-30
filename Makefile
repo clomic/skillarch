@@ -322,7 +322,7 @@ install-hardening: sanity-check ## Install hardening tools (opensnitch)
 install-clomic: sanity-check ## Install clomic tools
 	$(call INFO,Installing clomic tools...)
 	git remote set-url origin git@github.com:clomic/skillarch.git
-	$(PACMAN_INSTALL) obsidian minicom sagemath 7zip ncdu numlockx
+	$(PACMAN_INSTALL) obsidian minicom sagemath 7zip ncdu numlockx shellcheck tailscale 
 	caido_json=$$(curl -s 'https://api.caido.io/releases/latest')
 	CAIDO_LATEST=$$(echo "$$caido_json" | jq -r '.version')
 	install_caido() {

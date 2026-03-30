@@ -119,9 +119,9 @@ alias flameshotz='while true; do flameshot full -p ~/Downloads; sleep 1; done'
 # ────────────────────────────────────────
 alias show-disk-io='watch -cd -- iostat -h'
 alias sdi='show-disk-io'
-alias show-open-ports="sudo ss -latepun | grep -i listen"
+alias show-open-ports='sudo ss -ltpn | grep -i listen | grep ":\K\d+"'
 alias sop='show-open-ports'
-alias get-du='du -ch -d 1'
+alias get-du='du -hd1 2>/dev/null'
 alias get-pid-click='xprop _NET_WM_PID | cut -d" " -f3'
 get-pid-ps() { ps fauxw | fzf | awk '{ print$2}'; }
 alias get-shell-size='echo "stty rows $LINES cols $COLUMNS"'
