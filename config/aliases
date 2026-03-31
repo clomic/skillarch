@@ -161,7 +161,8 @@ crypt-enc() (set -e;
     rm "$1.tar.gz"; printf "Password: %s" "${PASS}" | cpyc;
     echo -e "\nEncrypted file: $1.tar.gz.enc")
 crypt-dec() (set -e;openssl enc -d -aes-256-cbc -pbkdf2 -in "$1" -out "${1%.enc}";tar xf "${1%.enc}";rm "${1%.enc}")
-
+alias 7za='7z a -mhe=on'
+alias 7zp='7zG a -p -mhe=on'
 # ────────────────────────────────────────
 #  Python
 # ────────────────────────────────────────

@@ -322,7 +322,7 @@ install-hardening: sanity-check ## Install hardening tools (opensnitch)
 install-clomic: sanity-check ## Install clomic tools
 	$(call INFO,Installing clomic tools...)
 	git remote set-url origin git@github.com:clomic/skillarch.git
-	$(PACMAN_INSTALL) obsidian minicom sagemath 7zip ncdu numlockx shellcheck-bin tailscale
+	$(PACMAN_INSTALL) obsidian minicom sagemath 7zip ncdu numlockx shellcheck-bin tailscale p7zip-gui
 
 	[[ -d ~/.exegol/my-resources ]] && {
 		curl -sL $$(curl -s https://api.github.com/repos/dathere/qsv/releases/latest | grep 'browser_download_url.*musl.zip'|grep -o 'https://[^"]*') -o /tmp/qsv-latest.zip && 7z x -y -o/tmp /tmp/qsv-latest.zip qsvlite>/dev/null&& mv /tmp/qsvlite ~/.exegol/my-resources/bin/qsv && rm /tmp/qsv-latest.zip
