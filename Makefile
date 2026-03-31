@@ -140,7 +140,7 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 	eval "$$(mise activate bash)" || true
 
 	# Install uv tools
-	for package in argcomplete bypass-url-parser exegol pre-commit sqlmap wafw00f yt-dlp semgrep defaultcreds-cheat-sheet; do
+	for package in argcomplete bypass-url-parser exegol pre-commit sqlmap wafw00f yt-dlp defaultcreds-cheat-sheet opengrep; do
 		uv tool install "$$package" || {
 			$(call WARN,Retrying $$package install...)
 			uv tool install -q "$$package"
@@ -330,9 +330,12 @@ install-clomic: sanity-check ## Install clomic tools
 		sudo cp /opt/skillarch/config/tmux.conf ~/.exegol/my-resources/setup/tmux/.tmux.conf
 		sudo cp /opt/skillarch/config/exegol/load_user_setup.sh ~/.exegol/my-resources/setup/
 	}
+	
 	$(call ska-link,/opt/skillarch/config/clomic.zsh-theme,$$HOME/.oh-my-zsh/themes/clomic.zsh-theme)
+	
 	sudo ln -sf /opt/skillarch/config/systemd/resolved.conf /etc/systemd/resolved.conf
 	sudo ln -sf /opt/skillarch/config/minicom/minirc.dfl /etc/minirc.dfl
+	
 	[[ ! -d /opt/cyberchef || $$(grep -oP "CyberChef \Kv[0-9]+(\.[0-9]+)+" /opt/cyberchef/index.html) != $$(curl -s https://api.github.com/repos/gchq/CyberChef/releases/latest | jq -r '.tag_name') ]] && {
 		$(call INFO, Install or upgrade Cyberchef);
 		mkdir -p /tmp/cyberchef;
@@ -343,6 +346,16 @@ install-clomic: sanity-check ## Install clomic tools
 		[[ -d /opt/cyberchef ]] && sudo rm -rf /opt/cyberchef
 		sudo mv /tmp/cyberchef /opt/cyberchef;
 	}
+	
+	for package in opengrep; do \
+		for attempt in 1 2 3; do \
+			mise use -g "$$package@latest" && break || { \
+				$(call WARN,mise install $$package failed (attempt $$attempt/3)$(comma) retrying in 5s...) ; \
+				sleep 5 ; \
+			} ; \
+		done ; \
+	done
+	
 	$(call DONE,Clomic tools installed!)
 
 install-sysreptor:  sanity-check ## Install sysreptor
