@@ -140,7 +140,7 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 	eval "$$(mise activate bash)" || true
 
 	# Install uv tools
-	for package in argcomplete bypass-url-parser exegol pre-commit sqlmap wafw00f yt-dlp defaultcreds-cheat-sheet opengrep; do
+	for package in argcomplete bypass-url-parser exegol pre-commit sqlmap wafw00f yt-dlp defaultcreds-cheat-sheet; do
 		uv tool install "$$package" || {
 			$(call WARN,Retrying $$package install...)
 			uv tool install -q "$$package"
@@ -322,20 +322,20 @@ install-hardening: sanity-check ## Install hardening tools (opensnitch)
 install-clomic: sanity-check ## Install clomic tools
 	$(call INFO,Installing clomic tools...)
 	git remote set-url origin git@github.com:clomic/skillarch.git
-	$(PACMAN_INSTALL) obsidian minicom sagemath 7zip ncdu numlockx shellcheck-bin tailscale 
-	
+	$(PACMAN_INSTALL) obsidian minicom sagemath 7zip ncdu numlockx shellcheck-bin tailscale
+
 	[[ -d ~/.exegol/my-resources ]] && {
 		curl -sL $$(curl -s https://api.github.com/repos/dathere/qsv/releases/latest | grep 'browser_download_url.*musl.zip'|grep -o 'https://[^"]*') -o /tmp/qsv-latest.zip && 7z x -y -o/tmp /tmp/qsv-latest.zip qsvlite>/dev/null&& mv /tmp/qsvlite ~/.exegol/my-resources/bin/qsv && rm /tmp/qsv-latest.zip
 		sudo cp /opt/skillarch/config/exegol/aliases ~/.exegol/my-resources/setup/zsh
 		sudo cp /opt/skillarch/config/tmux.conf ~/.exegol/my-resources/setup/tmux/.tmux.conf
 		sudo cp /opt/skillarch/config/exegol/load_user_setup.sh ~/.exegol/my-resources/setup/
 	}
-	
+
 	$(call ska-link,/opt/skillarch/config/clomic.zsh-theme,$$HOME/.oh-my-zsh/themes/clomic.zsh-theme)
-	
+
 	sudo ln -sf /opt/skillarch/config/systemd/resolved.conf /etc/systemd/resolved.conf
 	sudo ln -sf /opt/skillarch/config/minicom/minirc.dfl /etc/minirc.dfl
-	
+
 	[[ ! -d /opt/cyberchef || $$(grep -oP "CyberChef \Kv[0-9]+(\.[0-9]+)+" /opt/cyberchef/index.html) != $$(curl -s https://api.github.com/repos/gchq/CyberChef/releases/latest | jq -r '.tag_name') ]] && {
 		$(call INFO, Install or upgrade Cyberchef);
 		mkdir -p /tmp/cyberchef;
@@ -346,7 +346,7 @@ install-clomic: sanity-check ## Install clomic tools
 		[[ -d /opt/cyberchef ]] && sudo rm -rf /opt/cyberchef
 		sudo mv /tmp/cyberchef /opt/cyberchef;
 	}
-	
+
 	for package in opengrep; do \
 		for attempt in 1 2 3; do \
 			mise use -g "$$package@latest" && break || { \
@@ -355,7 +355,7 @@ install-clomic: sanity-check ## Install clomic tools
 			} ; \
 		done ; \
 	done
-	
+
 	$(call DONE,Clomic tools installed!)
 
 install-sysreptor:  sanity-check ## Install sysreptor
