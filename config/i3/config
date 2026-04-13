@@ -189,7 +189,7 @@ bindsym $mod+shift+s exec pavucontrol
 bindsym $mod+e exec emote
 bindsym $mod+b exec blueman-manager
 bindsym $mod+w exec systemsettings kcm_networkmanagement
-bindsym $mod+n exec dolphin
+bindsym $mod+n exec thunar
 bindsym $mod+v exec vlc
 bindsym $mod+c exec code
 bindsym $mod+o exec obsidian

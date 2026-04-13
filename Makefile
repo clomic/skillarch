@@ -185,7 +185,7 @@ install-gui: sanity-check ## Install i3, polybar, kitty, rofi, picom, KDE Plasma
 	[[ ! -f /etc/machine-id ]] && sudo systemd-machine-id-setup || true
 	$(PACMAN_INSTALL) xorg-server cachyos-kde-settings plasma-meta i3-gaps i3blocks i3lock i3lock-fancy-git i3status dmenu feh rofi nm-connection-editor picom polybar kitty brightnessctl xorg-xhost
 	# KDE Plasma X11 — Plasma 6 + kwin_x11, also used by cloud VNC target
-	$(PACMAN_INSTALL) plasma-desktop plasma-x11-session kwin-x11 konsole dolphin alacritty
+	$(PACMAN_INSTALL) plasma-desktop plasma-x11-session kwin-x11 konsole alacritty
 	yay --noconfirm --needed -S rofi-power-menu i3-battery-popup-git
 	# ── KDE Dark Theme (BreezeDark) ──
 	# plasma-apply-colorscheme needs a running Plasma session (D-Bus); during install
@@ -201,13 +201,17 @@ install-gui: sanity-check ## Install i3, polybar, kitty, rofi, picom, KDE Plasma
 	# GTK 3/4 — sync dark theme so GTK apps (Firefox, etc.) also go dark
 	echo -e '[Settings]\ngtk-theme-name=Breeze-Dark\ngtk-icon-theme-name=breeze-dark\ngtk-application-prefer-dark-theme=true' > ~/.config/gtk-3.0/settings.ini
 	echo -e '[Settings]\ngtk-theme-name=Breeze-Dark\ngtk-icon-theme-name=breeze-dark\ngtk-application-prefer-dark-theme=true' > ~/.config/gtk-4.0/settings.ini
-	# QT_QPA_PLATFORMTHEME=kde — ensures Qt apps read kdeglobals under i3 (not just Plasma)
-	echo "export QT_QPA_PLATFORMTHEME=kde" > ~/.xprofile
-	# Pin default taskbar launchers (systemsettings, chrome, dolphin, alacritty)
+	echo "export QT_QPA_PLATFORMTHEME=kde" > ~/.xprofile # Ensures Qt apps read kdeglobals under i3 (not just Plasma)
+	echo "export XDG_SESSION_TYPE=x11" >> ~/.xprofile # Ensure other other apps rely on x11 instead of wayland
+	# ── MIME defaults: image=eog, video/audio=vlc, pdf/html=chrome, text=kate, dir=thunar ──
+	# GTK file managers (Thunar, Nautilus, etc.) and xdg-open read ~/.config/mimeapps.list.
+	# We use Thunar instead of Dolphin because KIO's portal-based launcher hangs under i3.
+	printf '%s\n' '[Default Applications]' 'image/png=org.gnome.eog.desktop' 'image/jpeg=org.gnome.eog.desktop' 'image/gif=org.gnome.eog.desktop' 'image/webp=org.gnome.eog.desktop' 'image/bmp=org.gnome.eog.desktop' 'image/tiff=org.gnome.eog.desktop' 'image/svg+xml=org.gnome.eog.desktop' 'video/mp4=vlc.desktop' 'video/x-matroska=vlc.desktop' 'video/webm=vlc.desktop' 'video/quicktime=vlc.desktop' 'video/x-msvideo=vlc.desktop' 'audio/mpeg=vlc.desktop' 'audio/ogg=vlc.desktop' 'audio/flac=vlc.desktop' 'audio/x-wav=vlc.desktop' 'audio/vnd.wave=vlc.desktop' 'application/pdf=google-chrome.desktop' 'text/html=google-chrome.desktop' 'x-scheme-handler/http=google-chrome.desktop' 'x-scheme-handler/https=google-chrome.desktop' 'x-scheme-handler/about=google-chrome.desktop' 'x-scheme-handler/unknown=google-chrome.desktop' 'x-scheme-handler/mailto=google-chrome.desktop' 'text/plain=org.kde.kate.desktop' 'inode/directory=thunar.desktop' > ~/.config/mimeapps.list
+	# Pin default taskbar launchers (systemsettings, chrome, thunar, alacritty)
 	mkdir -p ~/.config
 	PLASMA_RC=~/.config/plasma-org.kde.plasma.desktop-appletsrc ; \
 	if [[ -f "$$PLASMA_RC" ]]; then \
-		sed -i 's|^launchers=.*|launchers=applications:systemsettings.desktop,applications:google-chrome.desktop,applications:org.kde.dolphin.desktop,applications:Alacritty.desktop|' "$$PLASMA_RC" ; \
+		sed -i 's|^launchers=.*|launchers=applications:systemsettings.desktop,applications:google-chrome.desktop,applications:thunar.desktop,applications:Alacritty.desktop|' "$$PLASMA_RC" ; \
 	fi
 
 	# i3 config
@@ -240,7 +244,7 @@ install-gui-tools: sanity-check ## Install GUI apps (Chrome, VSCode, Ghidra, etc
 	$(call INFO,Installing GUI applications...)
 	# Pre-create flatpak repo dir so post-install hooks don't fail in Docker (flatpak may be pulled as a dependency)
 	[[ -f /.dockerenv ]] && sudo mkdir -p /var/lib/flatpak/repo || true
-	$(PACMAN_INSTALL) vlc vlc-plugin-ffmpeg arandr blueman visual-studio-code-bin discord dunst filezilla flameshot ghex google-chrome gparted kdenlive kompare libreoffice-fresh meld okular qbittorrent torbrowser-launcher wireshark-qt ghidra signal-desktop dragon-drop-git emote guvcview audacity polkit-kde-agent dolphin kamoso
+	$(PACMAN_INSTALL) vlc vlc-plugin-ffmpeg arandr blueman visual-studio-code-bin discord dunst filezilla flameshot ghex google-chrome gparted kdenlive kompare libreoffice-fresh meld okular qbittorrent torbrowser-launcher wireshark-qt ghidra signal-desktop dragon-drop-git emote guvcview audacity polkit-kde-agent kamoso thunar thunar-archive-plugin thunar-volman tumbler ffmpegthumbnailer gvfs gvfs-mtp file-roller
 	[[ ! -f /.dockerenv ]] && $(PACMAN_INSTALL) flatpak && flatpak install -y flathub com.obsproject.Studio || true
 	# Do not start services in docker
 
@@ -517,6 +521,9 @@ cloud: sanity-check ## (Standalone) Install KasmVNC + cloud-init for cloud/remot
 	sudo sed -i 's/^#\?\s*PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
 	[[ ! -f /.dockerenv ]] && sudo systemctl restart sshd.service || true
 	sudo ufw allow 22/tcp comment 'SSH' || true
+
+	# ── bore: TCP tunnel to expose local ports through NAT (https://github.com/ekzhang/bore) ──
+	$(PACMAN_INSTALL) bore
 
 	# ── Delete all Snapper snapshots ──
 	# Snapper read-only snapshots cause libguestfs to detect multiple OS roots,
