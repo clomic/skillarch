@@ -97,7 +97,9 @@ alias wifi-nmtui='nmtui'
 alias wget-yolo="wget --no-check-certificate"
 digall() { dig +answer +multiline "$1" any @8.8.8.8; }
 alias ipv6-disable='sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1; sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1; sudo sysctl -w net.ipv6.conf.lo.disable_ipv6=1'
+alias ip6d=ipv6-disable
 alias ipv6-enable='sudo sysctl -w net.ipv6.conf.all.disable_ipv6=0; sudo sysctl -w net.ipv6.conf.default.disable_ipv6=0; sudo sysctl -w net.ipv6.conf.lo.disable_ipv6=0'
+alias ip6e=ipv6-enable
 alias dns-127='echo "nameserver 127.0.0.1" | sudo tee /etc/resolv.conf'
 alias dns-1='echo "nameserver 1.1.1.1" | sudo tee /etc/resolv.conf'
 alias dns-8='echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf'
@@ -105,6 +107,7 @@ alias dns-9='echo "nameserver 9.9.9.9" | sudo tee /etc/resolv.conf'
 alias get-ip='curl -sS ipinfo.io/ip ; echo'
 alias get-ip-cpy='curl -sS ipinfo.io/ip | cpy'
 alias pub='export PUB=$(curl -s ipv4.ident.me || curl -sS ifconfig.io); printf "%s" "${PUB%$'\''\n'\''}" | cpyc'
+alias wk='sudo -v && sudo wireshark &'
 
 # ────────────────────────────────────────
 #  Video, Audio & Screenshots
@@ -119,7 +122,7 @@ alias flameshotz='while true; do flameshot full -p ~/Downloads; sleep 1; done'
 # ────────────────────────────────────────
 alias show-disk-io='watch -cd -- iostat -h'
 alias sdi='show-disk-io'
-alias show-open-ports='sudo ss -ltpn | grep -i listen | grep ":\K\d+"'
+alias show-open-ports='sudo ss -ltpn | grep -i listen | grep -P ":\K\d+"'
 alias sop='show-open-ports'
 alias get-du='du -hd1 2>/dev/null'
 alias get-pid-click='xprop _NET_WM_PID | cut -d" " -f3'
@@ -138,6 +141,12 @@ alias makeqrcode='qrencode -t ANSI -o -'
 alias cgrep='grep --color=always'
 alias lgrep='grep --line-buffered'
 alias sortn='sort -V | uniq -c | sort -n'
+alias suc='sort|uniq -c|sort -h'
+alias suq='sort -u'
+alias qs='qsv search'
+alias qsh='qsv headers'
+alias qsl='qsv select'
+alias qsu='qsv sort -u'
 alias grephilight='export GREP_COLORS="mt=30;46"'
 cheat() { curl -s "cheat.sh/$1"; }
 alias clean-swap='sudo swapoff -a && sudo swapon -a'
@@ -245,6 +254,7 @@ sha1() { args_to_stdin "$@" | sha1sum | awk '{print$1}'; }
 sha256() { args_to_stdin "$@" | sha256sum | awk '{print$1}'; }
 toUpper() { args_to_stdin "$@" | perl -C -pe '$_=uc'; } # args_to_stdin "$@"|LC_ALL=C.UTF-8 awk '{print toupper($0)}'
 toLower() { args_to_stdin "$@" | perl -C -pe '$_=lc'; }
+fromEpoch() { args_to_stdin "$@" | date -ud @"$1" -Iseconds; }
 
 # ────────────────────────────────────────
 #  Web Recon
