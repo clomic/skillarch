@@ -58,7 +58,7 @@ make clean              # Docker-only: clear caches (pacman, yay, pip, mise, go,
 | `ska-help-bindings` | fzf fuzzy-search i3 keybindings |
 | `ska-help-packages` | fzf fuzzy-search installed pacman packages |
 | `ska-update-simple` | `ska && make update && make install` |
-| `ska-update-advanced` | Print git merge workflow for forked setups |
+| `ska-update-advanced` | Interactive upstream-merge for forks (commit local → fetch → preview → merge → push → reapply, all Y/n-prompted) |
 | `ska-sudo-unlock` | Reset faillock after 3 bad sudo attempts |
 | `ska-vnc` | Prompt for VNC password, set it, start KasmVNC on :1 |
 | `ska-vbox-install-guestutils` | Install VirtualBox guest utils |
@@ -286,7 +286,7 @@ make clean              # Docker-only: clear caches (pacman, yay, pip, mise, go,
 `bat`, `eza`, `fzf`, `ripgrep`, `fd`, `jq`, `glow`, `jless`, `gron`, `htmlq`, `qsv`, `viu`, `superfile`, `fastfetch`, `asciinema`, `bottom`, `htop`, `tmux`, `git-delta`, `lazygit`, `fq`, `fx`, `websocat`, `cloc`, `tree`, `rlwrap`, `parallel`, `tmate`, `trash-cli`, `sysstat`, `inotify-tools`
 
 ### Security / Offensive (pacman)
-`metasploit` (msfconsole, msfvenom), `hashcat`, `bettercap`, `nmap`, `wireshark-qt`, `ghidra`, `gdb+gef`, `gitleaks`, `opensnitch`
+`metasploit` (msfconsole, msfvenom), `hashcat`, `bettercap`, `nmap`, `wireshark-qt`, `ghidra`, `gdb+gef`, `gitleaks`, `opensnitch`, `bore` (TCP NAT tunnel — `bore local <PORT> --to bore.pub`)
 
 ### Security / Offensive (yay/AUR)
 `ffuf`, `gau`, `pdtm-bin`, `waybackurls`, `fabric-ai-bin`, `caido-desktop`, `caido-cli`, `gobypass403` (GitHub release), `wpprobe` (GitHub release)
@@ -312,6 +312,7 @@ make clean              # Docker-only: clear caches (pacman, yay, pip, mise, go,
 | `/opt/exploitdb` | exploit-database/exploitdb | ExploitDB (GitLab mirror) |
 | `/opt/pty4all` | laluka/pty4all | PTY helper for shells |
 | `/opt/pypotomux` | laluka/pypotomux | tmux session multiplexer |
+| `/opt/HExHTTP` | c0dejump/HExHTTP | HTTP header vuln / cache-poisoning scanner (isolated venv, `hexhttp -u https://target.tld/`) |
 
 ### Runtimes (mise)
 `python` (latest), `nodejs` (latest), `golang` (latest), `rust` (latest), `uv`, `pdm`, `terraform`
@@ -351,7 +352,6 @@ Installs KasmVNC (`kasmvncserver-bin`) + `openssl-1.1` (AUR, required — KasmVN
 | Service | Status | Start | Purpose |
 |---|---|---|---|
 | *(user-level)* | not installed by default | `ska-vnc` or `kasmvncserver :1` | KasmVNC remote desktop (yay: `kasmvncserver-bin`) |
-| *(user-level)* | installed | `bore local <PORT> --to bore.pub` | TCP tunnel through NAT ([github.com/ekzhang/bore](https://github.com/ekzhang/bore)) |
 
 #### KasmVNC Usage
 SSL is disabled (config: `~/.vnc/kasmvnc.yaml`). Access via SSH port-forward only.
