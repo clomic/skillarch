@@ -83,6 +83,7 @@ alias neofetch='fastfetch'
 alias hifetch='fastfetch'
 alias didi='sudo pacman -Sy discord'
 alias skau='ska-update-advanced'
+alias skaus='ska-update-simple'
 args_to_stdin() { printf "%s" "${*:-$(cat)}"; }
 
 # ────────────────────────────────────────
@@ -320,6 +321,7 @@ alias crl='curl -sS --path-as-is -gk -H "User-Agent: Mozilla/5.0 (X11; Linux x86
 alias crli='crl -D /dev/stderr'
 alias crlix='crli -x http://127.0.0.1:8080/'
 alias kdo='caido --no-sandbox >&/dev/null &'
+alias fzf-w='find /opt/lists -type f -name "*.txt"|fzf'
 
 # ────────────────────────────────────────
 #  Docker Management
