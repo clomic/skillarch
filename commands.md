@@ -244,7 +244,7 @@
 |uvr|`uv run`|
 |uvv|`uv venv .venv && source .venv/bin/activate`|
 |v|nvim|
-|webcam-guvcview||
+|webcam-guvcview|guvcview|
 |wget-yolo|`wget --no-check-certificate`|
 |wifi-nmtui|Text User Interface for controlling NetworkManager (Wifi)|
 |wk|Wireshark as root|

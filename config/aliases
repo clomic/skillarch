@@ -242,7 +242,7 @@ cmd_picker() {
 
   [[ -n "$selected" ]] && print -z "$selected"
 }
-bindkey '^f' cmd_picker
+bindkey -s '^f' "cmd_picker\n"
 # ────────────────────────────────────────
 #  Python
 # ────────────────────────────────────────
