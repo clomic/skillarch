@@ -9,7 +9,7 @@ alias ska='/opt/skillarch'
 alias skao='/opt/skillarch-original'
 alias ska-help-bindings='i3-msg -t get_config | grep -vF "#bindsym" | grep -oP "bindsym .*" | fzf'
 alias ska-help-aliases='alias | fzf'
-alias ska-help-packages='pacman -Q | fzf'
+alias ska-help-packages="{ pacman -Q|awk '{print\$1}'; uv tool list|awk '/^-/ {print\$2}'; mise ls|awk '/latest/ {print\$1}'; }|sort -u|fzf"
 alias ska-update-simple='ska && make update && make install'
 unalias ska-update-advanced 2>/dev/null # shed any stale alias from a prior source
 ska-update-advanced() {
@@ -145,7 +145,7 @@ alias dns-8='echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf'
 alias dns-9='echo "nameserver 9.9.9.9" | sudo tee /etc/resolv.conf'
 alias get-ip='curl -sS ipinfo.io/ip ; echo'
 alias get-ip-cpy='curl -sS ipinfo.io/ip | cpy'
-alias pub='export PUB=$(curl -s ipv4.ident.me || curl -sS ifconfig.io); printf "%s" "${PUB%$'\''\n'\''}" | cpyc'
+alias pub='export PUB=$(curl -s ipv4.ident.me || curl -sS ifconfig.io); printf "$PUB" | cpyc'
 alias wk='sudo -v && sudo wireshark &'
 
 # ────────────────────────────────────────
@@ -161,7 +161,7 @@ alias flameshotz='while true; do flameshot full -p ~/Downloads; sleep 1; done'
 # ────────────────────────────────────────
 alias show-disk-io='watch -cd -- iostat -h'
 alias sdi='show-disk-io'
-alias show-open-ports='sudo ss -ltpn | grep -i listen | grep -P ":\K\d+"'
+alias show-open-ports='sudo ss -lntp | grep -i listen | grep -P ":\K\d+"'
 alias sop='show-open-ports'
 alias get-du='du -hd1 2>/dev/null'
 alias get-pid-click='xprop _NET_WM_PID | cut -d" " -f3'
@@ -192,7 +192,7 @@ alias clean-swap='sudo swapoff -a && sudo swapon -a'
 alias cpy='xsel -ib'
 alias cpyc='tee >(xsel -ib)'
 alias paste='xsel -ob'
-alias get-meteo='curl https://wttr.in/'
+alias get-meteo='curl -sH "accept-language: fr" https://wttr.in/ | head -n -2'
 alias gl='glow -w0'
 alias fab='fabric-ai -s'
 cchef() (set -e;cd /opt/cyberchef && xdg-open index.html >&/dev/null &)
@@ -211,14 +211,48 @@ crypt-enc() (set -e;
 crypt-dec() (set -e;openssl enc -d -aes-256-cbc -pbkdf2 -in "$1" -out "${1%.enc}";tar xf "${1%.enc}";rm "${1%.enc}")
 alias 7za='7z a -mhe=on'
 alias 7zp='7zG a -p -mhe=on'
+xh() { [[ -z "$1" ]] && return ||  xxd "${@: -1}" | head "${@: 1:#-1}"; }
+cmd_picker() {
+    local md_file="${1:-/opt/skillarch/commands.md}"
+    local selected
+
+    selected=$(grep '|' "$md_file" | grep -v '^\s*|[-|]\+' | sed 's/\\|/\x00/g; s/``/\x01/g' \
+        | awk -F'|' 'NF>=3 {
+            cmd=$2; desc=$3;
+            gsub(/^ +| +$/, "", cmd);
+            gsub(/^ +| +$/, "", desc);
+            gsub(/\x00/, "|", desc);
+            # Colorize in blue strings between backticks (single or double)
+            while (match(desc, /\x01[^\x01]+\x01|`[^`]+`/)) {
+                inner = substr(desc, RSTART+1, RLENGTH-2)
+                colored = "\033[34m" inner "\033[0m"
+                desc = substr(desc, 1, RSTART-1) "\033[34m" inner "\033[0m" substr(desc, RSTART+RLENGTH)
+            }
+            if (cmd != "" && cmd != "Function/Alias")
+            printf "%-28s\t%s\n", cmd, desc
+        }' \
+        | fzf --ansi --height=50% --reverse \
+            --prompt="Command > " \
+            --delimiter='\t' \
+            --with-nth=1,2 --nth=1,2 \
+            --preview='printf "%s" {2}' \
+            --preview-window='down:3:wrap' \
+        | awk -F'\t' '{print $1}' \
+        | xargs)
+
+  [[ -n "$selected" ]] && print -z "$selected"
+}
+bindkey '^f' cmd_picker
 # ────────────────────────────────────────
 #  Python
 # ────────────────────────────────────────
 pv() { if [ -z "$1" ] ; then echo "Use: pv 3.12" ; else mise use "python@$1" ; mise config set env._.python.venv.path .venv ; mise config set --type list env._.python.venv.uv_create_args -- --seed ; mise config set --type bool env._.python.venv.create true ; mise exec -- which python ; mise exec -- python --version ; fi; }
 alias pyreq='pip install -r requirements.txt'
-alias pysrv='mkdir -pv /tmp/empty ; python -m http.server -d /tmp/empty'
+alias pysrv='mkdir -pv /tmp/empty && python -m http.server -d /tmp/empty'
 alias uvv='uv venv .venv && source .venv/bin/activate'
 alias uvr='uv run'
+alias uvp='uv pip install'
+alias uvreq='uv pip install -r requirements.txt'
 alias uva='uv add --script' # to update a script with a lib (mytool.py added_lib) or with requirements.txt (mytool.py -r requirements.txt)
 alias uvpwn='uvx --with pwntools python'
 
@@ -229,21 +263,23 @@ alias get-badchars='echo -e "\x22\x27<?>][]{}_)(*;/\x5c"'
 alias get-bytes-hex='for i in {0..255}; do printf "%b\n" "$(printf '0x%02x' "$i")"; done'
 alias get-bytes-raw='for i in {0..255}; do  printf "\\$(printf '%03o' "$i")\n";done'
 alias get-bytes-url='for i in {0..255}; do printf "%%%.2x\n" "$i";done'
-alias get-chars='for c in {32..126}; do printf "\\$(printf '%03o' $c)\n"; done'
+alias get-chars='for c in {32..126}; do printf "\\x$(printf '%02x' $c)\n"; done'
 alias get-alpha='for c in {65..90} {97..122}; do printf "\\$(printf '%03o' $c)\n"; done'
 alias get-alphanum='for c in {48..57} {65..90} {97..122}; do printf "\\$(printf '%03o' $c)\n"; done'
 alias nocolor='sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g"'
-alias b64d='base64 -d'
+b64() { args_to_stdin "$@"|base64 -w0; }
+b64d() { args_to_stdin "$@"|base64 -d; }
+alias b64e='b64'
 b64url() { args_to_stdin "$@"|base64 -w0|tr -d '='|tr '/+' '_-'; }
-alias b64e='base64 -w0'
 b64urld() { args_to_stdin "$@"|tr -d ' \t\r\n'|tr '_-' '/+'|base64 -d; }
+alias b64urle='b64url'
 toDecimal() { args_to_stdin "$@"| while IFS= read -rku0 c; do printf "%d " "'$c";done |sed 's/^ //;s/ $//'; }
 alias toDec='toDecimal'
-fromDecimal() { args_to_stdin "$@"|tr ' ' '\n'| while read -r n; do printf "\\%s" "$(printf '%03o' "$n")";done; }
+fromDecimal() { args_to_stdin "$@"|xargs -n 1| while read -r n; do printf "\\x$(printf '%02x' $n)";done; }
 alias fromDec='fromDecimal'
 toHex() { args_to_stdin "$@"|xxd -p | tr -d '\n'; }
 alias hexencode='toHex'
-alias hexd='toHex'
+alias hexe='toHex'
 fromHex() { args_to_stdin "$@"|tr -d '\\x'|xxd -r -p; }
 alias hexdecode='fromHex'
 alias hexd='fromHex'
@@ -279,9 +315,12 @@ htmlencode() { args_to_stdin "$@" | sed -u -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e
 htmlunescape() { args_to_stdin "$@" | perl -pe 's/&lt;/</g; s/&gt;/>/g; s/&quot;/"/g; s/&apos;/'"'"'/g; s/&amp;/&/g; s/&#(\d+);/chr($1)/ge; s/&#x([0-9a-fA-F]+);/chr(hex($1))/ge'; }
 jsonescape() { args_to_stdin "$@" | perl -pe 's/\\/\\\\/g; s/"/\\"/g; s/\x08/\\b/g; s/\f/\\f/g; s/\n/\\n/g; s/\r/\\r/g; s/\t/\\t/g'; }
 jsonunescape() { args_to_stdin "$@" | perl -pe 's/\\b/\x08/g; s/\\f/\f/g; s/\\n/\n/g; s/\\r/\r/g; s/\\t/\t/g; s/\\"/"/g; s/\\\\/\\/g'; }
+unicodeencode() { args_to_stdin "$@" | perl -CS -pe 's/([^\x00-\x7E])/sprintf(ord($1)>0xFFFF?"\\u%x":"\\u%04x",ord($1))/ge'; }
 unicodeencodeall() { args_to_stdin "$@" | perl -CSD -ne 'use utf8; print map { sprintf "\\u%04x", ord($_) } split //'; }
-unicodedecode() { args_to_stdin "$@" | perl -CS -pe 's/\\u([0-9a-fA-F]{4})/chr(hex($1))/ge'; }
-xmlescape() { args_to_stdin "$@" | sed -u -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g' -e 's/"/\&quot;/g' -e "s/'/\&apos;/g"; }
+unicodedecode() { args_to_stdin "$@" | perl -CS -pe 's/\\u([0-9a-fA-F]+)|U\+([0-9a-fA-F]+)|%u([0-9a-fA-F]+)/chr(hex($1||$2||$3))/gie'; }
+alias fromUnicode='unicodedecode'
+alias toUnicode='unicodeencode'
+alias xmlescape='htmlencode'
 xmlunescape() { args_to_stdin "$@" | sed -u -e 's/&lt;/</g' -e 's/&gt;/>/g' -e 's/&quot;/"/g' -e "s/&apos;/'/g" -e 's/&amp;/\&/g'; }
 # alias urld="perl -MURI::Escape -ne 'print uri_unescape(\$_);'" # url decode stdin stream
 # xor "my_key" "my_string" ---  echo "my_string" | xor "my_key"
@@ -320,7 +359,7 @@ lfu() { outfile=fu-$(echo -n "$@" | sed -E "s#[/ ]#_#g").json ; ffuf --of json -
 alias crl='curl -sS --path-as-is -gk -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) snap Chromium/83.0.4103.106 Chrome/83.0.4103.106 Safari/537.36"'
 alias crli='crl -D /dev/stderr'
 alias crlix='crli -x http://127.0.0.1:8080/'
-alias kdo='caido --no-sandbox >&/dev/null &'
+alias kdo='caido --no-sandbox &> /dev/null &'
 alias fzf-w='find /opt/lists -type f -name "*.txt"|fzf'
 
 # ────────────────────────────────────────
@@ -372,8 +411,22 @@ alias dsecator="dockit -v ~/.secator:/root/.secator freelabz/secator" # normaliz
 alias drustscan='dockit rustscan/rustscan' # web path enum
 alias doneforall='dockit -w /OneForAll -v /tmp/results:/OneForAll/results shmilylty/oneforall' # noisy recon
 alias getfuzz='echo "AA<fuzz1>\"fuzz2'"'"'fuzz3\`%}})fuzz4\${{fuzz5\\"BB'
-alias getcan='f(){ echo "skanary$(date +%s%N)"; unset -f f; }; f'
-getcaninfo() { date -d "@${1:0:-9}" "+%Y-%m-%d %H:%M:%S.${1: -9}"; }
+get-homoglyph() { args_to_stdin "$@" | python3 -c "
+import urllib.request,os,unicodedata
+c=os.path.expanduser('~/.cache/confusables.txt')
+if not os.path.exists(c):os.makedirs(os.path.dirname(c),exist_ok=True);urllib.request.urlretrieve('https://www.unicode.org/Public/security/latest/confusables.txt',c)
+cps={f'{ord(x):04X}' for x in input()}
+for l in open(c):
+    p=l.strip().split(';')
+    if len(p)<2 or l[0]=='#':continue
+    s,t=p[0].strip(),p[1].strip().split()
+    a=list(dict.fromkeys([s]+t))
+    if cps&set(a):
+        try:print(chr(int(s,16)))
+        except:pass
+"; }
+alias getcan='echo "skanary$(date +%s%N)"'
+getcaninfo() { can="${1/#skanary/}"; date -d "@${can: :-9}" "+%Y-%m-%d %H:%M:%S.${can: -9}"; }
 
 ## Compliance & Auditing
 alias dssh-audit="dockit positronsecurity/ssh-audit"
@@ -392,7 +445,7 @@ alias ddroopescan="dockit droope/droopescan" # drupal scanner
 
 ## Reverse Engineering & Forensics
 alias dretdec='dockit blacktop/retdec' # binary to c code
-alias dbinwalk-dd="/usr/bin/binwalk --dd='.*'"
+alias unblob='mkdir -p "$PWD/output" && docker run --rm --pull always -v "$PWD/output":/data/output -v "$PWD":/data/input ghcr.io/onekey-sec/unblob:latest'
 
 ## Sysadmin & Dev Tools
 alias dsysdig='dockit --privileged -v /var/run/docker.sock:/host/var/run/docker.sock -v /dev:/host/dev -v /proc:/host/proc:ro -v /boot:/host/boot:ro -v /src:/src -v /lib/modules:/host/lib/modules:ro -v /usr:/host/usr:ro -v /etc:/host/etc:ro --entrypoint /usr/bin/sysdig docker.io/sysdig/sysdig --modern-bpf --unbuffer'

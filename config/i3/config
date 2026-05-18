@@ -223,3 +223,6 @@ for_window [floating] resize set 1536 864, move position 192 108
 bindsym $mod+h exec kitty --title "Help: SkillArch Bindings" zsh -ic "ska-help-bindings"
 bindsym $mod+Shift+h exec kitty --title "Help: SkillArch Aliases" zsh -ic "ska-help-aliases"
 bindsym $mod+Control+h exec kitty --title "Help: SkillArch packages" zsh -ic "ska-help-packages"
+
+# Proxy
+bindsym $mod+Control+p exec caido --no-sandbox &> /dev/null &

@@ -370,6 +370,14 @@ install-clomic: sanity-check ## Install clomic tools
 		done ; \
 	done
 
+	# Install uv tools
+	for package in aliasr updog yq; do
+		uv tool install "$$package" || {
+			$(call WARN,Retrying $$package install...)
+			uv tool install -q "$$package"
+		}
+	done
+
 	$(call DONE,Clomic tools installed!)
 
 install-sysreptor:  sanity-check ## Install sysreptor

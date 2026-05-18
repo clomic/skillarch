@@ -80,8 +80,9 @@ make clean              # Docker-only: clear caches (pacman, yay, pip, mise, go,
 ### File Management
 | Alias | Action |
 |---|---|
-| `l` | `eza -ll --group-directories-first` |
+| `l` | `eza -l --group-directories-first` |
 | `la` | `l -a` |
+| `laa` | `l -aa` (include . and ..)|
 | `t` / `t2` / `t3` | eza tree (depth 1/2/3) |
 | `rm` | `trash-put` (safe delete) |
 | `te` | `trash-empty` |
@@ -147,8 +148,8 @@ make clean              # Docker-only: clear caches (pacman, yay, pip, mise, go,
 | Alias | Action |
 |---|---|
 | `show-disk-io` / `sdi` | `watch iostat -h` |
-| `show-open-ports` / `sop` | `ss -latepun \| grep LISTEN` |
-| `get-du` | `du -ch -d 1` |
+| `show-open-ports` / `sop` | `sudo ss -lntp \| grep -i listen \| grep -P ":\K\d+"` |
+| `get-du` | `du -hd1 2>/dev/null` |
 | `dirmon` | `inotifywait` recursive file monitoring |
 | `get-pid-click` | Click a window to get its PID |
 | `get-pid-ps` | fzf-select process to get PID |
@@ -165,7 +166,7 @@ make clean              # Docker-only: clear caches (pacman, yay, pip, mise, go,
 | Alias | Action |
 |---|---|
 | `upload` | Upload file to 0x0.st |
-| `cpy` | Copy stdin to clipboard (xclip) |
+| `cpy` | Copy stdin to clipboard (xsel) |
 | `paste` | Paste from clipboard |
 | `cheat` | `curl cheat.sh/<arg>` |
 | `fab` | `fabric-ai -s` (AI-powered text processing) |
