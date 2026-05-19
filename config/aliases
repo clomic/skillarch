@@ -9,7 +9,7 @@ alias ska='/opt/skillarch'
 alias skao='/opt/skillarch-original'
 alias ska-help-bindings='i3-msg -t get_config | grep -vF "#bindsym" | grep -oP "bindsym .*" | fzf'
 alias ska-help-aliases='alias | fzf'
-alias ska-help-packages='pacman -Q | fzf'
+alias ska-help-packages="{ pacman -Q|awk '{print\$1}'; uv tool list|awk '/^-/ {print\$2}'; mise ls|awk '/latest/ {print\$1}'; }|sort -u|fzf"
 alias ska-update-simple='ska && make update && make install'
 unalias ska-update-advanced 2>/dev/null # shed any stale alias from a prior source
 ska-update-advanced() {
@@ -97,7 +97,7 @@ alias c='code'
 alias C='code .'
 alias p='python'
 alias cdtmp='pushd $(mktemp -d)'
-alias ff='f(){ find . -iname "*$1*" 2>/dev/null; unset -f f; }; f'
+ff() { find . -iname "*$1*" 2>/dev/null; }
 
 # ────────────────────────────────────────
 #  Git
@@ -110,11 +110,11 @@ alias gdh='git diff HEAD'
 # ────────────────────────────────────────
 #  File Management
 # ────────────────────────────────────────
-alias l="eza -ll --group-directories-first $@"
-alias la="l -a $@"
-alias t="l -T $@"
-alias t2="t -L 2 $@"
-alias t3="t -L 3 $@"
+alias l="eza -l --group-directories-first"
+alias la="l -a"
+alias t="l -T"
+alias t2="t -L 2"
+alias t3="t -L 3"
 alias rm='trash-put'
 alias te='trash-empty'
 alias cp='cp -i'
@@ -123,14 +123,14 @@ compdef _files trash-put # fix trash-put file completion
 # ────────────────────────────────────────
 #  Networking
 # ────────────────────────────────────────
-alias ipa="ip -br a | grep -vF DOWN"
-alias ipaa="ip -br a"
+alias ipa="ip -c -br a | grep -vF DOWN"
+alias ipaa="ip -c -br a"
 alias nc='ncat'
 alias ncl='ncat -lnvp'
 alias ssh-yolo='ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
 alias wifi-nmtui='nmtui'
 alias wget-yolo="wget --no-check-certificate"
-alias digall='f(){ dig +answer +multiline "$1" any @8.8.8.8;  unset -f f; }; f'
+digall() { dig +answer +multiline "$1" any @8.8.8.8; }
 alias ipv6-disable='sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1; sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1; sudo sysctl -w net.ipv6.conf.lo.disable_ipv6=1'
 alias ipv6-enable='sudo sysctl -w net.ipv6.conf.all.disable_ipv6=0; sudo sysctl -w net.ipv6.conf.default.disable_ipv6=0; sudo sysctl -w net.ipv6.conf.lo.disable_ipv6=0'
 alias dns-127='echo "nameserver 127.0.0.1" | sudo tee /etc/resolv.conf'
@@ -154,11 +154,11 @@ alias flameshotz='while true; do flameshot full -p ~/Downloads; sleep 1; done'
 # ────────────────────────────────────────
 alias show-disk-io='watch -cd -- iostat -h'
 alias sdi='show-disk-io'
-alias show-open-ports="sudo ss -latepun | grep -i listen"
+alias show-open-ports='sudo ss -lntp | grep -i listen | grep -P ":\K\d+"'
 alias sop='show-open-ports'
-alias get-du='du -ch -d 1'
+alias get-du='du -hd1 2>/dev/null'
 alias get-pid-click='xprop _NET_WM_PID | cut -d" " -f3'
-alias get-pid-ps='ps fauxw | fzf | awk "{ print \$2}"'
+alias get-pid-ps='ps fauxw | fzf --reverse| awk "{print\$2}"'
 alias get-shell-size='echo "stty rows $LINES cols $COLUMNS"'
 alias dirmon='inotifywait -rm -e create -e moved_to -e modify -e access -e attrib -e close_write -e moved_from'
 alias killit='sudo kill -KILL'
@@ -166,9 +166,9 @@ alias killit='sudo kill -KILL'
 # ────────────────────────────────────────
 #  Misc Utilities
 # ────────────────────────────────────────
-alias upload='f(){ curl -F"file=@$1" https://0x0.st;  unset -f f; }; f'
-alias usleep='f(){ python3 -c "import time; time.sleep($1)";  unset -f f; }; f'
-alias nosleep='systemd-inhibit --what sleep:idle sleep 999999'
+aupload() { curl -F"file=@$1" https://0x0.st; }
+usleep() { python3 -c "import time; time.sleep($1)"; }
+lias nosleep='systemd-inhibit --what sleep:idle sleep 999999'
 alias makeqrcode='qrencode -t ANSI -o -'
 alias b64d='base64 -d'
 alias b64e='base64 -w 0'
@@ -178,7 +178,7 @@ alias cgrep='grep --color=always'
 alias lgrep='grep --line-buffered'
 alias sortn='sort -V | uniq -c | sort -n'
 alias grephilight='export GREP_COLORS="mt=30;46"'
-alias cheat='f(){ curl -s "cheat.sh/$1";  unset -f f; }; f'
+cheat() { curl -s "cheat.sh/$1"; }
 alias clean-swap='sudo swapoff -a && sudo swapon -a'
 alias cpy='xclip -selection clipboard'
 alias paste='xclip -selection clipboard -o'
@@ -192,7 +192,7 @@ alias fab='fabric-ai -s'
 # ────────────────────────────────────────
 alias pv='f(){ if [ -z "$1" ] ; then echo "Use: pv 3.12" ; else mise use "python@$1" ; mise config set env._.python.venv.path .venv ; mise config set --type list env._.python.venv.uv_create_args -- --seed ; mise config set --type bool env._.python.venv.create true ; mise exec -- which python ; mise exec -- python --version ; fi;  unset -f f; }; f'
 alias pyreq='pip install -r requirements.txt'
-alias pysrv='mkdir -pv /tmp/empty ; python -m http.server -d /tmp/empty'
+alias pysrv='mkdir -pv /tmp/empty && python -m http.server -d /tmp/empty'
 
 # ────────────────────────────────────────
 #  Data Generation & Encoding
@@ -211,25 +211,25 @@ alias urld="perl -MURI::Escape -ne 'print uri_unescape(\$_);'" # url decode stdi
 # ────────────────────────────────────────
 #  Web Recon
 # ────────────────────────────────────────
-alias getinfo-known-creds='f(){ xdg-open "https://cirt.net/passwords?criteria=$@" ;  unset -f f; }; f'
-alias getinfo-known-port='f(){ xdg-open "https://www.speedguide.net/port.php?port=$@" ;  unset -f f; }; f'
+getinfo-known-creds() { xdg-open "https://cirt.net/passwords?criteria=${*// /+}" ; }
+getinfo-known-port() { xdg-open "https://www.speedguide.net/port.php?port=$1" ; }
 alias getinfo-bookhacktricks='f(){ xdg-open "https://book.hacktricks.wiki/en/index.html?search=$@" ;  unset -f f; }; f'
-alias getinfo-certspotter='f(){ curl -sS "https://api.certspotter.com/v1/issuances?domain=$1&include_subdomains=true&expand=dns_names&expand=issuer&expand=cert" | jq ;  unset -f f; }; f'
-alias getinfo-virustotal='f(){ xdg-open "https://www.virustotal.com/gui/domain/$1" ;  unset -f f; }; f'
-alias getinfo-crtsh='f(){ curl -sk "https://crt.sh/json?q=$1" | jq . ; unset -f f; }; f'
-alias getinfo-wayback='f(){ curl -sk "https://web.archive.org/cdx/search/cdx?fl=original&collapse=urlkey&url=*.$1" ; unset -f f; }; f'
-alias getinfo-leakix='f(){ curl -sk "https://leakix.net/api/graph/hostname/$1?v[]=hostname&v[]=ip&d=auto&l=auto" | jq | grep -ioP "hostname/[^\"]+" | cut -d/ -f2 | sort -uV ; unset -f f; }; f'
+getinfo-certspotter() { curl -sS "https://api.certspotter.com/v1/issuances?domain=$1&include_subdomains=true&expand=dns_names&expand=issuer&expand=cert" | jq ; }
+getinfo-virustotal() { xdg-open "https://www.virustotal.com/gui/domain/$1" ; }
+getinfo-crtsh() { curl -sk "https://crt.sh/json?q=$1" | jq . ; }
+getinfo-wayback() { curl -sk "https://web.archive.org/cdx/search/cdx?fl=original&collapse=urlkey&url=*.$1" ; }
+getinfo-leakix() { curl -sk "https://leakix.net/api/graph/hostname/$1?v[]=hostname&v[]=ip&d=auto&l=auto" | jq | grep -ioP "hostname/[^\"]+" | cut -d/ -f2 | sort -uV ; }
 unalias gau 2>/dev/null # gau real tool instead of omz git alias
 
 # ────────────────────────────────────────
 #  Web Fuzzing
 # ────────────────────────────────────────
-alias probe-urls='f(){ while read url; do curl -sk "$url" -o /dev/null -w "%{http_code}:%{size_download}:%{url_effective}\n" ; done < "$@" ; ; unset -f f; }; f'
+probe-urls() { while read -r url; do curl -sk "$url" -o /dev/null -w "%{http_code}:%{size_download}:%{url_effective}\n" ; done < "${1?}" ; }
 alias fu='ffuf --of json -mc all -t 2 -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"'
-alias cfu='f(){ jq -r ".results[]|[.status,.length,.lines,.words,.url]|@tsv" "$@"|sort -uV; unset -f f; }; f'
-alias cfu-clean='f(){ cfu $@ | cut -d "|" -f1,3- | awk -F/ "!_[\$1]++" | sort -u -t: -k1,1 ;  unset -f f; }; f'
-alias cfu-clean-url='f(){ cfu-clean $@ | cut -d"|" -f4- ;  unset -f f; }; f'
-alias lfu='flfu(){ outfile=fu-$(echo -n "$@" | sed -E "s#[/ ]#_#g").json ; ffuf --of json -o "$outfile" -mc all -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36" $@ ; cfu-clean "$outfile" ; unset -f flfu; }; flfu'
+cfu() { jq -r ".results[]|[.status,.length,.lines,.words,.url]|@tsv" "$@"|sort -uV; }
+cfu-clean() { cfu "$@" | cut -d "|" -f1,3- | awk -F/ "!_[\$1]++" | sort -u -t: -k1,1 ; }
+cfu-clean-url() { cfu-clean "$@" | cut -d"|" -f4- ; }
+lfu() { outfile=fu-$(echo -n "$@" | sed -E "s#[/ ]#_#g").json ; ffuf --of json -o "$outfile" -mc all -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36" "$@" ; cfu-clean "$outfile" ; }
 alias crl='curl -sS --path-as-is -gk -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) snap Chromium/83.0.4103.106 Chrome/83.0.4103.106 Safari/537.36"'
 alias crli='crl -D /dev/stderr'
 alias crlix='crli -x http://127.0.0.1:8080/'
@@ -264,15 +264,15 @@ alias dgitleaks="dockit zricethezav/gitleaks"
 ## Recon & Enumeration
 alias drecon-amass='dockit caffix/amass'
 alias drecon-findomain='dockit edu4rdshl/findomain -t'
-alias drecon-wappa='dockit wappalyzer/cli -r -D 2 -P -a "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) snap Chromium/83.0.4103.106 Chrome/83.0.4103.106 Safari/537.36" $@'
+alias drecon-wappa='dockit wappalyzer/cli -r -D 2 -P -a "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) snap Chromium/83.0.4103.106 Chrome/83.0.4103.106 Safari/537.36"'
 
 ## Fuzzing & Crawling
 alias dsecator="dockit -v ~/.secator:/root/.secator freelabz/secator" # normalize offensive arsenal
 alias drustscan='dockit rustscan/rustscan' # web path enum
 alias doneforall='dockit -w /OneForAll -v /tmp/results:/OneForAll/results shmilylty/oneforall' # noisy recon
 alias getfuzz='echo "AA<fuzz1>\"fuzz2'"'"'fuzz3\`%}})fuzz4\${{fuzz5\\"BB'
-alias getcan='f(){ echo "skanary$(date +%s%N)"; unset -f f; }; f'
-alias getcaninfo='f(){ date -d "@${1:0:-9}" "+%Y-%m-%d %H:%M:%S.${1: -9}"; unset -f f; }; f'
+alias getcan='echo "skanary$(date +%s%N)"'
+getcaninfo() { can="${1/#skanary/}"; date -d "@${can: :-9}" "+%Y-%m-%d %H:%M:%S.${can: -9}"; }
 
 ## Compliance & Auditing
 alias dssh-audit="dockit positronsecurity/ssh-audit"
