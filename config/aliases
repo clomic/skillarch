@@ -170,13 +170,11 @@ alias upload='f(){ curl -F"file=@$1" https://0x0.st;  unset -f f; }; f'
 alias usleep='f(){ python3 -c "import time; time.sleep($1)";  unset -f f; }; f'
 alias nosleep='systemd-inhibit --what sleep:idle sleep 999999'
 alias makeqrcode='qrencode -t ANSI -o -'
-alias b64d='base64 -d'
-alias b64e='base64 -w 0'
-alias back-n='sed -u "s/\\\n/\n/g"'
-alias back-t='sed -u "s/\\\t/\t/g"'
 alias cgrep='grep --color=always'
 alias lgrep='grep --line-buffered'
 alias sortn='sort -V | uniq -c | sort -n'
+alias suc='sort|uniq -c|sort -h'
+alias suq='sort -u'
 alias grephilight='export GREP_COLORS="mt=30;46"'
 alias cheat='f(){ curl -s "cheat.sh/$1";  unset -f f; }; f'
 alias clean-swap='sudo swapoff -a && sudo swapon -a'
@@ -197,16 +195,80 @@ alias pysrv='mkdir -pv /tmp/empty ; python -m http.server -d /tmp/empty'
 # ────────────────────────────────────────
 #  Data Generation & Encoding
 # ────────────────────────────────────────
+args_to_stdin() { printf "%s" "${*:-$(cat)}"; }
 alias get-badchars='echo -e "\x22\x27<?>][]{}_)(*;/\x5c"'
-alias get-bytes-hex='python3 -c "for i in range(0,256): print(hex(i))"'
-alias get-bytes-raw='python3 -c "for i in range(0,256): print(chr(i))"'
-alias get-bytes-url='python3 -c "for i in range(0,256): print(hex(i).replace(\"0x\", \"%\"))"'
+alias get-bytes-hex='for i in {0..255}; do printf "%b\n" "$(printf '0x%02x' "$i")"; done'
+alias get-bytes-raw='for i in {0..255}; do  printf "\\$(printf '%03o' "$i")\n";done'
+alias get-bytes-url='for i in {0..255}; do printf "%%%.2x\n" "$i";done'
+alias get-chars='for c in {32..126}; do printf "\\x$(printf '%02x' $c)\n"; done'
+alias get-alpha='for c in {65..90} {97..122}; do printf "\\$(printf '%03o' $c)\n"; done'
+alias get-alphanum='for c in {48..57} {65..90} {97..122}; do printf "\\$(printf '%03o' $c)\n"; done'
 alias nocolor='sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g"'
-alias nonullbyte='sed "s/\x00//g"'
-alias urldec='python3 -c "import sys; from urllib.parse import unquote; print(unquote(sys.argv[1]))"'
-alias urlenc='python3 -c "import sys; from urllib.parse import quote; print(quote(sys.argv[1], safe=str()))"'
-alias urlencall='f(){ echo -n "$1" | xxd -p -c 1000000 | sed "s#..#%&#g"; unset -f f; }; f'
-alias urld="perl -MURI::Escape -ne 'print uri_unescape(\$_);'" # url decode stdin stream
+b64() { args_to_stdin "$@"|base64 -w0; }
+b64d() { args_to_stdin "$@"|base64 -d; }
+alias b64e='b64'
+b64url() { args_to_stdin "$@"|base64 -w0|tr -d '='|tr '/+' '_-'; }
+b64urld() { args_to_stdin "$@"|tr -d ' \t\r\n'|tr '_-' '/+'|base64 -d; }
+alias b64urle='b64url'
+toDecimal() { args_to_stdin "$@"| while IFS= read -rku0 c; do printf "%d " "'$c";done |sed 's/^ //;s/ $//'; }
+alias toDec='toDecimal'
+fromDecimal() { args_to_stdin "$@"|xargs -n 1| while read -r n; do printf "\\x$(printf '%02x' $n)";done; }
+alias fromDec='fromDecimal'
+toHex() { args_to_stdin "$@"|xxd -p | tr -d '\n'; }
+alias hexencode='toHex'
+alias hexe='toHex'
+fromHex() { args_to_stdin "$@"|tr -d '\\x'|xxd -r -p; }
+alias hexdecode='fromHex'
+alias hexd='fromHex'
+hex2py() { args_to_stdin "$@" | sed -u -E "s/([0-9a-fA-F]{2})/0x\1, /g" | sed -E 's/^/[/; s/, $/]/'; }
+hex2c() { args_to_stdin "$@" | sed -u -E 's/([0-9a-fA-F]{2})/\\x\1/g'; }
+base10to16() { args_to_stdin "$@" | bc <<< "obase=16; ibase=10; $(cat)" | tr -d '\\\n'; }
+alias 10to16='base10to16'
+base16to10() { args_to_stdin "$@" | bc <<< "obase=10; ibase=16; $(cat)" | tr -d '\\\n'; }
+alias 16to10='base16to10'
+base10to2()  { args_to_stdin "$@" | bc <<< "obase=2;  ibase=10; $(cat)" | tr -d '\\\n'; }
+alias 10to2='base10to2'
+base2to10()  { args_to_stdin "$@" | bc <<< "obase=10; ibase=2;  $(cat)" | tr -d '\\\n'; }
+alias 2to10='base2to10'
+alias back-n='sed -u "s/\\\n/\n/g"'
+alias back-t='sed -u "s/\\\t/\t/g"'
+nonullbyte() { args_to_stdin "$@"|tr -d "\0"; }
+alias nnb='nonullbyte'
+utf8toLatin() { args_to_stdin "$@" | iconv -f UTF-8 -t ISO-8859-1//TRANSLIT; }
+latinToUtf8() { args_to_stdin "$@" | iconv -f ISO-8859-1 -t UTF-8//TRANSLIT; }
+utf16to8() { args_to_stdin "$@" | iconv -f UTF-16LE -t UTF-8; }
+utf16le() { args_to_stdin "$@" | iconv -f UTF-8 -t UTF-16LE; }
+alias utf16='utf16le'
+utf16be() { args_to_stdin "$@" | iconv -f UTF-8 -t UTF-16BE; }
+nthash() { args_to_stdin "$@"|iconv -t utf16le|openssl md4 -provider legacy|cut -d' ' -f2|tr -d '\n'; }
+NThash() { args_to_stdin "$@"|nthash|toUpper; }
+urldecode() { args_to_stdin "$@" | tr '+' ' '|sed -E 's/%([0-9A-Fa-f]{2})/\\x\1/g'|xargs -0 echo -en; }
+alias urld='urldecode'
+urlencode() { args_to_stdin "$@"|python3 -c "import sys; from urllib.parse import quote; import fileinput; print(quote(sys.stdin.read(), safe=str()))"; }
+alias urle="urlencode"
+urlencodeall() { args_to_stdin "$@"|xxd -p|tr -d '\n'|sed "s#..#%&#g"; }
+alias urleall="urlencodeall"
+htmlencode() { args_to_stdin "$@" | sed -u -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g' -e 's/"/\&quot;/g' -e "s/'/\&apos;/g"; }
+htmlunescape() { args_to_stdin "$@" | perl -pe 's/&lt;/</g; s/&gt;/>/g; s/&quot;/"/g; s/&apos;/'"'"'/g; s/&amp;/&/g; s/&#(\d+);/chr($1)/ge; s/&#x([0-9a-fA-F]+);/chr(hex($1))/ge'; }
+jsonescape() { args_to_stdin "$@" | perl -pe 's/\\/\\\\/g; s/"/\\"/g; s/\x08/\\b/g; s/\f/\\f/g; s/\n/\\n/g; s/\r/\\r/g; s/\t/\\t/g'; }
+jsonunescape() { args_to_stdin "$@" | perl -pe 's/\\b/\x08/g; s/\\f/\f/g; s/\\n/\n/g; s/\\r/\r/g; s/\\t/\t/g; s/\\"/"/g; s/\\\\/\\/g'; }
+unicodeencode() { args_to_stdin "$@" | perl -CS -pe 's/([^\x00-\x7E])/sprintf(ord($1)>0xFFFF?"\\u%x":"\\u%04x",ord($1))/ge'; }
+unicodeencodeall() { args_to_stdin "$@" | perl -CSD -ne 'use utf8; print map { sprintf "\\u%04x", ord($_) } split //'; }
+unicodedecode() { args_to_stdin "$@" | perl -CS -pe 's/\\u([0-9a-fA-F]+)|U\+([0-9a-fA-F]+)|%u([0-9a-fA-F]+)/chr(hex($1||$2||$3))/gie'; }
+alias fromUnicode='unicodedecode'
+alias toUnicode='unicodeencode'
+alias xmlescape='htmlencode'
+xmlunescape() { args_to_stdin "$@" | sed -u -e 's/&lt;/</g' -e 's/&gt;/>/g' -e 's/&quot;/"/g' -e "s/&apos;/'/g" -e 's/&amp;/\&/g'; }
+# xor "my_key" "my_string" ---  echo "my_string" | xor "my_key"
+xor() { local k="$1" i r j;[[ $# -eq 2 ]]&&i="$2"||i="$(cat)";for ((j=0; j<${#i}; j++));do r+=$(printf "%02x" $(( $(printf "%d" "'${i:$j:1}") ^ $(printf "%d" "'${k:$((j % ${#k})):1}") )));done;fromHex "$r"; }
+# xorh "key_in_hex" "hex_string" ---  echo "hex_string" | xorh "key_in_hex"
+xorh() { local k i r j;k=$(fromHex "$1")||return 1;[[ $# -eq 2 ]]&&i="$2"||i="$(tr -d '\n')";i=$(fromHex "$i")||return 1;for ((j=0;j<${#i};j++));do r+=$(printf "%02x" $(( $(printf "%d" "'${i:$j:1}") ^ $(printf "%d" "'${k:$((j % ${#k})):1}") )));done;printf "%s" "$r"; }
+md5() { args_to_stdin "$@" | md5sum | awk '{print$1}'; }
+sha1() { args_to_stdin "$@" | sha1sum | awk '{print$1}'; }
+sha256() { args_to_stdin "$@" | sha256sum | awk '{print$1}'; }
+toUpper() { args_to_stdin "$@" | perl -C -pe '$_=uc'; } # args_to_stdin "$@"|LC_ALL=C.UTF-8 awk '{print toupper($0)}'
+toLower() { args_to_stdin "$@" | perl -C -pe '$_=lc'; }
+fromEpoch() { args_to_stdin "$@" | date -ud @"$1" -Iseconds; }
 
 # ────────────────────────────────────────
 #  Web Recon
@@ -233,6 +295,7 @@ alias lfu='flfu(){ outfile=fu-$(echo -n "$@" | sed -E "s#[/ ]#_#g").json ; ffuf 
 alias crl='curl -sS --path-as-is -gk -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) snap Chromium/83.0.4103.106 Chrome/83.0.4103.106 Safari/537.36"'
 alias crli='crl -D /dev/stderr'
 alias crlix='crli -x http://127.0.0.1:8080/'
+alias fzf-w='find /opt/lists -type f -name "*.txt"|fzf'
 
 # ────────────────────────────────────────
 #  Docker Management
@@ -273,6 +336,21 @@ alias doneforall='dockit -w /OneForAll -v /tmp/results:/OneForAll/results shmily
 alias getfuzz='echo "AA<fuzz1>\"fuzz2'"'"'fuzz3\`%}})fuzz4\${{fuzz5\\"BB'
 alias getcan='f(){ echo "skanary$(date +%s%N)"; unset -f f; }; f'
 alias getcaninfo='f(){ date -d "@${1:0:-9}" "+%Y-%m-%d %H:%M:%S.${1: -9}"; unset -f f; }; f'
+get-homoglyph() { args_to_stdin "$@" | python3 -c "
+import urllib.request,os,unicodedata
+c=os.path.expanduser('/opt/lists/confusables.txt')
+if not os.path.exists(c):os.makedirs(os.path.dirname(c),exist_ok=True);urllib.request.urlretrieve('https://www.unicode.org/Public/security/latest/confusables.txt',c)
+cps={f'{ord(x):04X}' for x in input()}
+for l in open(c):
+    p=l.strip().split(';')
+    if len(p)<2 or l[0]=='#':continue
+    s,t=p[0].strip(),p[1].strip().split()
+    a=list(dict.fromkeys([s]+t))
+    if cps&set(a):
+        try:print(chr(int(s,16)))
+        except:pass
+"; }
+
 
 ## Compliance & Auditing
 alias dssh-audit="dockit positronsecurity/ssh-audit"
