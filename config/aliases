@@ -7,9 +7,9 @@
 # ────────────────────────────────────────
 alias ska='/opt/skillarch'
 alias skao='/opt/skillarch-original'
-alias ska-help-bindings='i3-msg -t get_config | grep -vF "#bindsym" | grep -oP "bindsym .*" | fzf'
-alias ska-help-aliases='alias | fzf --reverse'
-alias ska-help-packages="{ pacman -Q|awk '{print\$1}'; uv tool list|awk '/^-/ {print\$2}'; mise ls|awk '/latest/ {print\$1}'; }|sort -u|fzf --reverse"
+alias ska-help-bindings='i3-msg -t get_config | grep -vF "#bindsym" | grep -oP "bindsym .*" | sort | fzf --layout=reverse-list'
+alias ska-help-aliases='alias | fzf --layout=reverse-list'
+alias ska-help-packages="{ pacman -Q|awk '{print\$1}'; uv tool list|awk '/^-/ {print\$2}'; mise ls|awk '/latest/ {print\$1}'; }|sort -u|fzf --layout=reverse-list"
 alias ska-update-simple='ska && make update && make install'
 unalias ska-update-advanced 2>/dev/null # shed any stale alias from a prior source
 ska-update-advanced() {
