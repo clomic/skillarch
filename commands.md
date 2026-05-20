@@ -115,7 +115,6 @@
 |get-du|`du -hd1 2>/dev/null`|
 |getfuzz|``AA<fuzz1>"fuzz2'fuzz3`%}})fuzz4${{fuzz5\BB``|
 |get-homoglyph|Give the list of homoglyph for characters (e.g. `get-homoglyph '*'\|tr -d '\n'` → ⁎٭∗𐌟)|
-|getinfo-bookhacktricks|Search HackTricks|
 |getinfo-certspotter|CT log lookup via certspotter API|
 |getinfo-crtsh|crt.sh JSON certificate search|
 |getinfo-known-creds|Open cirt.net for default creds|
