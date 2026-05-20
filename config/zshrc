@@ -112,6 +112,7 @@ export PAGER=/usr/bin/bat
 export TERMINAL=/usr/bin/kitty
 export VISUAL=/usr/bin/vim
 source $ZSH/oh-my-zsh.sh
+unalias -a # shed any stale alias from a prior source
 source /opt/skillarch/config/aliases
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 eval "$(register-python-argcomplete --no-defaults exegol)"
