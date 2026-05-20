@@ -7,11 +7,10 @@
 # ────────────────────────────────────────
 alias ska='/opt/skillarch'
 alias skao='/opt/skillarch-original'
-alias ska-help-bindings='i3-msg -t get_config | grep -vF "#bindsym" | grep -oP "bindsym .*" | fzf'
-alias ska-help-aliases='alias | fzf'
-alias ska-help-packages="{ pacman -Q|awk '{print\$1}'; uv tool list|awk '/^-/ {print\$2}'; mise ls|awk '/latest/ {print\$1}'; }|sort -u|fzf"
+alias ska-help-bindings='i3-msg -t get_config | grep -vF "#bindsym" | grep -oP "bindsym .*" | sort | fzf --layout=reverse-list'
+alias ska-help-aliases='alias | fzf --layout=reverse-list'
+alias ska-help-packages="{ pacman -Q|awk '{print\$1}'; uv tool list|awk '/^-/ {print\$2}'; mise ls|awk '/latest/ {print\$1}'; }|sort -u|fzf --layout=reverse-list"
 alias ska-update-simple='ska && make update && make install'
-unalias ska-update-advanced 2>/dev/null # shed any stale alias from a prior source
 ska-update-advanced() {
     # Interactive upstream-merge workflow for forked SkillArch setups.
     cd /opt/skillarch 2>/dev/null || { echo "No /opt/skillarch — clone your fork there first."; return 1; }
@@ -166,7 +165,7 @@ alias killit='sudo kill -KILL'
 # ────────────────────────────────────────
 #  Misc Utilities
 # ────────────────────────────────────────
-aupload() { curl -F"file=@$1" https://0x0.st; }
+upload() { curl -F"file=@$1" https://0x0.st; }
 usleep() { python3 -c "import time; time.sleep($1)"; }
 lias nosleep='systemd-inhibit --what sleep:idle sleep 999999'
 alias makeqrcode='qrencode -t ANSI -o -'
@@ -219,7 +218,6 @@ getinfo-virustotal() { xdg-open "https://www.virustotal.com/gui/domain/$1" ; }
 getinfo-crtsh() { curl -sk "https://crt.sh/json?q=$1" | jq . ; }
 getinfo-wayback() { curl -sk "https://web.archive.org/cdx/search/cdx?fl=original&collapse=urlkey&url=*.$1" ; }
 getinfo-leakix() { curl -sk "https://leakix.net/api/graph/hostname/$1?v[]=hostname&v[]=ip&d=auto&l=auto" | jq | grep -ioP "hostname/[^\"]+" | cut -d/ -f2 | sort -uV ; }
-unalias gau 2>/dev/null # gau real tool instead of omz git alias
 
 # ────────────────────────────────────────
 #  Web Fuzzing
