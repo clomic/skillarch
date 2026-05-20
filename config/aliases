@@ -153,7 +153,7 @@ alias flameshotz='while true; do flameshot full -p ~/Downloads; sleep 1; done'
 # ────────────────────────────────────────
 alias show-disk-io='watch -cd -- iostat -h'
 alias sdi='show-disk-io'
-alias show-open-ports='sudo ss -lntp | grep -i listen | grep -P ":\K\d+"'
+alias show-open-ports='sudo ss -lntp | grep -i listen'
 alias sop='show-open-ports'
 alias get-du='du -hd1 2>/dev/null'
 alias get-pid-click='xprop _NET_WM_PID | cut -d" " -f3'
@@ -167,7 +167,7 @@ alias killit='sudo kill -KILL'
 # ────────────────────────────────────────
 upload() { curl -F"file=@$1" https://0x0.st; }
 usleep() { python3 -c "import time; time.sleep($1)"; }
-lias nosleep='systemd-inhibit --what sleep:idle sleep 999999'
+alias nosleep='systemd-inhibit --what sleep:idle sleep 999999'
 alias makeqrcode='qrencode -t ANSI -o -'
 alias cgrep='grep --color=always'
 alias lgrep='grep --line-buffered'
@@ -265,7 +265,7 @@ xorh() { local k i r j;k=$(fromHex "$1")||return 1;[[ $# -eq 2 ]]&&i="$2"||i="$(
 md5() { args_to_stdin "$@" | md5sum | awk '{print$1}'; }
 sha1() { args_to_stdin "$@" | sha1sum | awk '{print$1}'; }
 sha256() { args_to_stdin "$@" | sha256sum | awk '{print$1}'; }
-toUpper() { args_to_stdin "$@" | perl -C -pe '$_=uc'; } # args_to_stdin "$@"|LC_ALL=C.UTF-8 awk '{print toupper($0)}'
+toUpper() { args_to_stdin "$@" | perl -C -pe '$_=uc'; }
 toLower() { args_to_stdin "$@" | perl -C -pe '$_=lc'; }
 fromEpoch() { args_to_stdin "$@" | date -ud @"$1" -Iseconds; }
 

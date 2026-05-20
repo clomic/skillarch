@@ -305,7 +305,7 @@ install-wordlists: sanity-check ## Install wordlists (SecLists, rockyou, etc.)
 	# Download all wordlists in parallel
 	ska_clone_list() { local pkg=$${1##*/}; [[ ! -d "/opt/lists/$$pkg" ]] && git clone --depth=1 "$$1" "/var/tmp/$$pkg" && sudo mv "/var/tmp/$$pkg" "/opt/lists/$$pkg" || true ; }
 	( [[ ! -f /opt/lists/rockyou.txt ]] && curl -sL "https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt" -o /opt/lists/rockyou.txt || true ) &
-	( [[ ! -f /opt/lists/confusable.txt ]] && curl -sL "https://www.unicode.org/Public/security/latest/confusables.txt" -o /opt/lists/confusables.txt || true ) &
+	( [[ ! -f /opt/lists/confusables.txt ]] && curl -sL "https://www.unicode.org/Public/security/latest/confusables.txt" -o /opt/lists/confusables.txt || true ) &
 	ska_clone_list https://github.com/swisskyrepo/PayloadsAllTheThings &
 	ska_clone_list https://github.com/1N3/BruteX &
 	ska_clone_list https://github.com/1N3/IntruderPayloads &
