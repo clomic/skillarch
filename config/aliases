@@ -1,6 +1,11 @@
 # ================================================================
 #  SkillArch Aliases
 # ================================================================
+# Self-discover function names declared below and unalias them, so this file
+# is safely re-sourceable. zsh refuses to redefine an existing alias as a
+# function (parse error near `()`); we strip only the names that conflict,
+# preserving everything else (oh-my-zsh's `gp`, `gst`, `gco`, …).
+unalias ${(f)"$(grep -oP '^[a-zA-Z_][a-zA-Z0-9_-]*(?=\(\))' ${(%):-%x})"} 2>/dev/null
 
 # ────────────────────────────────────────
 #  SkillArch Helpers
@@ -11,7 +16,6 @@ alias ska-help-bindings='i3-msg -t get_config | grep -vF "#bindsym" | grep -oP "
 alias ska-help-aliases='alias | fzf --layout=reverse-list'
 alias ska-help-packages="{ pacman -Q|awk '{print\$1}'; uv tool list|awk '/^-/ {print\$2}'; mise ls|awk '/latest/ {print\$1}'; }|sort -u|fzf --layout=reverse-list"
 alias ska-update-simple='ska && make update && make install'
-unalias ska-update-advanced 2>/dev/null # shed any stale alias from a prior source
 ska-update-advanced() {
     # Interactive upstream-merge workflow for forked SkillArch setups.
     cd /opt/skillarch 2>/dev/null || { echo "No /opt/skillarch — clone your fork there first."; return 1; }
@@ -72,7 +76,7 @@ ska-update-advanced() {
     echo
     echo "── Stay in the loop ──"
     echo "Join the SkillArch channel on OffenSkill's Discord for news, help & latest tweaks:"
-    echo "  https://discord.gg/QmBfFkge"
+    echo "  https://discord.gg/2T8GGAnwv5"
 }
 alias ska-vbox-install-guestutils='sudo pacman -S virtualbox-guest-utils && sudo usermod -aG vboxsf "$USER"'
 alias ska-vbox-install='sudo pacman -S virtualbox virtualbox-host-dkms && echo -e "\n\n\nNow reboot to load the vbox drivers"'
@@ -164,7 +168,7 @@ alias show-open-ports='sudo ss -lntp | grep -i listen | grep -P ":\K\d+"'
 alias sop='show-open-ports'
 alias get-du='du -hd1 2>/dev/null'
 alias get-pid-click='xprop _NET_WM_PID | cut -d" " -f3'
-get-pid-ps() { ps fauxw|fzf --reverse|awk '{print$2}'; }
+alias get-pid-ps='ps fauxw | fzf --reverse| awk "{print\$2}"'
 alias get-shell-size='echo "stty rows $LINES cols $COLUMNS"'
 alias dirmon='inotifywait -rm -e create -e moved_to -e modify -e access -e attrib -e close_write -e moved_from'
 alias killit='sudo kill -KILL'

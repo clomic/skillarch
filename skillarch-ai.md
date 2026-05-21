@@ -134,15 +134,34 @@ make clean              # Docker-only: clear caches (pacman, yay, pip, mise, go,
 | `getinfo-leakix` | LeakIX hostname/IP graph lookup |
 
 ### Encoding & Data
-| Alias | Action |
+> Most converters accept either an argument or stdin (via `args_to_stdin`), so `b64 foo` and `echo foo \| b64` both work and chain naturally.
+
+| Alias / Function | Action |
 |---|---|
-| `b64d` / `b64e` | base64 decode/encode |
-| `urldec` / `urlenc` / `urlencall` | URL decode/encode (partial/full) |
-| `urld` | URL decode stdin stream (perl) |
+| `b64` / `b64d` / `b64e` | base64 encode (alias `b64e`=`b64`) / decode |
+| `b64url` / `b64urld` / `b64urle` | base64 url-safe encode / decode |
+| `toHex` / `fromHex` (aliases `hexe`/`hexd`) | hex encode / decode |
+| `hex2py` / `hex2c` | Format hex as Python list / C `\xNN` string |
+| `toDec` / `fromDec` | Decimal encode / decode |
+| `base10to16` / `base16to10` / `base10to2` / `base2to10` (+ short aliases `10to16` etc.) | base conversion via `bc` |
+| `urlencode` / `urldecode` / `urlencodeall` (aliases `urle`/`urld`/`urleall`) | URL encode/decode |
+| `htmlencode` / `htmlunescape` / `xmlescape` / `xmlunescape` | HTML/XML entity encode/decode |
+| `jsonescape` / `jsonunescape` | JSON string escape/unescape |
+| `unicodeencode` / `unicodedecode` / `unicodeencodeall` | `\uNNNN` escape |
+| `utf16le` / `utf16be` / `utf16to8` / `utf8toLatin` / `latinToUtf8` | iconv shortcuts |
+| `nthash` / `NThash` | NTLM hash (lowercase / uppercase) |
+| `md5` / `sha1` / `sha256` | One-shot hash, hex digest only |
+| `toUpper` / `toLower` | Case transforms |
+| `xor` / `xorh` | XOR text/hex with key (also accepts pipe input) |
+| `fromEpoch` | Unix timestamp → ISO-8601 |
 | `nocolor` | Strip ANSI color codes |
-| `nonullbyte` | Strip null bytes |
+| `nonullbyte` (alias `nnb`) | Strip null bytes |
 | `get-badchars` | Print common injection characters |
 | `get-bytes-hex/raw/url` | All 256 bytes in hex/raw/URL form |
+| `get-chars` / `get-alpha` / `get-alphanum` | Printable / alpha / alphanumeric character sets |
+| `get-homoglyph` | Homoglyph confusables for input chars (uses `/opt/lists/confusables.txt`) |
+| `suc` / `suq` | `sort\|uniq -c\|sort -h` / `sort -u` shortcuts |
+| `fzf-w` | fzf-pick a wordlist from `/opt/lists` |
 
 ### Monitoring & System
 | Alias | Action |
