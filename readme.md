@@ -106,7 +106,7 @@ make help
 ```
 
 > Or join the SkillArch Discord server 🍀\
-> ➡️ https://discord.com/invite/tH8wEpNKWS ⬅️\
+> ➡️ https://discord.gg/2T8GGAnwv5 ⬅️\
 > Yes, I help in the SkillArch channel, not in DMs! 😇
 
 ### Ska Helpers, i3 bindings, aliases, tools

@@ -76,7 +76,7 @@ ska-update-advanced() {
     echo
     echo "── Stay in the loop ──"
     echo "Join the SkillArch channel on OffenSkill's Discord for news, help & latest tweaks:"
-    echo "  https://discord.gg/QmBfFkge"
+    echo "  https://discord.gg/2T8GGAnwv5"
 }
 alias ska-vbox-install-guestutils='sudo pacman -S virtualbox-guest-utils && sudo usermod -aG vboxsf "$USER"'
 alias ska-vbox-install='sudo pacman -S virtualbox virtualbox-host-dkms && echo -e "\n\n\nNow reboot to load the vbox drivers"'
