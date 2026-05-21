@@ -1,6 +1,11 @@
 # ================================================================
 #  SkillArch Aliases
 # ================================================================
+# Wipe any pre-existing aliases so this file is safely re-sourceable:
+# without this, alias→function conversions (e.g. `ff`, `digall`, `upload`,
+# `cheat`, `getinfo-*`, `cfu*`, `lfu`, `probe-urls`) fail with
+# "parse error near `()'" because zsh refuses to redefine an alias as a function.
+unalias -a 2>/dev/null
 
 # ────────────────────────────────────────
 #  SkillArch Helpers
@@ -153,7 +158,7 @@ alias flameshotz='while true; do flameshot full -p ~/Downloads; sleep 1; done'
 # ────────────────────────────────────────
 alias show-disk-io='watch -cd -- iostat -h'
 alias sdi='show-disk-io'
-alias show-open-ports='sudo ss -lntp | grep -i listen'
+alias show-open-ports='sudo ss -lntp | grep -i listen | grep -P ":\K\d+"'
 alias sop='show-open-ports'
 alias get-du='du -hd1 2>/dev/null'
 alias get-pid-click='xprop _NET_WM_PID | cut -d" " -f3'
@@ -267,7 +272,7 @@ sha1() { args_to_stdin "$@" | sha1sum | awk '{print$1}'; }
 sha256() { args_to_stdin "$@" | sha256sum | awk '{print$1}'; }
 toUpper() { args_to_stdin "$@" | perl -C -pe '$_=uc'; }
 toLower() { args_to_stdin "$@" | perl -C -pe '$_=lc'; }
-fromEpoch() { args_to_stdin "$@" | date -ud @"$1" -Iseconds; }
+fromEpoch() { [[ $# -eq 0 && -t 0 ]] && return; local s=$(args_to_stdin "$@"); date -ud @"$s" -Iseconds; }
 
 # ────────────────────────────────────────
 #  Web Recon
