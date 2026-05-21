@@ -330,9 +330,9 @@ xorh() { local k i r j;k=$(fromHex "$1")||return 1;[[ $# -eq 2 ]]&&i="$2"||i="$(
 md5() { args_to_stdin "$@" | md5sum | awk '{print$1}'; }
 sha1() { args_to_stdin "$@" | sha1sum | awk '{print$1}'; }
 sha256() { args_to_stdin "$@" | sha256sum | awk '{print$1}'; }
-toUpper() { args_to_stdin "$@" | perl -C -pe '$_=uc'; } # args_to_stdin "$@"|LC_ALL=C.UTF-8 awk '{print toupper($0)}'
+toUpper() { args_to_stdin "$@" | perl -C -pe '$_=uc'; }
 toLower() { args_to_stdin "$@" | perl -C -pe '$_=lc'; }
-fromEpoch() { args_to_stdin "$@" | date -ud @"$1" -Iseconds; }
+fromEpoch() { [[ $# -eq 0 && -t 0 ]] && return; local s=$(args_to_stdin "$@"); date -ud @"$s" -Iseconds; }
 
 # ────────────────────────────────────────
 #  Web Recon
@@ -344,7 +344,6 @@ getinfo-virustotal() { xdg-open "https://www.virustotal.com/gui/domain/$1" ; }
 getinfo-crtsh() { curl -sk "https://crt.sh/json?q=$1" | jq . ; }
 getinfo-wayback() { curl -sk "https://web.archive.org/cdx/search/cdx?fl=original&collapse=urlkey&url=*.$1" ; }
 getinfo-leakix() { curl -sk "https://leakix.net/api/graph/hostname/$1?v[]=hostname&v[]=ip&d=auto&l=auto" | jq | grep -ioP "hostname/[^\"]+" | cut -d/ -f2 | sort -uV ; }
-# unalias gau 2>/dev/null # gau real tool instead of omz git alias
 
 # ────────────────────────────────────────
 #  Web Fuzzing

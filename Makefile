@@ -244,6 +244,8 @@ install-gui-tools: sanity-check ## Install GUI apps (Chrome, VSCode, Ghidra, etc
 	$(call INFO,Installing GUI applications...)
 	# Pre-create flatpak repo dir so post-install hooks don't fail in Docker (flatpak may be pulled as a dependency)
 	[[ -f /.dockerenv ]] && sudo mkdir -p /var/lib/flatpak/repo || true
+	# Force refresh DBs — chaotic-aur rolls fast; stale local DB → 404 on package files (e.g. visual-studio-code-bin)
+	sudo pacman --noconfirm -Syy || true
 	$(PACMAN_INSTALL) vlc vlc-plugin-ffmpeg arandr blueman visual-studio-code-bin discord dunst filezilla flameshot ghex google-chrome gparted kdenlive kompare libreoffice-fresh meld okular qbittorrent torbrowser-launcher wireshark-qt ghidra signal-desktop dragon-drop-git emote guvcview audacity polkit-kde-agent kamoso thunar thunar-archive-plugin thunar-volman tumbler ffmpegthumbnailer gvfs gvfs-mtp file-roller
 	[[ ! -f /.dockerenv ]] && $(PACMAN_INSTALL) flatpak && flatpak install -y flathub com.obsproject.Studio || true
 	# Do not start services in docker
@@ -313,7 +315,7 @@ install-wordlists: sanity-check ## Install wordlists (SecLists, rockyou, etc.)
 	# Download all wordlists in parallel
 	ska_clone_list() { local pkg=$${1##*/}; [[ ! -d "/opt/lists/$$pkg" ]] && git clone --depth=1 "$$1" "/var/tmp/$$pkg" && sudo mv "/var/tmp/$$pkg" "/opt/lists/$$pkg" || true ; }
 	( [[ ! -f /opt/lists/rockyou.txt ]] && curl -sL "https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt" -o /opt/lists/rockyou.txt || true ) &
-	( [[ ! -f /opt/lists/confusable.txt ]] && curl -sL "https://www.unicode.org/Public/security/latest/confusables.txt" -o /opt/lists/confusables.txt || true ) &
+	( [[ ! -f /opt/lists/confusables.txt ]] && curl -sL "https://www.unicode.org/Public/security/latest/confusables.txt" -o /opt/lists/confusables.txt || true ) &
 	ska_clone_list https://github.com/swisskyrepo/PayloadsAllTheThings &
 	ska_clone_list https://github.com/1N3/BruteX &
 	ska_clone_list https://github.com/1N3/IntruderPayloads &
