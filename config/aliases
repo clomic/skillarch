@@ -1,22 +1,11 @@
 # ================================================================
 #  SkillArch Aliases
 # ================================================================
-# Make this file safely re-sourceable: zsh refuses to redefine an existing
-# alias as a function (parse error near `()`). We surgically unalias only
-# the names we're about to define as functions below — this preserves
-# oh-my-zsh aliases (`gp`, `gst`, `gco`, …) that the user actually wants.
-# Keep this list in sync with the `name()` definitions further down.
-for _f in \
-  args_to_stdin b64 b64d b64url b64urld base10to16 base10to2 base16to10 base2to10 \
-  cfu cfu-clean cfu-clean-url cheat digall ff fromDecimal fromEpoch fromHex \
-  getcaninfo get-homoglyph getinfo-certspotter getinfo-crtsh getinfo-known-creds \
-  getinfo-known-port getinfo-leakix getinfo-virustotal getinfo-wayback \
-  hex2c hex2py htmlencode htmlunescape jsonescape jsonunescape latinToUtf8 \
-  lfu md5 nonullbyte nthash NThash probe-urls sha1 sha256 ska-update-advanced \
-  toDecimal toHex toLower toUpper unicodedecode unicodeencode unicodeencodeall \
-  upload urldecode urlencode urlencodeall usleep utf16be utf16le utf16to8 \
-  utf8toLatin xmlunescape xor xorh \
-; do unalias "$_f" 2>/dev/null; done; unset _f
+# Self-discover function names declared below and unalias them, so this file
+# is safely re-sourceable. zsh refuses to redefine an existing alias as a
+# function (parse error near `()`); we strip only the names that conflict,
+# preserving everything else (oh-my-zsh's `gp`, `gst`, `gco`, …).
+unalias ${(f)"$(grep -oP '^[a-zA-Z_][a-zA-Z0-9_-]*(?=\(\))' ${(%):-%x})"} 2>/dev/null
 
 # ────────────────────────────────────────
 #  SkillArch Helpers
