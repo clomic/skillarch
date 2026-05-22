@@ -117,6 +117,7 @@ alias gdh='git diff HEAD'
 #  File Management
 # ────────────────────────────────────────
 alias l="eza -l --group-directories-first --icons"
+alias li="eza -l --group-directories-first"
 alias la="l -a"
 alias laa="l -aa"
 alias t="l -T"

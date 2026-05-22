@@ -9,3 +9,8 @@ alias cpy='tee >(xsel -i)'
 alias cpyc='tee >(xsel -ib)'
 
 cheat() { curl -s "cheat.sh/$1" }
+alias l="eza -l --group-directories-first --icons"
+alias li="eza -l --group-directories-first"
+alias la="l -a"
+alias laa="l -aa"
+alias lgrep='grep --line-buffered'
