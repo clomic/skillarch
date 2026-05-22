@@ -233,15 +233,11 @@ cmd_picker_select() {
     | fzf --ansi --height=50% --reverse --prompt="Command > " --delimiter='\t' --with-nth=1,2 --nth=1,2 --preview='printf "%s" {2}' --preview-window='down:3:wrap' \
     | awk -F'\t' '{print $1}' | xargs
 }
-cmd_picker() {
-  local selected=$(cmd_picker_select)
-  [[ -n "$selected" ]] && print -z "$selected"
-}
-
+cmd_picker() { local s=$(cmd_picker_select); [[ -n "$s" ]] && print -z "$s"; }
 _cmd_picker_widget() {
-  local before="$LBUFFER"
-  local selected=$(cmd_picker_select)
-  [[ -n "$selected" ]] && LBUFFER="${before}${selected}"
+  local b="$LBUFFER"
+  local s=$(cmd_picker_select)
+  [[ -n "$s" ]] && LBUFFER="${b}${s}"
   zle reset-prompt
 }
 zle -N _cmd_picker_widget

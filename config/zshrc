@@ -111,7 +111,6 @@ export EDITOR=/usr/bin/vim
 export PAGER=/usr/bin/bat
 export TERMINAL=/usr/bin/kitty
 export VISUAL=/usr/bin/vim
-unalias -a
 [[ -f ~/.my_aliases ]] && source ~/.my_aliases
 source $ZSH/oh-my-zsh.sh
 source /opt/skillarch/config/aliases

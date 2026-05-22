@@ -31,6 +31,7 @@
 |cgrep|grep with color|
 |cheat|`curl cheat.sh/<arg>`|
 |clean-swap|Clean /proc/swaps|
+|cmd_picker|Allow to pick a custom command or alias|
 |cp|cp with -i (prompt before overwrite)|
 |cpy|Copy stdin to Primary Selection (xsel)|
 |cpyc|Copy stdin to Clipboard Selection (xsel)|
@@ -100,6 +101,7 @@
 |fromHex|`fromHex 536b696c6c41726368` → SkillArch|
 |fromUnicode|`fromUnicode "U+1f680 \u1F339 %u1f499"` → 🚀 🌹 💙|
 |fu|ffuf with JSON output, browser UA, `-mc all`|
+|fzf-h|fzf of history|
 |fzf-w|fzf of Wordlists|
 |gdh|`git diff HEAD`|
 |gen_pass|Generate a password with 6 words (Entropy: 6*log2(673361) = 116.4)|
@@ -169,7 +171,7 @@
 |nonullbyte|Strip null bytes|
 |nosleep|Prevent system sleep (systemd-inhibit)|
 |nthash|NtHash in lowercase|
-|NThash|NtHash in uppercase|
+|NThash|NtHash in Uppercase|
 |p|python|
 |paste|Paste from clipboard|
 |probe-urls|Bulk HTTP probe from URL list file|
