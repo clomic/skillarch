@@ -30,8 +30,7 @@
 |clean-swap|Clean /proc/swaps|
 |cmd_picker|Allow to pick a custom command or alias|
 |cp|cp with -i (prompt before overwrite)|
-|cpy|Copy stdin to Primary Selection (xsel)|
-|cpyc|Copy stdin to Clipboard Selection (xsel)|
+|cpy|Copy stdin to Clipboard (xclip)|
 |crl|curl with real browser UA|
 |crli|crl + dump response headers to stderr|
 |crlix|crli proxied through Caido (127.0.0.1:8080)|
@@ -139,9 +138,8 @@
 |jsonescape|`jsonescape '{"distrib": "SkillArch", "quote": "That'"'"'s awesome!"}'` → {\"distrib\": \"SkillArch\", \"quote\": \"That's awesome!\"}|
 |jsonunescape|`jsonunescape '{\"distrib\": \"SkillArch\", \"quote\": \"That'"'"'s awesome!\"}'` → {"distrib": "SkillArch", "quote": "That's awesome!"}|
 |killit|`sudo kill -KILL` |
-|l|`eza -l --group-directories-first --icons`|
+|l|`eza -l --group-directories-first`|
 |la|`l -a`|
-|laa|`l -aa` (include . and ..)|
 |latinToUtf8|`fromHex 48e920e761207661203f\|latinToUtf8` → Hé ça va ? |
 |lfu|ffuf + save JSON + auto-filter results|
 |lgrep|`grep --line-buffered` (flush output on every line)|
@@ -179,7 +177,7 @@
 |ska-update-simple|`ska && make update && make install`|
 |ska-vbox-install|Install Virtualbox package|
 |ska-vbox-install-guestutils|Install VirtualBox guest utils|
-|ska-vnc|Prompt for VNC password, set it, start KasmVNC on :1|
+|ska-vnc|Start KasmVNC on :1 (no auth, localhost only)|
 |sop|Show TCP Open ports (Listen mode)|
 |sortn|`sort -V \| uniq -c \| sort -n`|
 |ssh-yolo|SSH ignoring host key checks|

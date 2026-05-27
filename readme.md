@@ -150,26 +150,21 @@ make help
 
 ### Pre-Built SkillArch qcow (no install, just boot)
 
-I maintain a ready-to-boot SkillArch qcow2 image. The easiest way to get the download URL is via tempai:
+I maintain a ready-to-boot SkillArch qcow2 image on a private basic-auth mirror. No install needed — download and boot in GNOME Boxes / virt-manager / Proxmox / any qemu frontend.
 
-```bash
-tp update qcow   # interactive picker → prints a wget-ready URL with embedded basic-auth
+```
+http://skillarch:mercilaluuu@bs.offenskill.com:42069/skillarch/
 ```
 
-You can also curl directly from the asset server (basic-auth protected):
-
 ```bash
-ASSET='http://bs.offenskill.com:42069/skillarch'
-AUTH='skillarch:mercilaluuu'
+BASE='http://skillarch:mercilaluuu@bs.offenskill.com:42069/skillarch'
 
-# --- List available images (JSON) ---
-curl -s -u "$AUTH" -H 'Accept: application/json' "$ASSET/" \
-  | jq -r '.[].name' | sort -r
+# --- List available images ---
+curl -s -H 'Accept: application/json' "$BASE/" | jq -r '.[].name' | sort -r
 
 # --- Download the latest in one shot ---
-LATEST=$(curl -s -u "$AUTH" -H 'Accept: application/json' "$ASSET/" \
-  | jq -r '.[].name' | sort -r | head -1)
-curl -LO --continue-at - -u "$AUTH" "$ASSET/$LATEST"
+LATEST=$(curl -s -H 'Accept: application/json' "$BASE/" | jq -r '.[].name' | sort -r | head -1)
+wget --continue --user-agent='Mozilla/5.0 (X11; Linux x86_64)' "$BASE/$LATEST"
 echo "Downloaded: $LATEST"
 ```
 
