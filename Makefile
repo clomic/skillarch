@@ -61,7 +61,7 @@ install: ## Install SkillArch (full)
 	$(MAKE) install-wordlists
 	$(call STEP,$$((curStep++)),$$numSteps,Installing hardening tools)
 	$(MAKE) install-hardening
-	
+
 	$(MAKE) clean
 	$(MAKE) test
 	$(call DONE,You are all set up! Enjoy SkillArch! <3)

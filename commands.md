@@ -66,25 +66,25 @@
 |da|`cd /DATA`|
 |dbinwalk-dd|binwalk extract all file types (`binwalk --dd='.*'`)|
 |dcarbonyl|Chrome in Terminal|
-|ddroopescan|droope/droopescan \|
+|ddroopescan|Docker: droope/droopescan — Drupal scanner|
 |defaultcreds|Default credentials lookup tool|
 |delta|Syntax-highlighting pager for git/diff output|
 |dex|fzf-select container + exec into it|
 |dexr|fzf-select container + exec as root|
-|dgitleaks|zricethezav/gitleaks \|
-|dhashcat|dizcza/docker-hashcat \|
+|dgitleaks|Docker: zricethezav/gitleaks — secret scanner|
+|dhashcat|Docker: dizcza/docker-hashcat — GPU hash cracking|
 |di|Inspect container (fzf)|
 |didi|Launch a fresh updated discord|
 |digall|`dig +answer +multiline <domain> any @8.8.8.8`|
 |dip|Inspect container (fzf) and grep IPs|
 |dirmon|`inotifywait` recursive file monitoring|
 |discord|Chat and VoIP application|
-|djohn|phocean/john_the_ripper_jumbo \|
-|djwt-tool|ticarpi/jwt_tool \|
+|djohn|Docker: phocean/john_the_ripper_jumbo — John the Ripper|
+|djwt-tool|Docker: ticarpi/jwt_tool — JWT testing|
 |dkillall|Disable restart + stop all|
 |dl|`cd ~/Downloads`|
-|dmsfconsole|metasploitframework \|
-|dmsfvenom|metasploitframework \|
+|dmsfconsole|Docker: metasploitframework — msfconsole|
+|dmsfvenom|Docker: metasploitframework — msfvenom|
 |dnorestart|`docker update --restart=no $(docker ps -q)`|
 |dns-1|Switch DNS to 1.1.1.1|
 |dns-127|Switch DNS to 127.0.0.1|
@@ -95,30 +95,30 @@
 |docker-compose|Multi-container Docker orchestration|
 |dockit|Run any image with cwd mounted|
 |dockns|nsenter into container's namespaces|
-|doneforall|shmilylty/oneforall \|
+|doneforall|Docker: shmilylty/oneforall — comprehensive recon|
 |dos2unix|Convert DOS/Windows line endings to Unix|
 |dphp7|PHP 7.4 docker image|
 |dps|`docker ps`|
 |dragon-drop|Drag-and-drop for X11 from terminal|
-|drecon-amass|caffix/amass \|
-|drecon-findomain|edu4rdshl/findomain \|
-|drecon-wappa|wappalyzer/cli \|
-|dretdec|blacktop/retdec \|
-|drustscan|rustscan/rustscan \|
-|dsecator|freelabz/secator \|
-|dssh-audit|positronsecurity/ssh-audit \|
-|dssl-test|drwetter/testssl.sh \|
+|drecon-amass|Docker: caffix/amass — subdomain enumeration|
+|drecon-findomain|Docker: edu4rdshl/findomain — fast subdomain discovery|
+|drecon-wappa|Docker: wappalyzer/cli — tech fingerprinting|
+|dretdec|Docker: blacktop/retdec — binary to C decompiler|
+|drustscan|Docker: rustscan/rustscan — fast port scanner|
+|dsecator|Docker: freelabz/secator — normalize offensive arsenal|
+|dssh-audit|Docker: positronsecurity/ssh-audit — SSH config audit|
+|dssl-test|Docker: drwetter/testssl.sh — TLS/SSL testing|
 |dstopall|Stop all containers|
 |dswagger-editor|Launch on port 8000 a swagger editor (swaggerapi Docker image)|
-|dsysdig|sysdig/sysdig \|
-|dtrufflehog|trufflesecurity/trufflehog \|
+|dsysdig|Docker: sysdig/sysdig — system-level introspection|
+|dtrufflehog|Docker: trufflesecurity/trufflehog — secret scanning in git history|
 |dunst|Lightweight notification daemon|
 |dwipe-all|Full docker system prune|
 |dwipe-image|Wipe all Docker images|
 |dwipe-network|Wipe all Docker network interfaces|
 |dwipe-process|Wipe all Docker processes|
 |dwipe-volume|Wipe all Docker volumes|
-|dwpscan|wpscanteam/wpscan \|
+|dwpscan|Docker: wpscanteam/wpscan — WordPress scanner|
 |emote|Modern emoji picker|
 |exegol|Container-based pentesting environment manager|
 |exiftool|Read and write EXIF / metadata|
@@ -158,7 +158,7 @@
 |get-bytes-url|All 256 bytes in URL form|
 |get-chars|Print all characters from char 32 (space) to char 126 (~)|
 |get-du|`du -hd1 2>/dev/null`|
-|get-homoglyph|Give the list of homoglyph for characters (e.g. `get-homoglyph '*'\|
+|get-homoglyph|Show homoglyph-confusable characters, e.g. `get-homoglyph '*'`|
 |get-ip|Public IP via ipinfo.io|
 |get-ip-cpy|Public IP address is copied into the Clipboard and not displayed|
 |get-meteo|`curl wttr.in` weather|
@@ -230,7 +230,7 @@
 |konsole|KDE terminal emulator|
 |l|`eza -l --group-directories-first`|
 |la|`l -a`|
-|latinToUtf8|`fromHex 48e920e761207661203f\|
+|latinToUtf8|Convert Latin-1 to UTF-8, e.g. `fromHex 48e920e761207661203f \| latinToUtf8` → "Hé ça va ?"|
 |lazygit|Simple terminal UI for git commands|
 |lfu|ffuf + save JSON + auto-filter results|
 |lgrep|`grep --line-buffered` (flush output on every line)|
@@ -319,7 +319,7 @@
 |sns|AWS SNS notification exploitation tool|
 |socat|Multipurpose relay (SOcket CAT)|
 |sop|Show TCP Open ports (Listen mode)|
-|sortn|`sort -V \|
+|sortn|`sort -V \| uniq -c \| sort -n`|
 |spf|Pretty terminal file manager (superfile)|
 |sqlite3|Command-line interface for SQLite|
 |sqlmap|Automatic SQL injection detection & exploitation|
@@ -327,8 +327,8 @@
 |ssh-yolo|SSH ignoring host key checks|
 |sshpass|Non-interactive SSH password authentication|
 |subfinder|Passive subdomain discovery tool|
-|suc|`sort\|
-|suq|`sort\|
+|suc|`sort \| uniq -c \| sort -h`|
+|suq|sort -u|
 |t|eza tree|
 |t2|eza tree depth 2|
 |t3|eza tree depth 3|
@@ -390,14 +390,15 @@
 |wireshark|Network protocol analyzer|
 |wpprobe|WordPress vulnerability scanner|
 |xclip|Command-line interface to X clipboard|
-|xh|xxd <last_arg> \|
+|xh|xxd last_arg \| head rest_args, e.g. `xh -n -20 file` == `xxd file \| head -n -20`|
 |xmlescape|Convert characters to HTML Entities (e.g. `&` → `&amp;`)|
 |xmlunescape|Convert HTML Entities back to characters (e.g. `&amp;` → `&`)|
-|xor|`xor "my_key" "my_string"` or  `echo "my_string" \|
-|xorh|`xorh "key_in_hex" "hex_string"` or  `echo "hex_string" \|
+|xor|`xor "my_key" "my_string"` or `echo "my_string" \| xor "my_key"`|
+|xorh|`xorh "key_in_hex" "hex_string"` or `echo "hex_string" \| xorh "key_in_hex"`|
 |yay|AUR helper (pacman wrapper)|
 |yt-dlp|Download videos / audio from YouTube et al.|
 |yt-dlp-likes|Download Youtube Favorites Videos to MP3|
 |yt-mp3|Extract audio (in MP3) from Youtube link|
 |zip|Package and compress files|
 |zsh|Z shell — powerful interactive shell|
+
