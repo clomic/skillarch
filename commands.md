@@ -35,6 +35,7 @@
 |crli|crl + dump response headers to stderr|
 |crlix|crli proxied through Caido (127.0.0.1:8080)|
 |da|`cd /DATA`|
+|dbinwalk-dd|binwalk extract all file types (`binwalk --dd='.*'`)|
 |dcarbonyl|Chrome in Terminal|
 |ddroopescan|droope/droopescan \| Drupal scanner|
 |dex|fzf-select container + exec into it|
@@ -99,12 +100,19 @@
 |get-bytes-hex|All 256 bytes in hex form|
 |get-bytes-raw|All 256 bytes in raw form|
 |get-bytes-url|All 256 bytes in URL form|
-|getcan|Generate a Canary with the current unix timestamp in nanosecond (e.g. skanary1778607587707828891)|
-|getcaninfo|get time from canary (`getcaninfo skanary1778607587707828891` or `getcaninfo 1778607587707828891` → 2026-05-12 19:39:47.707828891) |
 |get-chars|Print all characters from char 32 (space) to char 126 (~)|
 |get-du|`du -hd1 2>/dev/null`|
-|getfuzz|``AA<fuzz1>"fuzz2'fuzz3`%}})fuzz4${{fuzz5\BB``|
 |get-homoglyph|Give the list of homoglyph for characters (e.g. `get-homoglyph '*'\|tr -d '\n'` → ⁎٭∗𐌟)|
+|get-ip|Public IP via ipinfo.io|
+|get-ip-cpy|Public IP address is copied into the Clipboard and not displayed|
+|get-meteo|`curl wttr.in` weather|
+|get-pid-click|Click a window to get its PID|
+|get-pid-ps|fzf-select process to get PID|
+|get-shell-size|Get numbers of rows and cols in current shell|
+|getcan|Generate a Canary with the current unix timestamp in nanosecond (e.g. skanary1778607587707828891)|
+|getcaninfo|get time from canary (`getcaninfo skanary1778607587707828891` or `getcaninfo 1778607587707828891` → 2026-05-12 19:39:47.707828891) |
+|getfuzz|``AA<fuzz1>"fuzz2'fuzz3`%}})fuzz4${{fuzz5\BB``|
+|getinfo-bookhacktricks|Search book.hacktricks.wiki (opens browser)|
 |getinfo-certspotter|CT log lookup via certspotter API|
 |getinfo-crtsh|crt.sh JSON certificate search|
 |getinfo-known-creds|Open cirt.net for default creds|
@@ -112,12 +120,6 @@
 |getinfo-leakix|LeakIX hostname/IP graph lookup|
 |getinfo-virustotal|Open VirusTotal for domain|
 |getinfo-wayback|Wayback Machine URL enumeration|
-|get-ip|Public IP via ipinfo.io|
-|get-ip-cpy|Public IP address is copied into the Clipboard and not displayed|
-|get-meteo|`curl wttr.in` weather|
-|get-pid-click|Click a window to get its PID|
-|get-pid-ps|fzf-select process to get PID|
-|get-shell-size|Get numbers of rows and cols in current shell|
 |git-clone-all-github|Clone all repos from `$GITHUB_USER` via API|
 |git-clone-all-gitlab|Clone all owned GitLab repos|
 |git-pull-all|`git pull` in all subdirs (parallel)|
@@ -125,8 +127,8 @@
 |hex2c|Convert Hex to C hex string (e.g. `hex2c 909090` → \x90\x90\x90)|
 |hex2py|Convert Hex into a Python hex array (e.g. `hex2py 909090` → [0x90, 0x90, 0x90])|
 |hexd|Decode Hex to ASCII string (e.g. `hexe 536b696c6c41726368` → SkillArch)|
-|hexe|Encode string to Hex (e.g. `hexe SkillArch` → 536b696c6c41726368)|
 |hexdecode|Decode Hex to ASCII string (e.g. `hexe 536b696c6c41726368` → SkillArch)|
+|hexe|Encode string to Hex (e.g. `hexe SkillArch` → 536b696c6c41726368)|
 |hexencode|Encode string to Hex (e.g. `hexe SkillArch` → 536b696c6c41726368)|
 |hifetch|fastfetch with SkillArch logo|
 |htmlencode|Convert characters to HTML Entities (e.g. `&` → `&amp;`)|
@@ -144,6 +146,8 @@
 |lfu|ffuf + save JSON + auto-filter results|
 |lgrep|`grep --line-buffered` (flush output on every line)|
 |makeqrcode|QR code in terminal|
+|mcrypt-dec|Decrypt mcrypt file (`mdecrypt`)|
+|mcrypt-enc|Encrypt file with a random password (auto-copied to clipboard)|
 |md5|MD5 Hash|
 |nc|`ncat`|
 |ncl|`ncat -lnvp` (listen)|
@@ -171,13 +175,13 @@
 |ska-help-aliases|fzf fuzzy-search all aliases|
 |ska-help-bindings|fzf fuzzy-search i3 keybindings|
 |ska-help-packages|fzf fuzzy-search installed pacman packages|
-|skao|`cd /opt/skillarch-original`|
 |ska-sudo-unlock|Reset faillock after 3 bad sudo attempts|
 |ska-update-advanced|Interactive upstream-merge for forks (commit local → fetch → preview → merge → push → reapply, all Y/n-prompted)|
 |ska-update-simple|`ska && make update && make install`|
 |ska-vbox-install|Install Virtualbox package|
 |ska-vbox-install-guestutils|Install VirtualBox guest utils|
 |ska-vnc|Start KasmVNC on :1 (no auth, localhost only)|
+|skao|`cd /opt/skillarch-original`|
 |sop|Show TCP Open ports (Listen mode)|
 |sortn|`sort -V \| uniq -c \| sort -n`|
 |ssh-yolo|SSH ignoring host key checks|
@@ -193,8 +197,8 @@
 |toDecimal|Convert into ordinal int array (e.g. `toDecimal "SkillArch"` → 83 107 105 108 108 65 114 99 104)|
 |toHex|(e.g. `toHex "SkillArch"` → 536b696c6c41726368)|
 |toLower|All in lower case|
-|toUpper|All in Upper case|
 |toUnicode|`toUnicode "Windows 🪟 vs Linux 🐧"` → Windows \u1fa9f vs Linux \u1f427|
+|toUpper|All in Upper case|
 |unicodedecode|`unicodedecode "SkillArch\u1f680"` → SkillArch🚀|
 |unicodeencode|`unicodeencode "Windows 🪟 vs Linux 🐧"` → Windows \u1fa9f vs Linux \u1f427|
 |unicodeencodeall|`unicodeencodeall 'SkillArch🚀'` → \u0053\u006b\u0069\u006c\u006c\u0041\u0072\u0063\u0068\u1f680|
