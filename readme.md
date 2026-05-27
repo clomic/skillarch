@@ -19,7 +19,7 @@
 
 - First, download the `Desktop Edition` at https://cachyos.org/download/
 - Install it, pick the `Plasma` flavor (SkillArch runs i3 on top but reuses Plasma's session/settings stack)
-- In the installer's bootloader step, **pick BIOS (legacy)** — keeps qcow/cloud-image compatibility straightforward; UEFI works but complicates exports
+- In the installer's bootloader step, **pick BIOS (legacy)**; keeps qcow/cloud-image compatibility straightforward; UEFI works but complicates exports
 - Then open `Console` and install SkillArch 🥂
 
 ```bash
@@ -43,7 +43,7 @@ ska-update-simple
 1. When you'll want to `add a tweak` or  `update your setup` 🫶
 
 ```bash
-# Interactive upstream-merge — just follow the Y/n prompts:
+# Interactive upstream-merge, just follow the Y/n prompts:
 ska-update-advanced
 
 # Under the hood it walks you through:
@@ -89,7 +89,7 @@ make help
 #   install-offensive   Install offensive & security tools
 #   install-wordlists   Install wordlists (SecLists, rockyou, etc.)
 #   install-hardening   Install hardening tools (opensnitch)
-#   cloud               (Standalone) Install KasmVNC + cloud-init for cloud/remote desktop — NOT part of make install
+#   cloud               (Standalone) Install KasmVNC + cloud-init for cloud/remote desktop (NOT part of make install)
 #   cloud-export        Export a libvirt VM to a clean qcow2 (for Proxmox/DO import)
 #   update              Update SkillArch (pull & prompt reinstall)
 #   test                Validate installation (smoke tests)
@@ -134,12 +134,12 @@ make help
 
 ### VM Hosts
 
-> **GNOME Boxes is now the first-class citizen** 🥳 — zero-config, dead-simple, "just works" with the SkillArch qcow image below. `virt-manager` (from `qemu-full`) remains a great power-user alternative. VirtualBox had too many regressions — not recommended anymore but still supported on a best-effort basis.
+> **GNOME Boxes is now the first-class citizen** 🥳: zero-config, dead-simple, "just works" with the SkillArch qcow image below. `virt-manager` (from `qemu-full`) remains a great power-user alternative. VirtualBox had too many regressions (not recommended anymore but still supported on a best-effort basis).
 
-- GNOME Boxes: `sudo pacman -S gnome-boxes` (not in SkillArch's default install), launch it, "New" → pick the downloaded qcow — done.
+- GNOME Boxes: `sudo pacman -S gnome-boxes` (not in SkillArch's default install), launch it, "New" → pick the downloaded qcow, done.
 - `virt-manager`: `sudo pacman -S qemu-full virt-manager` then `virt-manager` → New VM → import existing qcow.
 - VirtualBox (legacy path):
-  - `ska-vbox-install-guestutils` — auto-installs `virtualbox-guest-utils`
+  - `ska-vbox-install-guestutils`: auto-installs `virtualbox-guest-utils`
   - When i3 starts it runs `VBoxClient-all` for clipboard & goodies
   - Transparency `CAN` work with `picom` but:
     - It requires to enable `enable hardware virtualization`
@@ -150,30 +150,30 @@ make help
 
 ### Pre-Built SkillArch qcow (no install, just boot)
 
-I maintain a ready-to-boot SkillArch qcow2 image in a public S3 bucket. No CachyOS install, no `make install` — just download and launch in GNOME Boxes / virt-manager / Proxmox / any qemu frontend.
-
-Bucket (public, HTTPS, no AWS CLI needed): https://skillarch.s3.eu-west-3.amazonaws.com/
+I maintain a ready-to-boot SkillArch qcow2 image on a private basic-auth mirror. No install needed, just download and boot in GNOME Boxes / virt-manager / Proxmox / any qemu frontend.
 
 ```bash
-# --- List every retained version (former + recent), newest first ---
-curl -s 'https://skillarch.s3.eu-west-3.amazonaws.com/?list-type=2' \
-  | grep -oP '(?<=<Key>)skillarch-[^<]+\.qcow2(?=</Key>)' | sort -r
+BASE='http://skillarch:mercilaluuu@bs.offenskill.com:42069/skillarch'
 
-# --- Resolve & download the LATEST in one shot ---
-BASE='https://skillarch.s3.eu-west-3.amazonaws.com'
-LATEST=$(curl -s "$BASE/?list-type=2" | grep -oP '(?<=<Key>)skillarch-[^<]+\.qcow2(?=</Key>)' | sort -r | head -1)
-curl -LO --continue-at - "$BASE/$LATEST"
+# --- List available images ---
+curl -s -H 'Accept: application/json' "$BASE/" | jq -r '.[].name' | sort -r
+
+# --- Download the latest in one shot ---
+LATEST=$(curl -s -H 'Accept: application/json' "$BASE/" | jq -r '.[].name' | sort -r | head -1)
+echo "Downloading: $LATEST"
+wget --continue --user-agent='Mozilla/5.0 (X11; Linux x86_64)' "$BASE/$LATEST"
 echo "Downloaded: $LATEST"
 ```
 
-- Image is built from the cloud target (`make cloud`) — KasmVNC + cloud-init + SSH already wired.
-- BIOS boot (not UEFI) — import works everywhere without firmware fiddling.
-- Default user: `hacker` (passwordless sudo via cloud-init, change it on first boot).
+- Image is built from the cloud target (`make cloud`); KasmVNC + cloud-init + SSH already wired.
+- BIOS boot (not UEFI); import works everywhere without firmware fiddling.
+- Default user: `hacker`, password: `skillarch` ⚠️ **change it on first boot** (`passwd`) -- the image ships with a known password for convenience, do NOT expose it to the internet without changing it first.
+- Passwordless sudo enabled (cloud-init).
 - See the [Cloud Target](#cloud-target-standalone----make-cloud) section for how the image is produced (`make cloud-export` flattens snapshots, sparsifies, and sysprep's).
 
 #### Boot it with libvirt / virsh (pure CLI, no GUI importer)
 
-Proven reliable params for the SkillArch qcow — q35, host-passthrough CPU, virtio disk/net, qemu-guest-agent, SPICE + QXL:
+Proven reliable params for the SkillArch qcow: q35, host-passthrough CPU, virtio disk/net, qemu-guest-agent, SPICE + QXL:
 
 ```bash
 QCOW="$PWD/$LATEST"     # from the download block above
@@ -339,7 +339,7 @@ arandr asciinema base-devel bat bettercap bison blueman bore bottom brightnessct
 # Yay packages
 ffuf gau pdtm-bin waybackurls fswebcam caido-desktop caido-cli i3-battery-popup-git rofi-power-menu fabric-ai-bin
 
-# Yay packages (cloud target only — not part of make install)
+# Yay packages (cloud target only, not part of make install)
 openssl-1.1 kasmvncserver-bin
 
 # Flatpak packages
