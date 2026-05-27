@@ -7,6 +7,9 @@
 # preserving everything else (oh-my-zsh's `gp`, `gst`, `gco`, …).
 unalias ${(f)"$(grep -oP '^[a-zA-Z_][a-zA-Z0-9_-]*(?=\(\))' ${(%):-%x})"} 2>/dev/null
 
+# oh-my-zsh git plugin overwrites gau (getallurls) → unalias it
+unalias gau 2>/dev/null
+
 # ────────────────────────────────────────
 #  SkillArch Helpers
 # ────────────────────────────────────────

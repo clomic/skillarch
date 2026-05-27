@@ -150,19 +150,26 @@ make help
 
 ### Pre-Built SkillArch qcow (no install, just boot)
 
-I maintain a ready-to-boot SkillArch qcow2 image in a public S3 bucket. No CachyOS install, no `make install` — just download and launch in GNOME Boxes / virt-manager / Proxmox / any qemu frontend.
-
-Bucket (public, HTTPS, no AWS CLI needed): https://skillarch.s3.eu-west-3.amazonaws.com/
+I maintain a ready-to-boot SkillArch qcow2 image. The easiest way to get the download URL is via tempai:
 
 ```bash
-# --- List every retained version (former + recent), newest first ---
-curl -s 'https://skillarch.s3.eu-west-3.amazonaws.com/?list-type=2' \
-  | grep -oP '(?<=<Key>)skillarch-[^<]+\.qcow2(?=</Key>)' | sort -r
+tp update qcow   # interactive picker → prints a wget-ready URL with embedded basic-auth
+```
 
-# --- Resolve & download the LATEST in one shot ---
-BASE='https://skillarch.s3.eu-west-3.amazonaws.com'
-LATEST=$(curl -s "$BASE/?list-type=2" | grep -oP '(?<=<Key>)skillarch-[^<]+\.qcow2(?=</Key>)' | sort -r | head -1)
-curl -LO --continue-at - "$BASE/$LATEST"
+You can also curl directly from the asset server (basic-auth protected):
+
+```bash
+ASSET='http://bs.offenskill.com:42069/skillarch'
+AUTH='skillarch:mercilaluuu'
+
+# --- List available images (JSON) ---
+curl -s -u "$AUTH" -H 'Accept: application/json' "$ASSET/" \
+  | jq -r '.[].name' | sort -r
+
+# --- Download the latest in one shot ---
+LATEST=$(curl -s -u "$AUTH" -H 'Accept: application/json' "$ASSET/" \
+  | jq -r '.[].name' | sort -r | head -1)
+curl -LO --continue-at - -u "$AUTH" "$ASSET/$LATEST"
 echo "Downloaded: $LATEST"
 ```
 
