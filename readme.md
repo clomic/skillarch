@@ -152,8 +152,6 @@ make help
 
 I maintain a ready-to-boot SkillArch qcow2 image on a private basic-auth mirror. No install needed, just download and boot in GNOME Boxes / virt-manager / Proxmox / any qemu frontend.
 
-- http://skillarch:mercilaluuu@bs.offenskill.com:42069/skillarch/
-
 ```bash
 BASE='http://skillarch:mercilaluuu@bs.offenskill.com:42069/skillarch'
 
@@ -162,6 +160,7 @@ curl -s -H 'Accept: application/json' "$BASE/" | jq -r '.[].name' | sort -r
 
 # --- Download the latest in one shot ---
 LATEST=$(curl -s -H 'Accept: application/json' "$BASE/" | jq -r '.[].name' | sort -r | head -1)
+echo "Downloading: $LATEST"
 wget --continue --user-agent='Mozilla/5.0 (X11; Linux x86_64)' "$BASE/$LATEST"
 echo "Downloaded: $LATEST"
 ```
