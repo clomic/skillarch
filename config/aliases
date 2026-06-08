@@ -198,7 +198,7 @@ cheat() { curl -s "cheat.sh/$1"; }
 alias clean-swap='sudo swapoff -a && sudo swapon -a'
 alias cpy='xsel -ib'
 alias cpyc='tee >(xsel -ib)'
-alias paste='xsel -ob'
+alias pst='xsel -ob'
 alias get-meteo='curl -sH "accept-language: fr" https://wttr.in/ | head -n -2'
 alias gl='glow -w0'
 alias fab='fabric-ai -s'
@@ -208,7 +208,11 @@ alias exsta='exegol start'
 alias exsto='exegol stop'
 srsta() (set -e;cd /opt/sysreptor/deploy && docker compose up -d && sleep 10 && xdg-open http://127.1:8000 >&/dev/null &)
 srsto() (set -e;cd /opt/sysreptor/deploy && docker compose down;)
-gen_pass() { grep -hxP "[a-z]{4,6}" /opt/lists/SecLists/Miscellaneous/lang-{english,french-full}.txt|sort -u|shuf -n6|tr '\n' '-'|sed 's/-$//'; }
+gen_pass() { 
+    local p s=false; while getopts "s" o; do [[ "$o" == "s" ]] && s=true; done; 
+    p=$(grep -hxP "[a-z]{4,6}" /opt/lists/SecLists/Miscellaneous/lang-{english,french-full}.txt|sort -u|shuf -n6|paste -sd- -);
+    [[ "$s" == "true" ]] && p=$(echo "$p"|perl -pe '$_ = ucfirst($_);s/(a|e|i|o)/$1 eq "a"?"4":$1 eq "e"?"3":$1 eq "i"?"1":"0"/e'); echo "$p"; 
+}
 crypt-enc() (set -e;
     PASS=$(gen_pass)
     tar zcf "$1.tar.gz" "$1";
