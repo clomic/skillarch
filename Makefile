@@ -375,7 +375,7 @@ install-clomic: sanity-check ## Install clomic tools
 	done
 
 	# Install uv tools
-	for package in aliasr updog yq; do
+	for package in aliasr unblob updog yq; do
 		uv tool install "$$package" || {
 			$(call WARN,Retrying $$package install...)
 			uv tool install -q "$$package"
