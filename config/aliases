@@ -208,10 +208,10 @@ alias exsta='exegol start'
 alias exsto='exegol stop'
 srsta() (set -e;cd /opt/sysreptor/deploy && docker compose up -d && sleep 10 && xdg-open http://127.1:8000 >&/dev/null &)
 srsto() (set -e;cd /opt/sysreptor/deploy && docker compose down;)
-gen_pass() { 
-    local p s=false; while getopts "s" o; do [[ "$o" == "s" ]] && s=true; done; 
+gen_pass() {
+    local p; 
     p=$(grep -hxP "[a-z]{4,6}" /opt/lists/SecLists/Miscellaneous/lang-{english,french-full}.txt|sort -u|shuf -n6|paste -sd- -);
-    [[ "$s" == "true" ]] && p=$(echo "$p"|perl -pe '$_ = ucfirst($_);s/(a|e|i|o)/$1 eq "a"?"4":$1 eq "e"?"3":$1 eq "i"?"1":"0"/e'); echo "$p"; 
+    printf "$p"|perl -pe '$_ = ucfirst($_);s/(a|e|i|o)/$1 eq "a"?"4":$1 eq "e"?"3":$1 eq "i"?"1":"0"/e';
 }
 crypt-enc() (set -e;
     PASS=$(gen_pass)
@@ -340,7 +340,7 @@ sha1() { args_to_stdin "$@" | sha1sum | awk '{print$1}'; }
 sha256() { args_to_stdin "$@" | sha256sum | awk '{print$1}'; }
 toUpper() { args_to_stdin "$@" | perl -C -pe '$_=uc'; }
 toLower() { args_to_stdin "$@" | perl -C -pe '$_=lc'; }
-fromEpoch() { [[ $# -eq 0 && -t 0 ]] && return; local s=$(args_to_stdin "$@"); date -ud @"$s" -Iseconds; }
+fromEpoch() { [[ $# -eq 0 && -t 0 ]] && return; local s; s=$(args_to_stdin "$@"); date -ud @"$s" -Iseconds; }
 
 # ────────────────────────────────────────
 #  Web Recon
@@ -406,7 +406,7 @@ nmap-i() {
     local ip="$1"
     local -a p
     sudo nmap -sU -T4 --top-ports 1000 -oA nmap/udp "$ip" &
-    p=(${(f)"$(nmap -p- --min-rate=1000 -T4 -Pn "$ip"|awk '/^[0-9]/{print $1}'|cut -d/ -f1)"})
+    p=(${(f)"$(nmap -p- --min-rate=1000 -T4 -Pn $ip|awk '/^[0-9]/{print $1}'|cut -d/ -f1)"})
     (( $#p )) || { print -P "%F{red}No TCP port open%f"; return 0; }
     print -P "%F{yellow}TCP Ports → %B${p[*]}%b%f"
     sudo nmap -sC -sV -vv --version-all -oA nmap/tcp -p"${(j:,:)p}" "$ip"&
@@ -451,7 +451,6 @@ alias ddroopescan="dockit droope/droopescan" # drupal scanner
 
 ## Reverse Engineering & Forensics
 alias dretdec='dockit blacktop/retdec' # binary to c code
-alias unblob='mkdir -p "$PWD/output" && docker run --rm --pull always -v "$PWD/output":/data/output -v "$PWD":/data/input ghcr.io/onekey-sec/unblob:latest'
 
 ## Sysadmin & Dev Tools
 alias dsysdig='dockit --privileged -v /var/run/docker.sock:/host/var/run/docker.sock -v /dev:/host/dev -v /proc:/host/proc:ro -v /boot:/host/boot:ro -v /src:/src -v /lib/modules:/host/lib/modules:ro -v /usr:/host/usr:ro -v /etc:/host/etc:ro --entrypoint /usr/bin/sysdig docker.io/sysdig/sysdig --modern-bpf --unbuffer'

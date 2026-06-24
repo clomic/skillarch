@@ -258,7 +258,7 @@ install-gui-tools: sanity-check ## Install GUI apps (Chrome, VSCode, Ghidra, etc
 install-offensive: sanity-check ## Install offensive & security tools
 	$(call INFO,Installing offensive tools...)
 	$(PACMAN_INSTALL) metasploit fx lazygit fq gitleaks jdk21-openjdk hashcat bettercap bore
-	for pkg in ffuf gau pdtm-bin waybackurls fabric-ai-bin caido-desktop caido-cli; do yay --noconfirm --needed -S "$$pkg" || $(call WARN,Failed to install $$pkg$(comma) continuing...); done
+	for pkg in ffuf gau waybackurls fabric-ai-bin caido-desktop caido-cli; do yay --noconfirm --needed -S "$$pkg" || $(call WARN,Failed to install $$pkg$(comma) continuing...); done
 
 	# HExHTTP: HTTP header vuln/cache-poisoning scanner — clone + isolated venv + PATH shim.
 	# Upstream pyproject entrypoint is broken (hexhttp.py not packaged); bypass with a direct wrapper.
@@ -277,21 +277,16 @@ install-offensive: sanity-check ## Install offensive & security tools
 	mise exec -- go install github.com/sensepost/gowitness@latest > /dev/null &
 	wait
 
-	# Install GitHub binary releases -- gobypass403 & wpprobe (sequential to save API budget for pdtm)
+	# Install GitHub binary releases -- gobypass403 & wpprobe (sequential)
 	( wget -q "$$(curl -sL https://api.github.com/repos/slicingmelon/gobypass403/releases/latest | jq -r '.assets[] | select(.name | contains("linux_amd64")) | .browser_download_url')" -O /tmp/gobypass403 \
 		&& chmod +x /tmp/gobypass403 && sudo mv /tmp/gobypass403 /usr/local/bin/gobypass403 ) || true
 	( wget -q "$$(curl -sL https://api.github.com/repos/Chocapikk/wpprobe/releases/latest | jq -r '.assets[] | select(.name | test("linux_amd64")) | .browser_download_url')" -O /tmp/wpprobe \
 		&& chmod +x /tmp/wpprobe && sudo mv /tmp/wpprobe /usr/local/bin/wpprobe \
 		&& wpprobe update-db ) || true
 
-	# pdtm hits GitHub API rate limits (60 req/h unauthenticated) -- retry after reset (~4min)
-	[[ -f /usr/bin/pdtm ]] && { mkdir -p ~/.pdtm/go/bin; sudo chown "$$USER:$$USER" /usr/bin/pdtm; sudo mv /usr/bin/pdtm ~/.pdtm/go/bin; ~/.pdtm/go/bin/pdtm -u pdtm; } || true
-	for attempt in 1 2 3 4 5; do \
-		zsh -c "source ~/.zshrc && PATH=\$$PATH:\$$HOME/.pdtm/go/bin && pdtm -install-all -v" && break || { \
-			$(call WARN,pdtm install failed (attempt $$attempt/5)$(comma) likely rate-limited. Waiting 4m for reset...) ; \
-			sleep 240 ; \
-		} ; \
-	done || true
+	[[ -f $$HOME/bin/massdns ]] && git clone https://github.com/blechschmidt/massdns /tmp/massdns && make -C /tmp/massdns && mv /tmp/massdns/bin/massdns $$HOME/bin/ && rm -rf /tmp/massdns
+	mise use -g aqua:projectdiscovery/pdtm@latest
+	pdtm -ia; pdtm -ua
 	zsh -c "source ~/.zshrc && nuclei -update-templates -update-template-dir ~/.nuclei-templates" || true
 	rm -rf /tmp/nuclei[0-9]*
 
