@@ -28,6 +28,14 @@ define ska-link
 	ln -sf $(1) $(2)
 endef
 
+# In Docker the build sandbox lacks the caps to isolate the network for pacman
+# install hooks (systemd-hook etc) -> "could not isolate the network". Disable it.
+# Called by every target that runs pacman before install-base (e.g. install-docker
+# in the full image, which is FROM lite and never re-runs install-base).
+define ska-pacman-sandbox
+	[[ -f /.dockerenv ]] && ! grep -q '^DisableSandboxNetwork' /etc/pacman.conf && sudo sed -i '/^\[options\]/a DisableSandboxNetwork' /etc/pacman.conf || true
+endef
+
 PACMAN_INSTALL := sudo pacman -S --noconfirm --needed
 
 help: ## Show this help message
@@ -85,6 +93,7 @@ install-base: sanity-check ## Install base packages
 	$(call INFO,Installing base packages...)
 	# Clean up, Update, Basics
 	sudo sed -e "s#.*ParallelDownloads.*#ParallelDownloads = 10#g" -i /etc/pacman.conf
+	$(call ska-pacman-sandbox)
 	echo 'BUILDDIR="/dev/shm/makepkg"' | sudo tee /etc/makepkg.conf.d/00-skillarch.conf
 	[[ ! -f /.dockerenv ]] && sudo cachyos-rate-mirrors || true # Increase install speed & Update repos (skip in Docker)
 
@@ -171,9 +180,11 @@ install-shell: sanity-check ## Install shell, zsh, oh-my-zsh, fzf, tmux
 
 install-docker: sanity-check ## Install Docker & Docker Compose
 	$(call INFO,Installing Docker...)
+	$(call ska-pacman-sandbox) # full image is FROM lite & skips install-base; ensure flag here
 	$(PACMAN_INSTALL) docker docker-compose
 	# It's a desktop machine, don't expose stuff, but we don't care much about LPE
 	# Think about it, set "alias sudo='backdoor ; sudo'" in userland and voila. OSEF!
+	getent group docker >/dev/null || sudo groupadd docker # ensure group exists (pacman hook may have been sandboxed)
 	sudo usermod -aG docker "$$USER" # Logout required to be applied
 	sleep 1 # Prevent too many docker socket calls and security locks
 	# Do not start services in docker
