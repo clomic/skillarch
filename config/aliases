@@ -170,7 +170,7 @@ alias flameshotz='while true; do flameshot full -p ~/Downloads; sleep 1; done'
 # ────────────────────────────────────────
 alias show-disk-io='watch -cd -- iostat -h'
 alias sdi='show-disk-io'
-alias show-open-ports='sudo ss -lntup | awk '{print $1, $5, $6, $7}' | column -t | grep -P "Netid\K|:\K\d+ "'
+alias show-open-ports="sudo ss -lntup | awk '{print \$1, \$5, \$6, \$7}'| { read -r header; echo \"\$header\"; sort -V; } | column -t | grep -P 'Netid\K|:\K\d+ '"
 alias sop='show-open-ports'
 alias get-du='du -hd1 2>/dev/null'
 alias get-pid-click='xprop _NET_WM_PID | cut -d" " -f3'
