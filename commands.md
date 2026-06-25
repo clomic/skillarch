@@ -198,6 +198,7 @@
 |git-clone-all-gitlab|Clone all owned GitLab repos|
 |git-pull-all|`git pull` in all subdirs (parallel)|
 |gitleaks|Detect secrets / passwords in git repos|
+|gst|`git status --short`|
 |gl|glow|
 |glow|Render Markdown in the terminal|
 |go|The Go programming language toolchain|
@@ -216,6 +217,7 @@
 |hexdecode|Decode Hex to ASCII string (e.g. `hexe 536b696c6c41726368` → SkillArch)|
 |hexe|Encode string to Hex (e.g. `hexe SkillArch` → 536b696c6c41726368)|
 |hexencode|Encode string to Hex (e.g. `hexe SkillArch` → 536b696c6c41726368)|
+|hexhttp|HTTP header vuln/cache-poisoning scanner|
 |hifetch|fastfetch with SkillArch logo|
 |htmlencode|Convert characters to HTML Entities (e.g. `&` → `&amp;`)|
 |htmlq|jQuery-like HTML selector for CLI|
@@ -380,6 +382,7 @@
 |trash-put|Move files to trash (safe delete)|
 |tree|List contents of directories in a tree format|
 |tunnelx|Tunnel multiplexer for proxy chaining|
+|unblob|Extract files from any kind of container formats|
 |uncover|Search engine API aggregator for discovery|
 |unicodedecode|`unicodedecode "SkillArch\u1f680"` → SkillArch🚀|
 |unicodeencode|`unicodeencode "Windows 🪟 vs Linux 🐧"` → Windows \u1fa9f vs Linux \u1f427|

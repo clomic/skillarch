@@ -102,6 +102,7 @@ alias ta='tmux attach'
 alias b='bat'
 alias batall='find . -type f | xargs bat'
 alias v='nvim'
+alias vi='nvim'
 alias c='code'
 alias C='code .'
 alias p='python'
@@ -115,6 +116,7 @@ alias git-clone-all-github='curl -sk -H "Authorization: token ${GITHUB_READ_TOKE
 alias git-clone-all-gitlab='curl -sk -H "Authorization: Bearer ${GITLAB_READ_TOKEN}" "https://gitlab.com/api/v4/projects?owned=true&simple=true" | jq -r ".[].ssh_url_to_repo" | parallel -j10 "git clone {}"'
 alias git-pull-all='find . -maxdepth 2 -name ".git" | cut -d/ -f2 | parallel -j10 "cd {} && git pull"'
 alias gdh='git diff HEAD'
+alias gst='git status --short'
 
 # ────────────────────────────────────────
 #  File Management
@@ -209,7 +211,7 @@ alias exsto='exegol stop'
 srsta() (set -e;cd /opt/sysreptor/deploy && docker compose up -d && sleep 10 && xdg-open http://127.1:8000 >&/dev/null &)
 srsto() (set -e;cd /opt/sysreptor/deploy && docker compose down;)
 gen_pass() {
-    local p; 
+    local p;
     p=$(grep -hxP "[a-z]{4,6}" /opt/lists/SecLists/Miscellaneous/lang-{english,french-full}.txt|sort -u|shuf -n6|paste -sd- -);
     printf "$p"|perl -pe '$_ = ucfirst($_);s/(a|e|i|o)/$1 eq "a"?"4":$1 eq "e"?"3":$1 eq "i"?"1":"0"/e';
 }
@@ -250,6 +252,7 @@ _cmd_picker_widget() {
 }
 zle -N _cmd_picker_widget
 bindkey '^f' _cmd_picker_widget
+alias open='xdg-open'
 
 # ────────────────────────────────────────
 #  Python

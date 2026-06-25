@@ -10,7 +10,7 @@ C_INFO  := \033[1;34m
 C_WARN  := \033[1;33m
 C_ERR   := \033[1;31m
 C_BOLD  := \033[1m
-SKA_LOG := /var/tmp/skillarch-install_$$(date +%Y%m%d_%H%M%S).log
+SKA_LOG := /var/tmp/skillarch-install_$(shell date +%Y%m%d_%H%M%S).log
 ## Use the variable $(comma) instead of ',' to prevent it from being used as a parameter separator.
 comma   := ,
 
@@ -127,7 +127,6 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 	$(call INFO,Installing CLI tools & runtimes...)
 	$(PACMAN_INSTALL) base-devel bison bzip2 ca-certificates cloc cmake dos2unix expect ffmpeg foremost gdb gnupg htop bottom hwinfo icu inotify-tools iproute2 jq llvm lsof ltrace make mlocate mplayer ncurses net-tools ngrep nmap openssh openssl parallel perl-image-exiftool pkgconf python-virtualenv re2c readline ripgrep rlwrap socat sqlite sshpass tmate tor traceroute trash-cli tree unzip vbindiff xsel xz yay zip veracrypt git-delta viu qsv asciinema htmlq neovim glow jless websocat superfile gron eza fastfetch bat sysstat cronie tree-sitter bc
 	sudo ln -sf /usr/bin/bat /usr/local/bin/batcat
-	# bash -c "$$(curl -fsSL https://gef.blah.cat/sh)" || true
 	[[ ! -f ~/.gdbinit-gef.py ]] && curl -fsSL -o ~/.gdbinit-gef.py https://raw.githubusercontent.com/hugsy/gef/main/gef.py && echo "source ~/.gdbinit-gef.py" >> ~/.gdbinit || echo "gef already installed"
 	# nvim config
 	[[ ! -d ~/.config/nvim ]] && git clone --depth=1 https://github.com/LazyVim/starter ~/.config/nvim || true
@@ -274,7 +273,10 @@ install-offensive: sanity-check ## Install offensive & security tools
 	# HExHTTP: HTTP header vuln/cache-poisoning scanner — clone + isolated venv + PATH shim.
 	# Upstream pyproject entrypoint is broken (hexhttp.py not packaged); bypass with a direct wrapper.
 	[[ ! -d /opt/HExHTTP ]] && git clone --depth=1 https://github.com/c0dejump/HExHTTP /tmp/HExHTTP && sudo mv /tmp/HExHTTP /opt/HExHTTP && sudo chown -R "$$USER:$$USER" /opt/HExHTTP || true
-	[[ -d /opt/HExHTTP && ! -d /opt/HExHTTP/.venv ]] && mise exec -- uv venv -q /opt/HExHTTP/.venv && VIRTUAL_ENV=/opt/HExHTTP/.venv mise exec -- uv pip install -q -r <(sed -n '/^dependencies = \[/,/^\]/p' /opt/HExHTTP/pyproject.toml | grep -oP '"\K[^"]+(?=")' | grep -v 'darwin') || true
+	[[ -d /opt/HExHTTP && ! -d /opt/HExHTTP/.venv ]] && { uv venv -q /opt/HExHTTP/.venv && uv pip install -q -p /opt/HExHTTP/.venv /opt/HExHTTP || true; } || {
+		# Check for HExHTTP update
+		git -C /opt/HExHTTP/ pull -q && uv pip install -q -p /opt/HExHTTP/.venv /opt/HExHTTP
+	}
 	sudo tee /usr/local/bin/hexhttp > /dev/null <<-'SHIM'
 		#!/usr/bin/env bash
 		exec /opt/HExHTTP/.venv/bin/python /opt/HExHTTP/hexhttp.py "$$@"
