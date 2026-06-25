@@ -329,7 +329,7 @@
 |sha1|SHA1 Hash|
 |sha256|SHA256 Hash|
 |show-disk-io|`watch iostat -h`|
-|show-open-ports|Show TCP Open ports (Listen mode)|
+|show-open-ports|Show all listening ports (UDP + TCP)|
 |shuffledns|DNS brute-forcer with resolver shuffling|
 |signal-desktop|Encrypted messaging desktop app|
 |ska|`cd /opt/skillarch`|
@@ -347,7 +347,7 @@
 |skaus|`ska && make update && make install` (ska update simple)|
 |sns|AWS SNS notification exploitation tool|
 |socat|Multipurpose relay (SOcket CAT)|
-|sop|Show TCP Open ports (Listen mode)|
+|sop|Show all listening ports (UDP + TCP)|
 |sortn|`sort -V \| uniq -c \| sort -n`|
 |spf|Pretty terminal file manager (superfile)|
 |sqlite3|Command-line interface for SQLite|
