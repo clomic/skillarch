@@ -277,7 +277,7 @@ install-offensive: sanity-check ## Install offensive & security tools
 	[[ ! -d /opt/HExHTTP ]] && git clone --depth=1 https://github.com/c0dejump/HExHTTP /tmp/HExHTTP && sudo mv /tmp/HExHTTP /opt/HExHTTP && sudo chown -R "$$USER:$$USER" /opt/HExHTTP || true
 	[[ -d /opt/HExHTTP && ! -d /opt/HExHTTP/.venv ]] && { uv venv -q /opt/HExHTTP/.venv && uv pip install -q -p /opt/HExHTTP/.venv /opt/HExHTTP || true; } || {
 		# Check for HExHTTP update
-		git -C /opt/HExHTTP/ pull -q && uv pip install -q -p /opt/HExHTTP/.venv /opt/HExHTTP
+		git -C /opt/HExHTTP/ pull -q && uv pip install -q -p /opt/HExHTTP/.venv /opt/HExHTTP || true
 	}
 	sudo tee /usr/local/bin/hexhttp > /dev/null <<-'SHIM'
 		#!/usr/bin/env bash
@@ -299,10 +299,20 @@ install-offensive: sanity-check ## Install offensive & security tools
 		&& chmod +x /tmp/wpprobe && sudo mv /tmp/wpprobe /usr/local/bin/wpprobe \
 		&& wpprobe update-db ) || true
 
-	[[ -f $$HOME/bin/massdns ]] && git clone https://github.com/blechschmidt/massdns /tmp/massdns && make -C /tmp/massdns && mv /tmp/massdns/bin/massdns $$HOME/bin/ && rm -rf /tmp/massdns
+	# massdns: required by shuffledns (PD tool). Build from source into ~/.local/bin (on PATH via zshrc).
+	mkdir -p $$HOME/.local/bin
+	[[ ! -f $$HOME/.local/bin/massdns ]] && { git clone --depth=1 https://github.com/blechschmidt/massdns /tmp/massdns && make -C /tmp/massdns && mv /tmp/massdns/bin/massdns $$HOME/.local/bin/ && rm -rf /tmp/massdns; } || true
+
+	# pdtm via mise/aqua (avoids the AUR pdtm-bin churn). -install-all still hits the
+	# GitHub API rate limit (60 req/h unauthenticated) -- keep the retry-after-reset loop.
 	mise use -g aqua:projectdiscovery/pdtm@latest
-	pdtm -ia || true
-	pdtm -ua || true
+	for attempt in 1 2 3 4 5; do \
+		mise exec -- pdtm -ia && break || { \
+			$(call WARN,pdtm install failed (attempt $$attempt/5)$(comma) likely rate-limited. Waiting 4m for reset...) ; \
+			sleep 240 ; \
+		} ; \
+	done || true
+	mise exec -- pdtm -ua || true
 	zsh -c "source ~/.zshrc && nuclei -update-templates -update-template-dir ~/.nuclei-templates" || true
 	rm -rf /tmp/nuclei[0-9]*
 

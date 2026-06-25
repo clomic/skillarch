@@ -309,9 +309,10 @@ make clean              # Docker-only: clear caches (pacman, yay, pip, mise, go,
 `metasploit` (msfconsole, msfvenom), `hashcat`, `bettercap`, `nmap`, `wireshark-qt`, `ghidra`, `gdb+gef`, `gitleaks`, `opensnitch`, `bore` (TCP NAT tunnel — `bore local <PORT> --to bore.pub`)
 
 ### Security / Offensive (yay/AUR)
-`ffuf`, `gau`, `pdtm-bin`, `waybackurls`, `fabric-ai-bin`, `caido-desktop`, `caido-cli`, `gobypass403` (GitHub release), `wpprobe` (GitHub release)
+`ffuf`, `gau`, `waybackurls`, `fabric-ai-bin`, `caido-desktop`, `caido-cli`, `gobypass403` (GitHub release), `wpprobe` (GitHub release)
 
 ### pdtm Tools (Project Discovery)
+`pdtm` itself is installed via mise (`aqua:projectdiscovery/pdtm`), then `pdtm -ia` pulls the tools below. `massdns` (built from source into `~/bin`) backs `shuffledns`.
 `aix`, `alterx`, `asnmap`, `cdncheck`, `chaos-client`, `cloudlist`, `cvemap`, `dnsx`, `httpx`, `interactsh-client`, `interactsh-server`, `katana`, `mapcidr`, `naabu`, `notify`, `nuclei`, `proxify`, `shuffledns`, `simplehttpserver`, `subfinder`, `tldfinder`, `tlsx`, `tunnelx`, `uncover`, `urlfinder`
 
 ### Python uv Tools
