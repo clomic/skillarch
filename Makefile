@@ -267,7 +267,7 @@ install-offensive: sanity-check ## Install offensive & security tools
 	[[ ! -d /opt/HExHTTP ]] && git clone --depth=1 https://github.com/c0dejump/HExHTTP /tmp/HExHTTP && sudo mv /tmp/HExHTTP /opt/HExHTTP && sudo chown -R "$$USER:$$USER" /opt/HExHTTP || true
 	[[ -d /opt/HExHTTP && ! -d /opt/HExHTTP/.venv ]] && { uv venv -q /opt/HExHTTP/.venv && uv pip install -q -p /opt/HExHTTP/.venv /opt/HExHTTP || true; } || {
 		# Check for HExHTTP update
-		git -C /opt/HExHTTP/ pull -q && uv pip install -q -p /opt/HExHTTP/.venv /opt/HExHTTP
+		git -C /opt/HExHTTP/ pull -q && uv pip install -q -p /opt/HExHTTP/.venv /opt/HExHTTP || true
 	}
 	sudo tee /usr/local/bin/hexhttp > /dev/null <<-'SHIM'
 		#!/usr/bin/env bash
@@ -291,7 +291,8 @@ install-offensive: sanity-check ## Install offensive & security tools
 
 	[[ -f $$HOME/bin/massdns ]] && git clone https://github.com/blechschmidt/massdns /tmp/massdns && make -C /tmp/massdns && mv /tmp/massdns/bin/massdns $$HOME/bin/ && rm -rf /tmp/massdns
 	mise use -g aqua:projectdiscovery/pdtm@latest
-	pdtm -ia; pdtm -ua
+	pdtm -ia || true
+	pdtm -ua || true
 	zsh -c "source ~/.zshrc && nuclei -update-templates -update-template-dir ~/.nuclei-templates" || true
 	rm -rf /tmp/nuclei[0-9]*
 
