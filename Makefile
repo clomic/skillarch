@@ -155,6 +155,8 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 		}
 	done
 	uv tool upgrade --all || true
+	mise up || true
+	mise prune || true
 	$(call DONE,CLI tools & runtimes installed!)
 
 install-shell: sanity-check ## Install shell, zsh, oh-my-zsh, fzf, tmux
@@ -299,7 +301,8 @@ install-offensive: sanity-check ## Install offensive & security tools
 
 	[[ -f $$HOME/bin/massdns ]] && git clone https://github.com/blechschmidt/massdns /tmp/massdns && make -C /tmp/massdns && mv /tmp/massdns/bin/massdns $$HOME/bin/ && rm -rf /tmp/massdns
 	mise use -g aqua:projectdiscovery/pdtm@latest
-	pdtm -ia; pdtm -ua
+	pdtm -ia || true
+	pdtm -ua || true
 	zsh -c "source ~/.zshrc && nuclei -update-templates -update-template-dir ~/.nuclei-templates" || true
 	rm -rf /tmp/nuclei[0-9]*
 
@@ -373,7 +376,7 @@ install-clomic: sanity-check ## Install clomic tools
 		sudo mv /tmp/cyberchef /opt/cyberchef;
 	}
 
-	for package in opengrep; do \
+	for package in opengrep rtk; do \
 		for attempt in 1 2 3; do \
 			mise use -g "$$package@latest" && break || { \
 				$(call WARN,mise install $$package failed (attempt $$attempt/3)$(comma) retrying in 5s...) ; \
