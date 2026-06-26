@@ -100,7 +100,7 @@ install-base: sanity-check ## Install base packages
 	# Init keyring only if needed
 	[[ ! -d /etc/pacman.d/gnupg ]] && sudo pacman-key --init || true
 	sudo pacman --noconfirm -Sc
-	sudo rm -rf /var/cache/pacman/pkg/download-*
+	sudo rm -rf /var/cache/pacman/pkg/download-* 2>/dev/null
 	sudo pacman --noconfirm -Syu
 	$(PACMAN_INSTALL) git vim tmux wget curl archlinux-keyring
 
@@ -155,8 +155,8 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 		}
 	done
 	uv tool upgrade --all || true
-	mise up || true
-	mise prune || true
+	mise up -q || true
+	mise prune -q || true
 	$(call DONE,CLI tools & runtimes installed!)
 
 install-shell: sanity-check ## Install shell, zsh, oh-my-zsh, fzf, tmux
@@ -296,9 +296,10 @@ install-offensive: sanity-check ## Install offensive & security tools
 		&& chmod +x /tmp/wpprobe && sudo mv /tmp/wpprobe /usr/local/bin/wpprobe \
 		&& wpprobe update-db ) || true
 
-	# massdns: required by shuffledns (PD tool). Build from source into ~/.local/bin (on PATH via zshrc).
-	mkdir -p $$HOME/.local/bin
-	[[ ! -f $$HOME/.local/bin/massdns ]] && { git clone --depth=1 https://github.com/blechschmidt/massdns /tmp/massdns && make -C /tmp/massdns && mv /tmp/massdns/bin/massdns $$HOME/.local/bin/ && rm -rf /tmp/massdns; } || true
+	# massdns: required by shuffledns (PD tool) - Build from source into ~/.local/bin
+	[[ ! -d /opt/massdns ]] && { git clone --depth=1 https://github.com/blechschmidt/massdns && sudo mv -f massdns/ /opt/massdns && make -C /opt/massdns && cp /opt/massdns/bin/massdns $$HOME/.local/bin/; } || true
+	# Check for massdns update
+	[[ -d /opt/massdns ]] && git -C /opt/massdns pull | grep -q -v "Already up to date" && make -C /opt/massdns 2>/dev/null && cp /opt/massdns/bin/massdns $$HOME/.local/bin/ || true
 
 	# pdtm via mise/aqua (avoids the AUR pdtm-bin churn). -install-all still hits the
 	# GitHub API rate limit (60 req/h unauthenticated) -- keep the retry-after-reset loop.
