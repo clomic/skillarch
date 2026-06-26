@@ -261,12 +261,13 @@ install-gui-tools: sanity-check ## Install GUI apps (Chrome, VSCode, Ghidra, etc
 
 install-offensive: sanity-check ## Install offensive & security tools
 	$(call INFO,Installing offensive tools...)
+	ska_clone() { local pkg=$${1##*/}; [[ ! -d "/opt/$$pkg" ]] && git clone --depth=1 "$$1" "/tmp/$$pkg" && sudo mv "/tmp/$$pkg" "/opt/$$pkg" || true ; }
 	$(PACMAN_INSTALL) metasploit fx lazygit fq gitleaks jdk21-openjdk hashcat bettercap bore
 	for pkg in ffuf gau waybackurls fabric-ai-bin caido-desktop caido-cli; do yay --noconfirm --needed -S "$$pkg" || $(call WARN,Failed to install $$pkg$(comma) continuing...); done
 
 	# HExHTTP: HTTP header vuln/cache-poisoning scanner - clone + isolated venv + PATH shim.
 	# Upstream pyproject entrypoint is broken (hexhttp.py not packaged); bypass with a direct wrapper.
-	[[ ! -d /opt/HExHTTP ]] && git clone --depth=1 https://github.com/c0dejump/HExHTTP /tmp/HExHTTP && sudo mv /tmp/HExHTTP /opt/HExHTTP && sudo chown -R "$$USER:$$USER" /opt/HExHTTP || true
+	ska_clone https://github.com/c0dejump/HExHTTP && sudo chown -R "$$USER:$$USER" /opt/HExHTTP || true
 	[[ -d /opt/HExHTTP ]] && git -C /opt/HExHTTP/ pull -q && uv venv --allow-existing -q /opt/HExHTTP/.venv && uv pip install -q -p /opt/HExHTTP/.venv /opt/HExHTTP || true
 	sudo tee /usr/local/bin/hexhttp > /dev/null <<-'SHIM'
 		#!/usr/bin/env bash
@@ -289,7 +290,7 @@ install-offensive: sanity-check ## Install offensive & security tools
 		&& wpprobe update-db ) || true
 
 	# massdns: required by shuffledns (PD tool) - Build from source into ~/.local/bin
-	[[ ! -d /opt/massdns ]] && { git clone --depth=1 https://github.com/blechschmidt/massdns && sudo mv -f massdns/ /opt/massdns && make -C /opt/massdns && cp /opt/massdns/bin/massdns $$HOME/.local/bin/; } || true
+	ska_clone https://github.com/blechschmidt/massdns && make -C /opt/massdns 2>/dev/null && cp /opt/massdns/bin/massdns $$HOME/.local/bin/ || true
 	# Check for massdns update
 	[[ -d /opt/massdns ]] && git -C /opt/massdns pull | grep -q -v "Already up to date" && make -C /opt/massdns 2>/dev/null && cp /opt/massdns/bin/massdns $$HOME/.local/bin/ || true
 
@@ -307,7 +308,6 @@ install-offensive: sanity-check ## Install offensive & security tools
 	rm -rf /tmp/nuclei[0-9]*
 
 	# Clone custom tools -- run in parallel
-	ska_clone() { local pkg=$${1##*/}; [[ ! -d "/opt/$$pkg" ]] && git clone --depth=1 "$$1" "/tmp/$$pkg" && sudo mv "/tmp/$$pkg" "/opt/$$pkg" || true ; }
 	ska_clone https://github.com/jpillora/chisel &
 	ska_clone https://github.com/ambionics/phpggc &
 	ska_clone https://github.com/CBHue/PyFuscation &
