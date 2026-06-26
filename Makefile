@@ -275,10 +275,7 @@ install-offensive: sanity-check ## Install offensive & security tools
 	# HExHTTP: HTTP header vuln/cache-poisoning scanner — clone + isolated venv + PATH shim.
 	# Upstream pyproject entrypoint is broken (hexhttp.py not packaged); bypass with a direct wrapper.
 	[[ ! -d /opt/HExHTTP ]] && git clone --depth=1 https://github.com/c0dejump/HExHTTP /tmp/HExHTTP && sudo mv /tmp/HExHTTP /opt/HExHTTP && sudo chown -R "$$USER:$$USER" /opt/HExHTTP || true
-	[[ -d /opt/HExHTTP && ! -d /opt/HExHTTP/.venv ]] && { uv venv -q /opt/HExHTTP/.venv && uv pip install -q -p /opt/HExHTTP/.venv /opt/HExHTTP || true; } || {
-		# Check for HExHTTP update
-		git -C /opt/HExHTTP/ pull -q && uv pip install -q -p /opt/HExHTTP/.venv /opt/HExHTTP || true
-	}
+	[[ -d /opt/HExHTTP ]] && git -C /opt/HExHTTP/ pull -q && uv venv --allow-existing -q /opt/HExHTTP/.venv && uv pip install -q -p /opt/HExHTTP/.venv /opt/HExHTTP || true
 	sudo tee /usr/local/bin/hexhttp > /dev/null <<-'SHIM'
 		#!/usr/bin/env bash
 		exec /opt/HExHTTP/.venv/bin/python /opt/HExHTTP/hexhttp.py "$$@"
