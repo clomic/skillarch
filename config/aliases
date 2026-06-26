@@ -101,6 +101,7 @@ alias tn='tmux new'
 alias ta='tmux attach'
 alias b='bat'
 alias batall='find . -type f | xargs bat'
+alias batsh='bat -l sh'
 alias v='nvim'
 alias vi='nvim'
 alias c='code'
@@ -170,7 +171,7 @@ alias flameshotz='while true; do flameshot full -p ~/Downloads; sleep 1; done'
 # ────────────────────────────────────────
 alias show-disk-io='watch -cd -- iostat -h'
 alias sdi='show-disk-io'
-alias show-open-ports="sudo ss -lntup | awk '{print \$1, \$5, \$6, \$7}'| { read -r header; echo \"\$header\"; sort -V; } | column -t | grep -P 'Netid\K|:\K\d+ '"
+alias show-open-ports="sudo ss -lntup | awk '{print \$1,\$5,\$6,\$7}'| { read -r h; echo \"\$h\"; sort -V; } | column -t | grep -P 'Netid\K|:\K\d+ '"
 alias sop='show-open-ports'
 alias get-du='du -hd1 2>/dev/null'
 alias get-pid-click='xprop _NET_WM_PID | cut -d" " -f3'
@@ -224,6 +225,7 @@ crypt-enc() (set -e;
 crypt-dec() (set -e;openssl enc -d -aes-256-cbc -pbkdf2 -in "$1" -out "${1%.enc}";tar xf "${1%.enc}";rm "${1%.enc}")
 alias 7za='7z a -mhe=on'
 alias 7zp='7zG a -p -mhe=on'
+alias 7zpx='7zG x -mhe=on'
 xh() { [[ -z "$1" ]] && return ||  xxd "${@: -1}" | head "${@: 1:#-1}"; }
 alias fzf-h='print -z $(builtin fc -n -l 1|fzf --height=50% --tac --prompt="Command from history > " --preview="print {}" --preview-window="down:3:wrap")'
 bindkey -s '^h' "fzf-h\n"
