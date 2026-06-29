@@ -269,6 +269,7 @@ install-gui-tools: sanity-check ## Install GUI apps (Chrome, VSCode, Ghidra, etc
 
 install-offensive: sanity-check ## Install offensive & security tools
 	$(call INFO,Installing offensive tools...)
+	ska_clone() { local pkg=$${1##*/}; [[ ! -d "/opt/$$pkg" ]] && git clone --depth=1 "$$1" "/tmp/$$pkg" && sudo mv "/tmp/$$pkg" "/opt/$$pkg" || true ; }
 	$(PACMAN_INSTALL) metasploit fx lazygit fq gitleaks jdk21-openjdk hashcat bettercap bore
 	for pkg in ffuf gau waybackurls fabric-ai-bin caido-desktop caido-cli; do yay --noconfirm --needed -S "$$pkg" || $(call WARN,Failed to install $$pkg$(comma) continuing...); done
 
@@ -297,7 +298,7 @@ install-offensive: sanity-check ## Install offensive & security tools
 		&& wpprobe update-db ) || true
 
 	# massdns: required by shuffledns (PD tool) - Build from source into ~/.local/bin
-	[[ ! -d /opt/massdns ]] && { git clone --depth=1 https://github.com/blechschmidt/massdns && sudo mv -f massdns/ /opt/massdns && make -C /opt/massdns && cp /opt/massdns/bin/massdns $$HOME/.local/bin/; } || true
+	ska_clone https://github.com/blechschmidt/massdns && make -C /opt/massdns 2>/dev/null && cp /opt/massdns/bin/massdns $$HOME/.local/bin/ || true
 	# Check for massdns update
 	[[ -d /opt/massdns ]] && git -C /opt/massdns pull | grep -q -v "Already up to date" && make -C /opt/massdns 2>/dev/null && cp /opt/massdns/bin/massdns $$HOME/.local/bin/ || true
 
@@ -315,7 +316,6 @@ install-offensive: sanity-check ## Install offensive & security tools
 	rm -rf /tmp/nuclei[0-9]*
 
 	# Clone custom tools -- run in parallel
-	ska_clone() { local pkg=$${1##*/}; [[ ! -d "/opt/$$pkg" ]] && git clone --depth=1 "$$1" "/tmp/$$pkg" && sudo mv "/tmp/$$pkg" "/opt/$$pkg" || true ; }
 	ska_clone https://github.com/jpillora/chisel &
 	ska_clone https://github.com/ambionics/phpggc &
 	ska_clone https://github.com/CBHue/PyFuscation &

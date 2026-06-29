@@ -316,7 +316,7 @@ make clean              # Docker-only: clear caches (pacman, yay, pip, mise, go,
 `aix`, `alterx`, `asnmap`, `cdncheck`, `chaos-client`, `cloudlist`, `cvemap`, `dnsx`, `httpx`, `interactsh-client`, `interactsh-server`, `katana`, `mapcidr`, `naabu`, `notify`, `nuclei`, `proxify`, `shuffledns`, `simplehttpserver`, `subfinder`, `tldfinder`, `tlsx`, `tunnelx`, `uncover`, `urlfinder`
 
 ### Python uv Tools
-`sqlmap`, `wafw00f`, `bypass-url-parser`, `exegol`, `semgrep`, `pre-commit`, `argcomplete`, `yt-dlp`, `defaultcreds-cheat-sheet`
+`sqlmap`, `wafw00f`, `bypass-url-parser`, `exegol`, `opengrep`, `pre-commit`, `argcomplete`, `yt-dlp`, `defaultcreds-cheat-sheet`
 
 ### Go Tools (mise exec)
 `sns` (sw33tLie), `cook` (glitchedgitz), `brutespray` (x90skysn3k), `gowitness` (sensepost)
