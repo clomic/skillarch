@@ -147,8 +147,6 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 		}
 	done
 	uv tool upgrade --all || true
-	mise up -q || true
-	mise prune -q || true
 	$(call DONE,CLI tools & runtimes installed!)
 
 install-shell: sanity-check ## Install shell, zsh, oh-my-zsh, fzf, tmux
@@ -679,6 +677,11 @@ doctor: ## Diagnose system health & common issues
 	echo "  Shell: $$SHELL"
 	echo "  User: $$USER"
 	echo "  SkillArch: $$(cd /opt/skillarch 2>/dev/null && git log -1 --format='%h (%cr)' || echo 'unknown')"
+	echo ""
+	# Mise maintenance
+	$(call BOLD,--- Mise Maintenance ---)
+	echo "  Run 'mise up'      to upgrade outdated tool versions"
+	echo "  Run 'mise prune'    to delete unused runtime versions (reclaim disk space)"
 	echo ""
 
 list-tools: ## List installed offensive tools & versions
