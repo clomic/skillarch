@@ -255,6 +255,10 @@ install-gui-tools: sanity-check ## Install GUI apps (Chrome, VSCode, Ghidra, etc
 	xargs -I{} code --install-extension {} --force < config/extensions.txt
 	for pkg in fswebcam; do yay --noconfirm --needed -S "$$pkg" || $(call WARN,Failed to install $$pkg$(comma) continuing...); done
 	sudo ln -sf /usr/bin/google-chrome-stable /usr/local/bin/gog
+	# Flameshot 14 dropped native X11 capture in favor of xdg-desktop-portal,
+	# which has no working Screenshot backend under i3/X11. Force legacy mode.
+	mkdir -p ~/.config/flameshot
+	$(call ska-link,/opt/skillarch/config/flameshot/flameshot.ini,$$HOME/.config/flameshot/flameshot.ini)
 	$(call DONE,GUI applications installed!)
 
 install-offensive: sanity-check ## Install offensive & security tools
@@ -617,6 +621,7 @@ test-full: test ## Validate full Docker image install (runs test + extras)
 	ska_check "kitty config"   "[[ -L ~/.config/kitty/kitty.conf ]]"
 	ska_check "picom config"   "[[ -L ~/.config/picom.conf ]]"
 	ska_check "rofi config"    "[[ -L ~/.config/rofi/config.rasi ]]"
+	ska_check "flameshot config" "[[ -L ~/.config/flameshot/flameshot.ini ]]"
 	$(call BOLD,\n--- Wordlists ---)
 	ska_check "/opt/lists"        "[[ -d /opt/lists ]]"
 	ska_check "rockyou.txt"       "[[ -f /opt/lists/rockyou.txt ]]"
@@ -662,7 +667,7 @@ doctor: ## Diagnose system health & common issues
 	# Broken symlinks
 	$(call BOLD,--- Broken Symlinks (config) ---)
 	BROKEN=""
-	for link in ~/.zshrc ~/.tmux.conf ~/.vimrc ~/.config/nvim/init.lua ~/.config/i3/config ~/.config/polybar/config.ini ~/.config/polybar/launch.sh ~/.config/kitty/kitty.conf ~/.config/picom.conf ~/.config/rofi/config.rasi; do
+	for link in ~/.zshrc ~/.tmux.conf ~/.vimrc ~/.config/nvim/init.lua ~/.config/i3/config ~/.config/polybar/config.ini ~/.config/polybar/launch.sh ~/.config/kitty/kitty.conf ~/.config/picom.conf ~/.config/rofi/config.rasi ~/.config/flameshot/flameshot.ini; do
 		if [[ -L "$$link" ]] && [[ ! -e "$$link" ]]; then
 			echo -e "  $(C_ERR)[BROKEN]$(C_RST) $$link -> $$(readlink $$link)"
 			BROKEN="yes"
@@ -730,7 +735,7 @@ backup: ## Backup current configs before overwriting
 	BACKUP_DIR="$$HOME/.skillarch-backup-$$(date +%Y%m%d-%H%M%S)"
 	mkdir -p "$$BACKUP_DIR"
 	$(call INFO,Backing up configs to $$BACKUP_DIR)
-	for file in ~/.zshrc ~/.tmux.conf ~/.vimrc ~/.config/nvim/init.lua ~/.config/i3/config ~/.config/polybar/config.ini ~/.config/polybar/launch.sh ~/.config/kitty/kitty.conf ~/.config/picom.conf ~/.config/rofi/config.rasi /etc/X11/xorg.conf.d/30-touchpad.conf; do
+	for file in ~/.zshrc ~/.tmux.conf ~/.vimrc ~/.config/nvim/init.lua ~/.config/i3/config ~/.config/polybar/config.ini ~/.config/polybar/launch.sh ~/.config/kitty/kitty.conf ~/.config/picom.conf ~/.config/rofi/config.rasi ~/.config/flameshot/flameshot.ini /etc/X11/xorg.conf.d/30-touchpad.conf; do
 		if [[ -f "$$file" ]] || [[ -L "$$file" ]]; then
 			DEST="$$BACKUP_DIR/$$(basename $$file)"
 			cp -L "$$file" "$$DEST" 2>/dev/null && echo "  Backed up: $$file" || true

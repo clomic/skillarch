@@ -415,6 +415,7 @@ All configs live in `/opt/skillarch/config/` and are symlinked into `$HOME`:
 | `~/.config/kitty/kitty.conf` | `config/kitty/kitty.conf` |
 | `~/.config/picom.conf` | `config/picom.conf` |
 | `~/.config/rofi/config.rasi` | `config/rofi/config.rasi` |
+| `~/.config/flameshot/flameshot.ini` | `config/flameshot/flameshot.ini` |
 | `~/.vnc/kasmvnc.yaml` | `config/kasmvnc.yaml` |
 | `/etc/X11/xorg.conf.d/30-touchpad.conf` | `config/xorg.conf.d/30-touchpad.conf` |
 
