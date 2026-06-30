@@ -72,6 +72,8 @@ make clean              # Docker-only: clear caches (pacman, yay, pip, mise, go,
 | `C` | `code .` |
 | `p` | `python` |
 | `b` | `bat` |
+| `batall` | `find . -type f \| xargs bat` |
+| `batsh` | `bat -l sh` (Bash/Zsh/Shell syntax) |
 | `dl` | `cd ~/Downloads` |
 | `da` | `cd /DATA` |
 | `cdtmp` | `pushd $(mktemp -d)` |
@@ -93,6 +95,7 @@ make clean              # Docker-only: clear caches (pacman, yay, pip, mise, go,
 | `git-clone-all-gitlab` | Clone all owned GitLab repos |
 | `git-pull-all` | `git pull` in all subdirs (parallel) |
 | `gdh` | `git diff HEAD` |
+| `gst` | `git status --short` |
 
 ### Networking
 | Alias | Action |
@@ -166,7 +169,7 @@ make clean              # Docker-only: clear caches (pacman, yay, pip, mise, go,
 | Alias | Action |
 |---|---|
 | `show-disk-io` / `sdi` | `watch iostat -h` |
-| `show-open-ports` / `sop` | `ss -latepun \| grep LISTEN` |
+| `show-open-ports` / `sop` | `ss -lntup` (all listening TCP + UDP ports) |
 | `get-du` | `du -ch -d 1` |
 | `dirmon` | `inotifywait` recursive file monitoring |
 | `get-pid-click` | Click a window to get its PID |
@@ -179,6 +182,12 @@ make clean              # Docker-only: clear caches (pacman, yay, pip, mise, go,
 | `pv 3.12` | Create mise-managed Python venv (version arg required) |
 | `pyreq` | `pip install -r requirements.txt` |
 | `pysrv` | HTTP server from empty /tmp dir |
+| `uvv` | `uv venv .venv && source .venv/bin/activate` |
+| `uvr` | `uv run` |
+| `uvp` | `uv pip install` |
+| `uvreq` | `uv pip install -r requirements.txt` |
+| `uva` | `uv add --script` (add lib to script or via requirements.txt) |
+| `uvpwn` | `uvx --with pwntools python` |
 
 ### Misc
 | Alias | Action |
