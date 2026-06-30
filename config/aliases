@@ -205,7 +205,6 @@ alias pst='xsel -ob'
 alias get-meteo='curl -sH "accept-language: fr" https://wttr.in/ | head -n -2'
 alias gl='glow -w0'
 alias fab='fabric-ai -s'
-<<<<<<< HEAD
 cchef() (set -e;cd /opt/cyberchef && xdg-open index.html >&/dev/null &)
 ew() { local d="$HOME/.exegol/workspaces/$1"; [[ -d "$d" ]] && cd "$d"|| echo "Error: no $d folder" >&2; }
 alias exsta='exegol start'
@@ -227,10 +226,6 @@ crypt-dec() (set -e;openssl enc -d -aes-256-cbc -pbkdf2 -in "$1" -out "${1%.enc}
 alias 7za='7z a -mhe=on'
 alias 7zp='7zG a -p -mhe=on'
 alias 7zpx='7zG x -mhe=on'
-||||||| f970003
-alias fzf-h='print -z $(builtin fc -n -l 1|fzf --height=50% --tac --prompt="Command from history > " --preview="print {}" --preview-window="down:3:wrap")'
-=======
->>>>>>> upstream/main
 xh() { [[ -z "$1" ]] && return ||  xxd "${@: -1}" | head "${@: 1:#-1}"; }
 alias fzf-h='print -z $(builtin fc -n -l 1|fzf --height=50% --tac --prompt="Command from history > " --preview="print {}" --preview-window="down:3:wrap")'
 bindkey -s '^h' "fzf-h\n"
