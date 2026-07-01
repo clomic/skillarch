@@ -114,7 +114,6 @@ alias git-clone-all-github='curl -sk -H "Authorization: token ${GITHUB_READ_TOKE
 alias git-clone-all-gitlab='curl -sk -H "Authorization: Bearer ${GITLAB_READ_TOKEN}" "https://gitlab.com/api/v4/projects?owned=true&simple=true" | jq -r ".[].ssh_url_to_repo" | parallel -j10 "git clone {}"'
 alias git-pull-all='find . -maxdepth 2 -name ".git" | cut -d/ -f2 | parallel -j10 "cd {} && git pull"'
 alias gdh='git diff HEAD'
-alias gst='git status --short'
 
 # ────────────────────────────────────────
 #  File Management
