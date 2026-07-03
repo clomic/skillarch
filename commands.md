@@ -15,6 +15,9 @@
 |asnmap|ASN to IP range mapping|
 |audacity|Multi-track audio editor|
 |b|bat (A cat(1) clone with syntax highlighting and Git integration)|
+|b32|Encode into Base32|
+|b32d|Decode from Base32|
+|b32e|Encode into Base32|
 |b64|Encode into Base64|
 |b64d|Decode from Base64|
 |b64e|Encode into Base64|
@@ -199,7 +202,6 @@
 |git-clone-all-gitlab|Clone all owned GitLab repos|
 |git-pull-all|`git pull` in all subdirs (parallel)|
 |gitleaks|Detect secrets / passwords in git repos|
-|gst|`git status --short`|
 |gl|glow|
 |glow|Render Markdown in the terminal|
 |go|The Go programming language toolchain|

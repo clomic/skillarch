@@ -96,7 +96,6 @@ make clean              # Docker-only: clear caches (pacman, yay, pip, mise, go,
 | `git-clone-all-gitlab` | Clone all owned GitLab repos |
 | `git-pull-all` | `git pull` in all subdirs (parallel) |
 | `gdh` | `git diff HEAD` |
-| `gst` | `git status --short` |
 
 ### Networking
 | Alias | Action |
@@ -141,6 +140,7 @@ make clean              # Docker-only: clear caches (pacman, yay, pip, mise, go,
 
 | Alias / Function | Action |
 |---|---|
+| `b32` / `b32d` / `b32e` | base32 encode (alias `b32e`=`b32`) / decode |
 | `b64` / `b64d` / `b64e` | base64 encode (alias `b64e`=`b64`) / decode |
 | `b64url` / `b64urld` / `b64urle` | base64 url-safe encode / decode |
 | `toHex` / `fromHex` (aliases `hexe`/`hexd`) | hex encode / decode |
