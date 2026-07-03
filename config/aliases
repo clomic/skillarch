@@ -117,7 +117,6 @@ alias git-clone-all-github='curl -sk -H "Authorization: token ${GITHUB_READ_TOKE
 alias git-clone-all-gitlab='curl -sk -H "Authorization: Bearer ${GITLAB_READ_TOKEN}" "https://gitlab.com/api/v4/projects?owned=true&simple=true" | jq -r ".[].ssh_url_to_repo" | parallel -j10 "git clone {}"'
 alias git-pull-all='find . -maxdepth 2 -name ".git" | cut -d/ -f2 | parallel -j10 "cd {} && git pull"'
 alias gdh='git diff HEAD'
-alias gst='git status --short'
 
 # ────────────────────────────────────────
 #  File Management
@@ -281,6 +280,9 @@ alias get-chars='for c in {32..126}; do printf "\\x$(printf '%02x' $c)\n"; done'
 alias get-alpha='for c in {65..90} {97..122}; do printf "\\$(printf '%03o' $c)\n"; done'
 alias get-alphanum='for c in {48..57} {65..90} {97..122}; do printf "\\$(printf '%03o' $c)\n"; done'
 alias nocolor='sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g"'
+b32() { args_to_stdin "$@"|base32 -w0; }
+b32d() { args_to_stdin "$@"|base32 -d; }
+alias b32e='b32'
 b64() { args_to_stdin "$@"|base64 -w0; }
 b64d() { args_to_stdin "$@"|base64 -d; }
 alias b64e='b64'
