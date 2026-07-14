@@ -388,7 +388,7 @@ install-clomic: sanity-check ## Install clomic tools
 		sudo mv /tmp/cyberchef /opt/cyberchef;
 	}
 
-	for package in opengrep rtk; do \
+	for package in opengrep bun rtk npm:@earendil-works/pi-coding-agent; do \
 		for attempt in 1 2 3; do \
 			mise use -g "$$package@latest" && break || { \
 				$(call WARN,mise install $$package failed (attempt $$attempt/3)$(comma) retrying in 5s...) ; \
@@ -403,7 +403,17 @@ install-clomic: sanity-check ## Install clomic tools
 			$(call WARN,Retrying $$package install...)
 			uv tool install -q "$$package"
 		}
+	done;
+
+	# Install pi agent packages
+	for package in npm:context-mode npm:pi-mcp-adapter npm:pi-subagents git:github.com/DietrichGebert/ponytail; do
+		pi install "$$package" || {
+			$(call WARN,Retrying $$package install...)
+			pi install "$$package"
+		}
 	done
+
+	pi update --all
 
 	$(call DONE,Clomic tools installed!)
 
