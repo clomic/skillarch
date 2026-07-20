@@ -364,15 +364,18 @@ install-clomic: sanity-check ## Install clomic tools
 	git remote set-url origin git@github.com:clomic/skillarch.git
 	$(PACMAN_INSTALL) obsidian minicom sagemath 7zip ncdu numlockx shellcheck-bin tailscale p7zip-gui pigz pbzip2 pocl
 
-	[[ -d ~/.exegol/my-resources ]] && {
-		curl -sL $(curl -s https://api.github.com/repos/eza-community/eza/releases/latest | grep 'browser_download_url.*musl.tar.gz'|grep -o 'https://[^"]*') -o /tmp/eza-latest.tgz && tar zxf /tmp/eza-latest.tgz -C /tmp && mv /tmp/eza ~/.exegol/my-resources/bin/ && rm /tmp/eza-latest.tgz
-		curl -sL $$(curl -s https://api.github.com/repos/dathere/qsv/releases/latest | grep 'browser_download_url.*musl.zip'|grep -o 'https://[^"]*') -o /tmp/qsv-latest.zip && 7z x -y -o/tmp /tmp/qsv-latest.zip qsvlite>/dev/null&& mv /tmp/qsvlite ~/.exegol/my-resources/bin/qsv && rm /tmp/qsv-latest.zip
-		sudo cp /opt/skillarch/config/exegol/aliases ~/.exegol/my-resources/setup/zsh
-		sudo cp /opt/skillarch/config/tmux.conf ~/.exegol/my-resources/setup/tmux/.tmux.conf
-		sudo cp /opt/skillarch/config/exegol/load_user_setup.sh ~/.exegol/my-resources/setup/
+	[[ -d $$HOME/.exegol/my-resources ]] && {
+		curl -sL $(curl -s https://api.github.com/repos/eza-community/eza/releases/latest | grep 'browser_download_url.*musl.tar.gz'|grep -o 'https://[^"]*') -o /tmp/eza-latest.tgz && tar zxf /tmp/eza-latest.tgz -C /tmp && mv /tmp/eza $$HOME/.exegol/my-resources/bin/ && rm /tmp/eza-latest.tgz
+		curl -sL $$(curl -s https://api.github.com/repos/dathere/qsv/releases/latest | grep 'browser_download_url.*musl.zip'|grep -o 'https://[^"]*') -o /tmp/qsv-latest.zip && 7z x -y -o/tmp /tmp/qsv-latest.zip qsvlite>/dev/null&& mv /tmp/qsvlite $$HOME/.exegol/my-resources/bin/qsv && rm /tmp/qsv-latest.zip
+		sudo cp /opt/skillarch/config/exegol/aliases $$HOME/.exegol/my-resources/setup/zsh
+		sudo cp /opt/skillarch/config/tmux.conf $$HOME/.exegol/my-resources/setup/tmux/.tmux.conf
+		sudo cp /opt/skillarch/config/exegol/load_user_setup.sh $$HOME/.exegol/my-resources/setup/
 	}
 
 	$(call ska-link,/opt/skillarch/config/clomic.zsh-theme,$$HOME/.oh-my-zsh/themes/clomic.zsh-theme)
+
+	[[ ! -d $$HOME/.config/tmux/plugins/catppuccin ]] && git clone --depth=1 https://github.com/catppuccin/tmux.git $$HOME/.config/tmux/plugins/catppuccin/tmux || true
+
 
 	sudo ln -sf /opt/skillarch/config/systemd/resolved.conf /etc/systemd/resolved.conf
 	sudo ln -sf /opt/skillarch/config/minicom/minirc.dfl /etc/minirc.dfl
