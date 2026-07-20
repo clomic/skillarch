@@ -73,7 +73,7 @@ ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=245"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git ssh-agent colored-man-pages docker extract fzf mise npm terraform tmux zsh-autosuggestions zsh-completions zsh-syntax-highlighting z)
+plugins=(git ssh-agent colored-man-pages docker extract fzf mise npm terraform tmux zsh-autosuggestions zsh-completions zsh-syntax-highlighting)
 
 # source $ZSH/oh-my-zsh.sh
 
@@ -115,6 +115,7 @@ export VISUAL=/usr/bin/vim
 source $ZSH/oh-my-zsh.sh
 source /opt/skillarch/config/aliases
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-eval "$(register-python-argcomplete --no-defaults exegol)"
-
 export PATH=$PATH:~/.local/bin:~/.pdtm/go/bin
+eval "$(register-python-argcomplete --no-defaults exegol)"
+eval "$(zoxide init zsh)"
+eval "$(atuin init zsh)"

@@ -169,7 +169,7 @@ install-shell: sanity-check ## Install shell, zsh, oh-my-zsh, fzf, tmux
 	[[ ! -d ~/.oh-my-zsh/plugins/zsh-autosuggestions ]] && git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/plugins/zsh-autosuggestions || true
 	[[ ! -d ~/.oh-my-zsh/plugins/zsh-syntax-highlighting ]] && git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/plugins/zsh-syntax-highlighting || true
 	[[ ! -d ~/.ssh ]] && mkdir ~/.ssh && chmod 700 ~/.ssh || true # Must exist for ssh-agent to work
-	for plugin in colored-man-pages docker extract fzf mise npm terraform tmux zsh-autosuggestions zsh-completions zsh-syntax-highlighting ssh-agent z ; do zsh -c "source ~/.zshrc && omz plugin enable $$plugin || true" || true; done
+	for plugin in colored-man-pages docker extract fzf mise npm terraform tmux zsh-autosuggestions zsh-completions zsh-syntax-highlighting ssh-agent ; do zsh -c "source ~/.zshrc && omz plugin enable $$plugin || true" || true; done
 
 	# Install and configure fzf, tmux, vim
 	[[ ! -d ~/.fzf ]] && git clone --depth=1 https://github.com/junegunn/fzf ~/.fzf && ~/.fzf/install --all || true
@@ -388,7 +388,7 @@ install-clomic: sanity-check ## Install clomic tools
 		sudo mv /tmp/cyberchef /opt/cyberchef;
 	}
 
-	for package in opengrep bun rtk npm:@earendil-works/pi-coding-agent; do \
+	for package in opengrep bun rtk npm:@earendil-works/pi-coding-agent zoxide atuin; do \
 		for attempt in 1 2 3; do \
 			mise use -g "$$package@latest" && break || { \
 				$(call WARN,mise install $$package failed (attempt $$attempt/3)$(comma) retrying in 5s...) ; \
@@ -396,6 +396,7 @@ install-clomic: sanity-check ## Install clomic tools
 			} ; \
 		done ; \
 	done
+	eval "$$(mise activate bash)" || true
 
 	# Install uv tools
 	for package in aliasr unblob updog yq; do
@@ -412,8 +413,15 @@ install-clomic: sanity-check ## Install clomic tools
 			pi install "$$package"
 		}
 	done
-
 	pi update --all
+
+	# Atuin config
+	eval "$$(atuin init zsh)" || true
+	atuin import auto
+	atuin hook install pi
+	$(call ska-link,/opt/skillarch/config/atuin/config.toml,$$HOME/.config/atuin/config.toml)
+
+
 
 	$(call DONE,Clomic tools installed!)
 
