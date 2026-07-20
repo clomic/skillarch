@@ -396,6 +396,7 @@ install-clomic: sanity-check ## Install clomic tools
 			} ; \
 		done ; \
 	done
+	eval "$$(mise activate bash)" || true
 
 	# Install uv tools
 	for package in aliasr unblob updog yq; do
