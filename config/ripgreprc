@@ -1,0 +1,14 @@
+# Ripgrep config file
+
+# Search hidden files / directories
+--hidden
+
+# Files to search or to not search (!)
+--glob
+!.git*
+
+# Ignore case unless all caps
+--smart-case
+
+# colors will be passed after pipe
+--color=always

@@ -118,4 +118,6 @@ source /opt/skillarch/config/aliases
 export PATH=$PATH:~/.local/bin:~/.pdtm/go/bin
 eval "$(register-python-argcomplete --no-defaults exegol)"
 eval "$(zoxide init zsh)"
-eval "$(atuin init zsh)"
+eval "$(atuin init zsh --disable-up-arrow)"
+export RIPGREP_CONFIG_PATH=/opt/skillarch/config/ripgreprc
+

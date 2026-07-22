@@ -121,7 +121,7 @@ alias gdh='git diff HEAD'
 # ────────────────────────────────────────
 #  File Management
 # ────────────────────────────────────────
-alias l="eza -l --group-directories-first --icons"
+alias l="eza -l --group-directories-first --icons=auto"
 alias li="eza -l --group-directories-first"
 alias la="l -a"
 alias laa="l -aa"
@@ -170,8 +170,8 @@ alias flameshotz='while true; do flameshot full -p ~/Downloads; sleep 1; done'
 # ────────────────────────────────────────
 alias show-disk-io='watch -cd -- iostat -h'
 alias sdi='show-disk-io'
-alias show-open-ports="sudo ss -lntup | awk 'NR>1 {print \$1,\$5,\$6,\$7}'| {echo 'TCP/UDP Local:Port Peer:Port Process';sort -V} | column -t | grep -P 'TCP\K|:\K\d+ '"
-alias sop='show-open-ports'
+alias sop="sudo ss -lntup | awk 'NR>1 {print \$1,\$5,\$6,\$7}'| {echo 'TCP/UDP Local:Port Peer:Port Process';sort -V} | column -t | grep -P 'TCP\K|:\K\d+ '"
+alias show-open-ports='sop'
 alias get-du='du -hd1 2>/dev/null'
 alias get-pid-click='xprop _NET_WM_PID | cut -d" " -f3'
 alias get-pid-ps='ps fauxw | fzf --reverse| awk "{print\$2}"'
@@ -226,8 +226,8 @@ alias 7za='7z a -mhe=on'
 alias 7zp='7zG a -p -mhe=on'
 alias 7zpx='7zG x -mhe=on'
 xh() { [[ -z "$1" ]] && return ||  xxd "${@: -1}" | head "${@: 1:#-1}"; }
-alias fzf-h='print -z $(builtin fc -n -l 1|fzf --height=50% --tac --prompt="Command from history > " --preview="print {}" --preview-window="down:3:wrap")'
-bindkey -s '^h' "fzf-h\n"
+# alias fzf-h='print -z $(builtin fc -n -l 1|fzf --height=50% --tac --prompt="Command from history > " --preview="print {}" --preview-window="down:3:wrap")'
+# bindkey -s '^h' "fzf-h\n"
 cmd_picker_select() {
     local md_file="${1:-/opt/skillarch/commands.md}"
     grep '|' "$md_file" | grep -v '^\s*|[-|]\+' | sed 's/\\|/\x00/g; s/``/\x01/g' \
