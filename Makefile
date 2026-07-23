@@ -391,7 +391,7 @@ install-clomic: sanity-check ## Install clomic tools
 		sudo mv /tmp/cyberchef /opt/cyberchef;
 	}
 
-	for package in opengrep bun rtk npm:@earendil-works/pi-coding-agent zoxide atuin; do \
+	for package in opengrep bun rtk npm:@earendil-works/pi-coding-agent zoxide atuin gh hunkdiff; do \
 		for attempt in 1 2 3; do \
 			mise use -g "$$package@latest" && break || { \
 				$(call WARN,mise install $$package failed (attempt $$attempt/3)$(comma) retrying in 5s...) ; \
@@ -424,9 +424,20 @@ install-clomic: sanity-check ## Install clomic tools
 	atuin hook install pi
 	$(call ska-link,/opt/skillarch/config/atuin/config.toml,$$HOME/.config/atuin/config.toml)
 
+  # gh-dash
+	gh extension install dlvhdr/gh-dash
+	[[ ! -d $$HOME/.config/gh-dash ]] && mkdir -p "$$HOME/.config/gh-dash"
+	$(call ska-link,/opt/skillarch/config/gh-dash/config.yml,$$HOME/.config/gh-dash/config.yml)
 
+	# lazygit config
+	[[ ! -d $$HOME/.config/lazygit ]] && mkdir -p "$$HOME/.config/lazygit"
+	$(call ska-link,/opt/skillarch/config/lazygit/config.yml,$$HOME/.config/lazygit/config.yml)
 
-	$(call DONE,Clomic tools installed!)
+	# hunkdiff config
+	[[ ! -d $$HOME/.config/hunk ]] && mkdir -p "$$HOME/.config/hunk"
+	$(call ska-link,/opt/skillarch/config/hunk/config.yml,$$HOME/.config/hunk/config.yml)
+
+	$(call DONE,clomic tools installed!)
 
 install-sysreptor:  sanity-check ## Install sysreptor
 	get_sysreptor() {
