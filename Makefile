@@ -410,7 +410,7 @@ install-clomic: sanity-check ## Install clomic tools
 	done;
 
 	# Install pi agent packages
-	for package in npm:context-mode npm:pi-mcp-adapter npm:pi-subagents git:github.com/DietrichGebert/ponytail; do
+	for package in npm:context-mode npm:pi-mcp-adapter npm:pi-subagents git:github.com/DietrichGebert/ponytail git:github.com/otahontas/pi-coding-agent-catppuccin; do
 		pi install "$$package" || {
 			$(call WARN,Retrying $$package install...)
 			pi install "$$package"
