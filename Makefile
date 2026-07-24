@@ -419,7 +419,7 @@ install-clomic: sanity-check ## Install clomic tools
 	pi update --all
 
 	# Atuin config
-	eval "$$(atuin init zsh)" || true
+	eval "$$(atuin init bash)" 2>/dev/null || true
 	atuin import auto
 	atuin hook install pi
 	$(call ska-link,/opt/skillarch/config/atuin/config.toml,$$HOME/.config/atuin/config.toml)
