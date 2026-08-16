@@ -121,3 +121,5 @@ eval "$(zoxide init zsh)"
 eval "$(atuin init zsh --disable-up-arrow)"
 export RIPGREP_CONFIG_PATH=/opt/skillarch/config/ripgreprc
 
+
+if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)"; fi
