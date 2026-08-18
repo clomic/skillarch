@@ -440,5 +440,6 @@
 |yt-dlp-likes|Download Youtube Favorites Videos to MP3|
 |yt-mp3|Extract audio (in MP3) from Youtube link|
 |zip|Package and compress files|
+|zmv|`zmv '(*).log' '$1.txt'` `zmv -W '*.log' '*.txt'`|
 |zsh|Z shell — powerful interactive shell|
 

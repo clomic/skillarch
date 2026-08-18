@@ -1,0 +1,132 @@
+"$schema" = "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json"
+version = 4
+final_space = true
+
+#
+# === Venv ===
+#
+[[blocks]]
+type = "prompt"
+alignment = "left"
+newline = true
+
+[[blocks.segments]]
+type = "python"
+style = "plain"
+foreground = "p:text"
+template = "{{ if .Venv }}({{ .Venv }}) {{ end }}"
+
+[blocks.segments.options]
+home_enabled = false
+display_mode = "environment"
+fetch_virtual_env = true
+fetch_version = false
+folder_name_fallback = false
+
+
+#
+# === Filler ===
+#
+[[blocks]]
+type = "prompt"
+alignment = "right"
+filler = "<p:grey>─</>"
+force = true
+
+
+#
+# === Path + Git + Prompt
+#
+[[blocks]]
+type = "prompt"
+alignment = "left"
+
+# Path
+[[blocks.segments]]
+type = "path"
+style = "plain"
+foreground = "p:strong_blue"
+template = "{{ .Path }}"
+
+[blocks.segments.options]
+style = "full"
+home_icon = "~"
+folder_separator_icon = "/"
+
+
+# Git
+[[blocks.segments]]
+type = "git"
+style = "plain"
+foreground = "p:blue_jeans"
+template = " (<p:caribbean_green_pearl>{{ .HEAD }}</>{{ if .Working.Changed }}<p:chinese_yellow>*</>{{ end }})"
+
+[blocks.segments.options]
+branch_icon = ''
+commit_icon = '@'
+fetch_status = true
+fetch_stash_count = true
+fetch_upstream_icon = false
+
+
+# Prompt
+[[blocks.segments]]
+type = "text"
+style = "plain"
+foreground = "p:violets_are_blue"
+template = " »"
+
+#
+# === Status code + username@hostname ===
+#
+[[blocks]]
+type = "rprompt"
+alignment = "right"
+
+# Status code
+[[blocks.segments]]
+type = "status"
+foreground = "p:red"
+template = "{{ if .Error }}{{ .Code }} ↵ {{ end }}"
+
+# username@hostname
+[[blocks.segments]]
+type = "session"
+style = "plain"
+foreground = "p:grey"
+template = "{{ .UserName }}@{{ .HostName }}"
+
+[palette]
+strong_blue = "#0087D7"
+blue_jeans = "#5FAFFF" 
+violets_are_blue = "#8787FF"
+caribbean_green_pearl = "#5FD787"
+chinese_yellow = "#FFAF00"
+grey = "#3A3A3A"
+# Catppuccin Mocha
+rosewater = "#F5E0DC"
+flamingo = "#F2CDCD"
+pink = "#F5C2E7"
+mauve = "#CBA6F7"
+red = "#F38BA8"
+maroon = "#EBA0AC"
+peach = "#FAB387"
+yellow = "#F9E2AF"
+green = "#A6E3A1"
+teal = "#94E2D5"
+sky = "#89DCEB"
+sapphire = "#74C7EC"
+blue = "#89B4FA"
+lavender = "#B4BEFE"
+text = "#CDD6F4"
+subtext_1 = "#BAC2DE"
+subtext_0 = "#A6ADC8"
+overlay_2 = "#9399B2"
+overlay_1 = "#7F849C"
+overlay_0 = "#6C7086"
+surface_2 = "#585B70"
+surface_1 = "#45475A"
+surface_0 = "#313244"
+base = "#1E1E2E"
+mantle = "#181825"
+crust = "#11111B"

@@ -126,17 +126,17 @@ install-base: sanity-check ## Install base packages
 install-cli-tools: sanity-check ## Install CLI tools & runtimes
 	$(call INFO,Installing CLI tools & runtimes...)
 	$(PACMAN_INSTALL) base-devel bison bzip2 ca-certificates cloc cmake dos2unix expect ffmpeg foremost gdb gnupg htop bottom hwinfo icu inotify-tools iproute2 jq llvm lsof ltrace make mlocate mplayer ncurses net-tools ngrep nmap openssh openssl parallel perl-image-exiftool pkgconf python-virtualenv re2c readline ripgrep rlwrap socat sqlite sshpass tmate tor traceroute trash-cli tree unzip vbindiff xsel xz yay zip veracrypt git-delta viu qsv asciinema htmlq neovim glow jless websocat superfile gron eza fastfetch bat sysstat cronie tree-sitter bc
-	sudo ln -sf /usr/bin/bat /usr/local/bin/batcat
+	$(call ska-link,/opt/skillarch/config/ripgreprc,$$XDH_CONFIG_HOME/ripgrep/ripgreprc)
 	[[ ! -f ~/.gdbinit-gef.py ]] && curl -fsSL -o ~/.gdbinit-gef.py https://raw.githubusercontent.com/hugsy/gef/main/gef.py && echo "source ~/.gdbinit-gef.py" >> ~/.gdbinit || echo "gef already installed"
 	# nvim config
 	[[ ! -d ~/.config/nvim ]] && git clone --depth=1 https://github.com/LazyVim/starter ~/.config/nvim || true
-	$(call ska-link,/opt/skillarch/config/nvim/init.lua,$$HOME/.config/nvim/init.lua)
+	$(call ska-link,/opt/skillarch/config/nvim/init.lua,$$XDH_CONFIG_HOME/nvim/init.lua)
 	nvim --headless +"Lazy! sync" +qa >/dev/null # Download and update plugins
 
 	# Install mise and all php-build dependencies
 	$(PACMAN_INSTALL) mise libedit libffi libjpeg-turbo libpcap libpng libxml2 libzip postgresql-libs php-gd
 	# mise self-update # Currently broken, wait for upstream fix, pinged on 17/03/2025
-	for package in uv usage pdm rust terraform golang python nodejs opencode; do \
+	for package in uv usage pdm rust terraform golang python nodejs opencode oh-my-posh; do \
 		for attempt in 1 2 3; do \
 			mise use -g "$$package@latest" && break || { \
 				$(call WARN,mise install $$package failed (attempt $$attempt/3)$(comma) retrying in 5s...) ; \
@@ -161,20 +161,28 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 
 install-shell: sanity-check ## Install shell, zsh, oh-my-zsh, fzf, tmux
 	$(call INFO,Installing shell & dotfiles...)
-	# Install and Configure zsh and oh-my-zsh
-	$(PACMAN_INSTALL) zsh zsh-completions zsh-syntax-highlighting zsh-autosuggestions zsh-history-substring-search zsh-theme-powerlevel10k
-	[[ ! -d ~/.oh-my-zsh ]] && sh -c "$$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended || true
+# 	# Install and Configure zsh
+	$(PACMAN_INSTALL) zsh
+	$(call ska-link,/opt/skillarch/config/zshenv,$$HOME/.zshenv)
 	$(call ska-link,/opt/skillarch/config/zshrc,$$HOME/.zshrc)
-	[[ ! -d ~/.oh-my-zsh/plugins/zsh-completions ]] && git clone --depth=1 https://github.com/zsh-users/zsh-completions ~/.oh-my-zsh/plugins/zsh-completions || true
-	[[ ! -d ~/.oh-my-zsh/plugins/zsh-autosuggestions ]] && git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/plugins/zsh-autosuggestions || true
-	[[ ! -d ~/.oh-my-zsh/plugins/zsh-syntax-highlighting ]] && git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/plugins/zsh-syntax-highlighting || true
+	sh -c "$$(curl -s https://ohmyposh.dev/install.sh)" || true
+	[[ ! -d "$$XDG_CONFIG_HOME/ohmyposh" ]] && mkdir -p "$$XDG_CONFIG_HOME/ohmyposh"
+	$(call ska-link,/opt/skillarch/config/oh-my-posh/skillarch.toml,$$XDG_CONFIG_HOME/ohmyposh/skillarch.toml)
+	ZINIT_HOME="$$HOME/.local/share/zinit/zinit.git"
+	[[ ! -d "$$ZINIT_HOME" ]] && { \
+		mkdir -p "$$(dirname "$$ZINIT_HOME")"; \
+		git clone --depth=1 https://github.com/zdharma-continuum/zinit.git "$$ZINIT_HOME" || true; \
+	} || { git -C "$$ZINIT_HOME" pull -q || true; }
+	[[ ! -d "$$XDG_CONFIG_HOME/fsh/" ]] && curl -sSO --create-dirs --output-dir "$$XDG_CONFIG_HOME/fsh" https://raw.githubusercontent.com/catppuccin/zsh-fsh/refs/heads/main/themes/catppuccin-macchiato.ini || true
+
 	[[ ! -d ~/.ssh ]] && mkdir ~/.ssh && chmod 700 ~/.ssh || true # Must exist for ssh-agent to work
-	for plugin in colored-man-pages docker extract fzf mise npm terraform tmux zsh-autosuggestions zsh-completions zsh-syntax-highlighting ssh-agent ; do zsh -c "source ~/.zshrc && omz plugin enable $$plugin || true" || true; done
 
 	# Install and configure fzf, tmux, vim
-	[[ ! -d ~/.fzf ]] && git clone --depth=1 https://github.com/junegunn/fzf ~/.fzf && ~/.fzf/install --all || true
-	$(call ska-link,/opt/skillarch/config/tmux.conf,$$HOME/.tmux.conf)
+	[[ ! -d "$$HOME/.fzf" ]] && git clone --depth=1 https://github.com/junegunn/fzf "$$HOME/.fzf" && "$$HOME/.fzf/install" --all || true
+	[[ ! -d "$$XDG_CONFIG_HOME/tmux" ]] && mkdir -p "$$XDG_CONFIG_HOME/tmux"
+	$(call ska-link,/opt/skillarch/config/tmux.conf,$$XDG_CONFIG_HOME/tmux/tmux.conf)
 	$(call ska-link,/opt/skillarch/config/vimrc,$$HOME/.vimrc)
+
 	# Set the default user shell to zsh
 	sudo chsh -s /usr/bin/zsh "$$USER" # Logout required to be applied
 	$(call DONE,Shell & dotfiles installed!)
@@ -228,23 +236,23 @@ install-gui: sanity-check ## Install i3, polybar, kitty, rofi, picom, KDE Plasma
 
 	# i3 config
 	[[ ! -d ~/.config/i3 ]] && mkdir -p ~/.config/i3 || true
-	$(call ska-link,/opt/skillarch/config/i3/config,$$HOME/.config/i3/config)
+	$(call ska-link,/opt/skillarch/config/i3/config,$$XDH_CONFIG_HOME/i3/config)
 
 	# polybar config
 	[[ ! -d ~/.config/polybar ]] && mkdir -p ~/.config/polybar || true
-	$(call ska-link,/opt/skillarch/config/polybar/config.ini,$$HOME/.config/polybar/config.ini)
-	$(call ska-link,/opt/skillarch/config/polybar/launch.sh,$$HOME/.config/polybar/launch.sh)
+	$(call ska-link,/opt/skillarch/config/polybar/config.ini,$$XDH_CONFIG_HOME/polybar/config.ini)
+	$(call ska-link,/opt/skillarch/config/polybar/launch.sh,$$XDH_CONFIG_HOME/polybar/launch.sh)
 
 	# rofi config
 	[[ ! -d ~/.config/rofi ]] && mkdir -p ~/.config/rofi || true
-	$(call ska-link,/opt/skillarch/config/rofi/config.rasi,$$HOME/.config/rofi/config.rasi)
+	$(call ska-link,/opt/skillarch/config/rofi/config.rasi,$$XDH_CONFIG_HOME/rofi/config.rasi)
 
 	# picom config
-	$(call ska-link,/opt/skillarch/config/picom.conf,$$HOME/.config/picom.conf)
+	$(call ska-link,/opt/skillarch/config/picom.conf,$$XDH_CONFIG_HOME/picom.conf)
 
 	# kitty config
 	[[ ! -d ~/.config/kitty ]] && mkdir -p ~/.config/kitty || true
-	$(call ska-link,/opt/skillarch/config/kitty/kitty.conf,$$HOME/.config/kitty/kitty.conf)
+	$(call ska-link,/opt/skillarch/config/kitty/kitty.conf,$$XDH_CONFIG_HOME/kitty/kitty.conf)
 
 	# touchpad config
 	[[ ! -d /etc/X11/xorg.conf.d ]] && sudo mkdir -p /etc/X11/xorg.conf.d || true
@@ -268,7 +276,7 @@ install-gui-tools: sanity-check ## Install GUI apps (Chrome, VSCode, Ghidra, etc
 	# Flameshot 14 dropped native X11 capture in favor of xdg-desktop-portal,
 	# which has no working Screenshot backend under i3/X11. Force legacy mode.
 	mkdir -p ~/.config/flameshot
-	$(call ska-link,/opt/skillarch/config/flameshot/flameshot.ini,$$HOME/.config/flameshot/flameshot.ini)
+	$(call ska-link,/opt/skillarch/config/flameshot/flameshot.ini,$$XDH_CONFIG_HOME/flameshot/flameshot.ini)
 	$(call DONE,GUI applications installed!)
 
 install-offensive: sanity-check ## Install offensive & security tools
@@ -372,10 +380,9 @@ install-clomic: sanity-check ## Install clomic tools
 		sudo cp /opt/skillarch/config/exegol/load_user_setup.sh $$HOME/.exegol/my-resources/setup/
 	}
 
-	$(call ska-link,/opt/skillarch/config/clomic.zsh-theme,$$HOME/.oh-my-zsh/themes/clomic.zsh-theme)
+# 	$(call ska-link,/opt/skillarch/config/clomic.zsh-theme,$$HOME/.oh-my-zsh/themes/clomic.zsh-theme)
 
-	[[ ! -d $$HOME/.config/tmux/plugins/catppuccin ]] && git clone --depth=1 https://github.com/catppuccin/tmux.git $$HOME/.config/tmux/plugins/catppuccin/tmux || true
-
+	[[ ! -d "$$XDG_CONFIG_HOME/tmux/plugins/catppuccin" ]] && git clone --depth=1 https://github.com/catppuccin/tmux.git "$$XDG_CONFIG_HOME/tmux/plugins/catppuccin/tmux" || true
 
 	sudo ln -sf /opt/skillarch/config/systemd/resolved.conf /etc/systemd/resolved.conf
 	sudo ln -sf /opt/skillarch/config/minicom/minirc.dfl /etc/minirc.dfl
@@ -391,7 +398,7 @@ install-clomic: sanity-check ## Install clomic tools
 		sudo mv /tmp/cyberchef /opt/cyberchef;
 	}
 
-	for package in opengrep bun rtk npm:@earendil-works/pi-coding-agent zoxide atuin gh hunkdiff; do \
+	for package in opengrep bun rtk npm:@earendil-works/pi-coding-agent zoxide atuin gh hunkdiff yazi; do \
 		for attempt in 1 2 3; do \
 			mise use -g "$$package@latest" && break || { \
 				$(call WARN,mise install $$package failed (attempt $$attempt/3)$(comma) retrying in 5s...) ; \
@@ -419,23 +426,29 @@ install-clomic: sanity-check ## Install clomic tools
 	pi update --all
 
 	# Atuin config
-	eval "$$(atuin init bash)" 2>/dev/null || true
+	eval "$$(atuin init zsh)" 2>/dev/null || true
 	atuin import auto
 	atuin hook install pi
-	$(call ska-link,/opt/skillarch/config/atuin/config.toml,$$HOME/.config/atuin/config.toml)
+	$(call ska-link,/opt/skillarch/config/atuin/config.toml,$$XDH_CONFIG_HOME/atuin/config.toml)
 
-  # gh-dash
+	# gh-dash
 	gh extension install dlvhdr/gh-dash
-	[[ ! -d $$HOME/.config/gh-dash ]] && mkdir -p "$$HOME/.config/gh-dash"
-	$(call ska-link,/opt/skillarch/config/gh-dash/config.yml,$$HOME/.config/gh-dash/config.yml)
+	[[ ! -d $$XDH_CONFIG_HOME/gh-dash ]] && mkdir -p "$$XDH_CONFIG_HOME/gh-dash"
+	$(call ska-link,/opt/skillarch/config/gh-dash/config.yml,$$XDH_CONFIG_HOME/gh-dash/config.yml)
 
 	# lazygit config
-	[[ ! -d $$HOME/.config/lazygit ]] && mkdir -p "$$HOME/.config/lazygit"
-	$(call ska-link,/opt/skillarch/config/lazygit/config.yml,$$HOME/.config/lazygit/config.yml)
+	[[ ! -d $$XDH_CONFIG_HOME/lazygit ]] && mkdir -p "$$XDH_CONFIG_HOME/lazygit"
+	$(call ska-link,/opt/skillarch/config/lazygit/config.yml,$$XDH_CONFIG_HOME/lazygit/config.yml)
 
 	# hunkdiff config
-	[[ ! -d $$HOME/.config/hunk ]] && mkdir -p "$$HOME/.config/hunk"
-	$(call ska-link,/opt/skillarch/config/hunk/config.yml,$$HOME/.config/hunk/config.yml)
+	[[ ! -d $$XDH_CONFIG_HOME/hunk ]] && mkdir -p "$$XDH_CONFIG_HOME/hunk"
+	$(call ska-link,/opt/skillarch/config/hunk/config.yml,$$XDH_CONFIG_HOME/hunk/config.yml)
+
+	# yazi config
+	[[ ! -d $$XDH_CONFIG_HOME/yazi ]] && mkdir -p "$$XDH_CONFIG_HOME/yazi"
+	$(call ska-link,/opt/skillarch/config/yazi/theme.toml,$$XDH_CONFIG_HOME/yazi/theme.toml)
+	$(call ska-link,/opt/skillarch/config/yazi/Catppuccin-macchiato.toml,$$XDH_CONFIG_HOME/yazi/Catppuccin-macchiato.toml)
+
 
 	$(call DONE,clomic tools installed!)
 
@@ -723,7 +736,7 @@ test: ## Validate installation (smoke tests)
 	$(call BOLD,\n--- Shell & Config ---)
 	ska_check "oh-my-zsh"  "[[ -d ~/.oh-my-zsh ]]"
 	ska_check "zshrc link" "[[ -L ~/.zshrc ]]"
-	ska_check "tmux.conf"  "[[ -L ~/.tmux.conf ]]"
+	ska_check "tmux.conf"  "[[ -L ~/.config/tmux/tmux.conf ]]"
 	ska_check "vimrc"      "[[ -L ~/.vimrc ]]"
 	ska_check "nvim init"  "[[ -L ~/.config/nvim/init.lua ]]"
 	ska_check "ssh dir"    "[[ -d ~/.ssh ]]"
@@ -858,7 +871,7 @@ doctor: ## Diagnose system health & common issues
 	# Broken symlinks
 	$(call BOLD,--- Broken Symlinks (config) ---)
 	BROKEN=""
-	for link in ~/.zshrc ~/.tmux.conf ~/.vimrc ~/.config/nvim/init.lua ~/.config/i3/config ~/.config/polybar/config.ini ~/.config/polybar/launch.sh ~/.config/kitty/kitty.conf ~/.config/picom.conf ~/.config/rofi/config.rasi ~/.config/flameshot/flameshot.ini; do
+	for link in ~/.zshrc ~/.config/tmux/tmux.conf ~/.vimrc ~/.config/nvim/init.lua ~/.config/i3/config ~/.config/polybar/config.ini ~/.config/polybar/launch.sh ~/.config/kitty/kitty.conf ~/.config/picom.conf ~/.config/rofi/config.rasi ~/.config/flameshot/flameshot.ini; do
 		if [[ -L "$$link" ]] && [[ ! -e "$$link" ]]; then
 			echo -e "  $(C_ERR)[BROKEN]$(C_RST) $$link -> $$(readlink $$link)"
 			BROKEN="yes"
@@ -926,7 +939,7 @@ backup: ## Backup current configs before overwriting
 	BACKUP_DIR="$$HOME/.skillarch-backup-$$(date +%Y%m%d-%H%M%S)"
 	mkdir -p "$$BACKUP_DIR"
 	$(call INFO,Backing up configs to $$BACKUP_DIR)
-	for file in ~/.zshrc ~/.tmux.conf ~/.vimrc ~/.config/nvim/init.lua ~/.config/i3/config ~/.config/polybar/config.ini ~/.config/polybar/launch.sh ~/.config/kitty/kitty.conf ~/.config/picom.conf ~/.config/rofi/config.rasi ~/.config/flameshot/flameshot.ini /etc/X11/xorg.conf.d/30-touchpad.conf; do
+	for file in ~/.zshrc ~/.config/tmux/tmux.conf ~/.vimrc ~/.config/nvim/init.lua ~/.config/i3/config ~/.config/polybar/config.ini ~/.config/polybar/launch.sh ~/.config/kitty/kitty.conf ~/.config/picom.conf ~/.config/rofi/config.rasi ~/.config/flameshot/flameshot.ini /etc/X11/xorg.conf.d/30-touchpad.conf; do
 		if [[ -f "$$file" ]] || [[ -L "$$file" ]]; then
 			DEST="$$BACKUP_DIR/$$(basename $$file)"
 			cp -L "$$file" "$$DEST" 2>/dev/null && echo "  Backed up: $$file" || true

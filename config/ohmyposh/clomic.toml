@@ -1,0 +1,86 @@
+# "$schema" = "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json"
+version = 4
+final_space = true
+console_title_template = "{{.Folder}}{{if .Root}} :: root{{end}} :: {{.Shell}}"
+
+#
+# === Path + Git + Prompt
+#
+[[blocks]]
+type = "prompt"
+alignment = "left"
+newline = true
+
+# Path
+[[blocks.segments]]
+type = "path"
+style = "plain"
+foreground = "p:strong_blue"
+template = "{{.Path}} "
+
+[blocks.segments.options]
+style = "full"
+
+# Git
+[[blocks.segments]]
+type = "git"
+style = "plain"
+foreground = "p:blue_jeans"
+template = "(<p:caribbean_green_pearl>{{ .HEAD }}</>{{ if .BranchStatus }}<p:chinese_yellow>{{ .BranchStatus }}{{ end }}</>) "
+
+[blocks.segments.options]
+branch_icon = ''
+commit_icon = '@'
+fetch_status = true
+
+# Prompt
+[[blocks.segments]]
+foreground = "p:violets_are_blue"
+foreground_templates = [ "{{ if gt .Code 0 }}p:red{{ end }}" ]
+style = "plain"
+template = "»"
+type = "status"
+
+[blocks.segments.options]
+always_enabled = true
+
+# Transient Prompt
+[transient_prompt]
+foreground = "p:violets_are_blue"
+foreground_templates = [ "{{ if gt .Code 0 }}p:red{{ end }}" ]
+template = "» "
+
+[palette]
+strong_blue = "#0087D7"
+blue_jeans = "#5FAFFF"
+violets_are_blue = "#8787FF"
+caribbean_green_pearl = "#5FD787"
+chinese_yellow = "#FFAF00"
+grey = "#3A3A3A"
+# Catppuccin Mocha
+rosewater = "#F5E0DC"
+flamingo = "#F2CDCD"
+pink = "#F5C2E7"
+mauve = "#CBA6F7"
+red = "#F38BA8"
+maroon = "#EBA0AC"
+peach = "#FAB387"
+yellow = "#F9E2AF"
+green = "#A6E3A1"
+teal = "#94E2D5"
+sky = "#89DCEB"
+sapphire = "#74C7EC"
+blue = "#89B4FA"
+lavender = "#B4BEFE"
+text = "#CDD6F4"
+subtext_1 = "#BAC2DE"
+subtext_0 = "#A6ADC8"
+overlay_2 = "#9399B2"
+overlay_1 = "#7F849C"
+overlay_0 = "#6C7086"
+surface_2 = "#585B70"
+surface_1 = "#45475A"
+surface_0 = "#313244"
+base = "#1E1E2E"
+mantle = "#181825"
+crust = "#11111B"
