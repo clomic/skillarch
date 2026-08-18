@@ -9,7 +9,7 @@ export ZSH="$HOME/.oh-my-zsh"
 # load a random theme each time Oh My Zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="clomic"
+ZSH_THEME="af-magic"
 DISABLE_MAGIC_FUNCTIONS="true"
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=245"
 
@@ -73,9 +73,9 @@ ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=245"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git ssh-agent colored-man-pages docker extract fzf mise npm terraform tmux zsh-autosuggestions zsh-completions zsh-syntax-highlighting)
+plugins=(git ssh-agent docker extract fzf mise npm terraform tmux)
 
-# source $ZSH/oh-my-zsh.sh
+ source $ZSH/oh-my-zsh.sh
 
 # User configuration
 
@@ -107,10 +107,10 @@ plugins=(git ssh-agent colored-man-pages docker extract fzf mise npm terraform t
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 export BROWSER=/usr/bin/google-chrome-stable
-export EDITOR=/usr/bin/vim
+export EDITOR=/usr/bin/nvim
 export PAGER=/usr/bin/bat
 export TERMINAL=/usr/bin/kitty
-export VISUAL=/usr/bin/vim
+export VISUAL=/usr/bin/nvim
 [[ -f ~/.my_aliases ]] && source ~/.my_aliases
 source $ZSH/oh-my-zsh.sh
 source /opt/skillarch/config/aliases
@@ -120,4 +120,9 @@ eval "$(register-python-argcomplete --no-defaults exegol)"
 eval "$(zoxide init zsh)"
 eval "$(atuin init zsh --disable-up-arrow)"
 export RIPGREP_CONFIG_PATH=/opt/skillarch/config/ripgreprc
+# zsh completion for sesh
+fpath=(~/.zsh/completions $fpath)
+autoload -U compinit && compinit
 
+
+if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)"; fi

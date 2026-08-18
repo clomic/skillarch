@@ -430,11 +430,11 @@
 |wk|Wireshark as root|
 |wpprobe|WordPress vulnerability scanner|
 |xclip|Command-line interface to X clipboard|
-|xh|xxd last_arg \| head rest_args, e.g. `xh -n -20 file` == `xxd file \| head -n -20`|
 |xmlescape|Convert characters to HTML Entities (e.g. `&` → `&amp;`)|
 |xmlunescape|Convert HTML Entities back to characters (e.g. `&amp;` → `&`)|
 |xor|`xor "my_key" "my_string"` or `echo "my_string" \| xor "my_key"`|
 |xorh|`xorh "key_in_hex" "hex_string"` or `echo "hex_string" \| xorh "key_in_hex"`|
+|xxh|xxd last_arg \| head rest_args, e.g. `xxh -n -20 file` == `xxd file \| head -n -20`|
 |yay|AUR helper (pacman wrapper)|
 |yt-dlp|Download videos / audio from YouTube et al.|
 |yt-dlp-likes|Download Youtube Favorites Videos to MP3|

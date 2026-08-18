@@ -9,7 +9,7 @@ unalias ${(f)"$(grep -oP '^[a-zA-Z_][a-zA-Z0-9_-]*(?=\(\))' ${(%):-%x})"} 2>/dev
 
 # oh-my-zsh git plugin overwrites gau (getallurls) → unalias it
 unalias gau 2>/dev/null
-
+unalias zi
 # ────────────────────────────────────────
 #  SkillArch Helpers
 # ────────────────────────────────────────
@@ -99,6 +99,7 @@ alias dl='cd ~/Downloads'
 alias da='cd /DATA'
 alias tn='tmux new'
 alias ta='tmux attach'
+alias batcat='bat'
 alias b='bat'
 alias batall='find . -type f | xargs bat'
 alias batsh='bat -l sh'
@@ -121,7 +122,7 @@ alias gdh='git diff HEAD'
 # ────────────────────────────────────────
 #  File Management
 # ────────────────────────────────────────
-alias l="eza -l --group-directories-first --icons=auto"
+alias l="eza -l -sdate --icons=auto"
 alias li="eza -l --group-directories-first"
 alias la="l -a"
 alias laa="l -aa"
@@ -131,7 +132,7 @@ alias t3="t -L 3"
 alias rm='trash-put'
 alias te='trash-empty'
 alias cp='cp -i'
-compdef _files trash-put # fix trash-put file completion
+# compdef _files trash-put # fix trash-put file completion
 
 # ────────────────────────────────────────
 #  Networking
@@ -225,7 +226,7 @@ crypt-dec() (set -e;openssl enc -d -aes-256-cbc -pbkdf2 -in "$1" -out "${1%.enc}
 alias 7za='7z a -mhe=on'
 alias 7zp='7zG a -p -mhe=on'
 alias 7zpx='7zG x -mhe=on'
-xh() { [[ -z "$1" ]] && return ||  xxd "${@: -1}" | head "${@: 1:#-1}"; }
+xxh() { [[ -z "$1" ]] && return ||  xxd "${@: -1}" | head "${@: 1:#-1}"; }
 # alias fzf-h='print -z $(builtin fc -n -l 1|fzf --height=50% --tac --prompt="Command from history > " --preview="print {}" --preview-window="down:3:wrap")'
 # bindkey -s '^h' "fzf-h\n"
 cmd_picker_select() {

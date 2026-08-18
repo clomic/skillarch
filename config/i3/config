@@ -196,7 +196,7 @@ bindsym $mod+o exec obsidian
 bindsym $mod+BackSpace split toggle
 bindsym $mod+m exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
 
-bindsym $mod+Escape exec rofi -show power-menu -modi "power-menu:rofi-power-menu --choices shutdown/reboot/logout/suspend"
+bindsym $mod+Escape exec --no-startup-id LC_ALL=C.UTF-8 PYTHONIOENCODING=UTF-8 rofi -show power-menu -modi "power-menu:rofi-power-menu --choices shutdown/reboot/logout/suspend"
 bindsym $mod+l exec i3lock-fancy -f Bitstream-Vera-Serif -t 'Welcome back to SkillArch'
 
 # Window Colors

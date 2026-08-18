@@ -4,8 +4,14 @@
 --hidden
 
 # Files to search or to not search (!)
---glob
-!.git*
+--glob=!.git*
+--glob=!/node_modules/
+--glob=!/build/
+--glob=!/dist/
+--glob=!/.venv/
+--glob=!/target/
+--glob=!/vendor/
+--glob=!/vendor-rust/
 
 # Ignore case unless all caps
 --smart-case
