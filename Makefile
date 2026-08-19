@@ -318,12 +318,12 @@ install-offensive: sanity-check ## Install offensive & security tools
 	# GitHub API rate limit (60 req/h unauthenticated) -- keep the retry-after-reset loop.
 	mise use -g aqua:projectdiscovery/pdtm@latest
 	for attempt in 1 2 3 4 5; do \
-		mise exec -- pdtm -ia && break || { \
+		zsh -c "source ~/.zshrc && mise exec -- pdtm -ia" && break || { \
 			$(call WARN,pdtm install failed (attempt $$attempt/5)$(comma) likely rate-limited. Waiting 4m for reset...) ; \
 			sleep 240 ; \
 		} ; \
 	done || true
-	mise exec -- pdtm -ua || true
+	zsh -c "source ~/.zshrc && mise exec -- pdtm -ua" || true
 	zsh -c "source ~/.zshrc && nuclei -update-templates -update-template-dir ~/.nuclei-templates" || true
 	rm -rf /tmp/nuclei[0-9]*
 
