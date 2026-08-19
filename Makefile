@@ -22,11 +22,11 @@ ERR  = echo -e "$(C_ERR)✖  $(1)$(C_RST)" >&2
 STEP = echo -e "$(C_BOLD)$(C_INFO)==>  [$(1)/$(2)]$(C_RST) $(C_INFO)$(3)...$(C_RST)"
 DONE = echo -e "\n$(C_OK)✓ Done - $(1)$(C_RST)\n"
 
-HOMECONFIG = "$(HOME_CONFIG)"
+HOME_CONFIG = "$$HOME/.config"
 
 define ska-link
 	# Check if directory exists and create it if not
-	[[ ! -d $(dirname $(2)) ]] && mkdir -p $(dirname $(2))
+	[[ ! -d $$(dirname $(2)) ]] && mkdir -p $$(dirname $(2))
 	# Backup existing file (if not already a symlink) and create symlink
 	[[ -f $(2) && ! -L $(2) ]] && mv $(2) $(2).skabak || true
 	ln -sf $(1) $(2)
@@ -138,7 +138,6 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 	nvim --headless +"Lazy! sync" +qa >/dev/null # Download and update plugins
 
 	# lazygit config
-	[[ ! -d $(HOME_CONFIG)/lazygit ]] && mkdir -p "$(HOME_CONFIG)/lazygit"
 	$(call ska-link,/opt/skillarch/config/lazygit/config.yml,$(HOME_CONFIG)/lazygit/config.yml)
 
 	# Install mise and all php-build dependencies
