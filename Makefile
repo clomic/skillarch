@@ -433,19 +433,19 @@ install-clomic: sanity-check ## Install clomic tools
 
 	# gh-dash
 	gh extension install dlvhdr/gh-dash
-	[[ ! -d $$XDH_CONFIG_HOME/gh-dash ]] && mkdir -p "$$XDH_CONFIG_HOME/gh-dash"
+	[[ ! -d $$HOME/.config/gh-dash ]] && mkdir -p "$$HOME/.config/gh-dash"
 	$(call ska-link,/opt/skillarch/config/gh-dash/config.yml,$$HOME/.config/gh-dash/config.yml)
 
 	# lazygit config
-	[[ ! -d $$XDH_CONFIG_HOME/lazygit ]] && mkdir -p "$$XDH_CONFIG_HOME/lazygit"
+	[[ ! -d $$HOME/.config/lazygit ]] && mkdir -p "$$HOME/.config/lazygit"
 	$(call ska-link,/opt/skillarch/config/lazygit/config.yml,$$HOME/.config/lazygit/config.yml)
 
 	# hunkdiff config
-	[[ ! -d $$XDH_CONFIG_HOME/hunk ]] && mkdir -p "$$XDH_CONFIG_HOME/hunk"
+	[[ ! -d $$HOME/.config/hunk ]] && mkdir -p "$$HOME/.config/hunk"
 	$(call ska-link,/opt/skillarch/config/hunk/config.yml,$$HOME/.config/hunk/config.yml)
 
 	# yazi config
-	[[ ! -d $$XDH_CONFIG_HOME/yazi ]] && mkdir -p "$$XDH_CONFIG_HOME/yazi"
+	[[ ! -d $$HOME/.config/yazi ]] && mkdir -p "$$HOME/.config/yazi"
 	$(call ska-link,/opt/skillarch/config/yazi/theme.toml,$$HOME/.config/yazi/theme.toml)
 	$(call ska-link,/opt/skillarch/config/yazi/Catppuccin-macchiato.toml,$$HOME/.config/yazi/Catppuccin-macchiato.toml)
 

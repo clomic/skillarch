@@ -17,6 +17,7 @@ path=(
   $HOME/.local/bin
   $HOME/.fzf/bin
   $path
+  $HOME/.pdtm/go/bin
 )
 path=($^path(N-/))
 export PATH
