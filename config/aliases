@@ -147,7 +147,7 @@ alias gwtrm='git worktree remove'
 # ────────────────────────────────────────
 #  Terraforms
 # ────────────────────────────────────────
-alias alias tf="terraform"
+alias tf="terraform"
 alias tfa='terraform apply'
 alias 'tfa!'='terraform apply -auto-approve'
 alias tfap='terraform apply -parallelism=1'
@@ -228,6 +228,9 @@ alias rm='trash-put'
 alias te='trash-empty'
 alias cp='cp -i'
 compdef _files trash-put # fix trash-put file completion
+alias -g NE='2>/dev/null'      # No Error
+alias -g DN='>/dev/null'       # Dev Null
+alias -g NUL='>/dev/null 2>&1' # NULL (All to /dev/null)
 
 # ────────────────────────────────────────
 #  Networking

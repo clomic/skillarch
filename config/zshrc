@@ -108,11 +108,11 @@ load_cached_init register-python-argcomplete --no-defaults exegol
 load_cached_init wt config shell init zsh
 
 # === Aliases, Hooks & Helpers ===
-[[ -f ~/.my_aliases ]] && source ~/.my_aliases
 [[ -f /opt/skillarch/config/aliases ]] && source /opt/skillarch/config/aliases
+[[ -f ~/.my_aliases ]] && source ~/.my_aliases
 
 # Colored man/help pages via bat
-man() { GROFF_NO_SGR=1 MANPAGER="sh -c 'col -bx | bat -plman --theme \"Catppuccin Mocha\"'" command man "$@"; }
+man() { GROFF_NO_SGR=1 MANPAGER="sh -c 'col -bx | bat -plman'" command man "$@"; }
 
 _help_accept_line() {
     local original="$BUFFER"
