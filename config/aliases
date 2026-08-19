@@ -4,12 +4,12 @@
 # Self-discover function names declared below and unalias them, so this file
 # is safely re-sourceable. zsh refuses to redefine an existing alias as a
 # function (parse error near `()`); we strip only the names that conflict,
-# preserving everything else (oh-my-zsh's `gp`, `gst`, `gco`, …).
+# preserving everything else.
 unalias ${(f)"$(grep -oP '^[a-zA-Z_][a-zA-Z0-9_-]*(?=\(\))' ${(%):-%x})"} 2>/dev/null
 
-# oh-my-zsh git plugin overwrites gau (getallurls) → unalias it
-unalias gau 2>/dev/null
-unalias zi
+# zinit owerwrite zi (zoxide interactive) → unalias it
+unalias zi 2>/dev/null
+
 # ────────────────────────────────────────
 #  SkillArch Helpers
 # ────────────────────────────────────────
@@ -99,7 +99,6 @@ alias dl='cd ~/Downloads'
 alias da='cd /DATA'
 alias tn='tmux new'
 alias ta='tmux attach'
-alias batcat='bat'
 alias b='bat'
 alias batall='find . -type f | xargs bat'
 alias batsh='bat -l sh'
@@ -118,11 +117,107 @@ alias git-clone-all-github='curl -sk -H "Authorization: token ${GITHUB_READ_TOKE
 alias git-clone-all-gitlab='curl -sk -H "Authorization: Bearer ${GITLAB_READ_TOKEN}" "https://gitlab.com/api/v4/projects?owned=true&simple=true" | jq -r ".[].ssh_url_to_repo" | parallel -j10 "git clone {}"'
 alias git-pull-all='find . -maxdepth 2 -name ".git" | cut -d/ -f2 | parallel -j10 "cd {} && git pull"'
 alias gdh='git diff HEAD'
+alias g="git"
+alias ga="git add"
+alias gaa='git add --all'
+alias gb='git branch'
+alias gba='git branch --all'
+alias gbd='git branch --delete'
+alias gbr='git branch --remotes'
+alias gc="git commit -v"
+alias gco='git checkout'
+alias gd='git diff'
+alias gds="git diff --staged"
+alias gf='git fetch'
+alias gl="git pull"
+alias glo="git log --oneline --decorate"
+alias gm='git merge'
+alias gp="git push"
+alias gr='git remote'
+alias gs="git status"
+alias gsh='git show'
+alias gst='git status'
+alias gss='git status -s'
+alias gwt='git worktree'
+alias gwta='git worktree add'
+alias gwtls='git worktree list'
+alias gwtmv='git worktree move'
+alias gwtrm='git worktree remove'
+
+# ────────────────────────────────────────
+#  Terraforms
+# ────────────────────────────────────────
+alias alias tf="terraform"
+alias tfa='terraform apply'
+alias 'tfa!'='terraform apply -auto-approve'
+alias tfap='terraform apply -parallelism=1'
+alias tfapp='terraform apply tfplan'
+alias tfc='terraform console'
+alias tfd='terraform destroy'
+alias 'tfd!'='terraform destroy -auto-approve'
+alias tfdp='terraform destroy -parallelism=1'
+alias tff='terraform fmt'
+alias tffr='terraform fmt -recursive'
+alias tfi='terraform init'
+alias tfir='terraform init -reconfigure'
+alias tfiu='terraform init -upgrade'
+alias tfiur='terraform init -upgrade -reconfigure'
+alias tfo='terraform output'
+alias tfp='terraform plan'
+alias tfpo='terraform plan -out tfplan'
+alias tfs='terraform state'
+alias tfsh='terraform show'
+alias tft='terraform test'
+alias tfv='terraform validate'
+alias tfw='terraform workspace'
+alias tfwl='terraform workspace list'
+alias tfws='terraform workspace select'
+
+# ────────────────────────────────────────
+#  NPM
+# ────────────────────────────────────────
+alias npmD='npm i -D '
+alias npmE='PATH="$(npm bin)":"$PATH"'
+alias npmF='npm i -f'
+alias npmI='npm init'
+alias npmL='npm list'
+alias npmL0='npm ls --depth=0'
+alias npmO='npm outdated'
+alias npmP='npm publish'
+alias npmR='npm run'
+alias npmS='npm i -S '
+alias npmSe='npm search'
+alias npmU='npm update'
+alias npmV='npm -v'
+alias npmg='npm i -g '
+alias npmi='npm info'
+alias npmrb='npm run build'
+alias npmrd='npm run dev'
+alias npmst='npm start'
+alias npmt='npm test'
 
 # ────────────────────────────────────────
 #  File Management
 # ────────────────────────────────────────
-alias l="eza -l -sdate --icons=auto"
+alias -g ...='../..'
+alias -g ....='../../..'
+alias -g .....='../../../..'
+alias -g ......='../../../../..'
+alias -- -='cd -'
+alias 1='cd -1'
+alias 2='cd -2'
+alias 3='cd -3'
+alias 4='cd -4'
+alias 5='cd -5'
+alias 6='cd -6'
+alias 7='cd -7'
+alias 8='cd -8'
+alias 9='cd -9'
+alias md='mkdir -p'
+alias rd=rmdir
+alias ls='ls --color=tty'
+alias ll='ls -lah'
+alias l="eza -l --group-directories-first --icons=auto"
 alias li="eza -l --group-directories-first"
 alias la="l -a"
 alias laa="l -aa"
@@ -132,7 +227,7 @@ alias t3="t -L 3"
 alias rm='trash-put'
 alias te='trash-empty'
 alias cp='cp -i'
-# compdef _files trash-put # fix trash-put file completion
+compdef _files trash-put # fix trash-put file completion
 
 # ────────────────────────────────────────
 #  Networking
@@ -226,7 +321,7 @@ crypt-dec() (set -e;openssl enc -d -aes-256-cbc -pbkdf2 -in "$1" -out "${1%.enc}
 alias 7za='7z a -mhe=on'
 alias 7zp='7zG a -p -mhe=on'
 alias 7zpx='7zG x -mhe=on'
-xxh() { [[ -z "$1" ]] && return ||  xxd "${@: -1}" | head "${@: 1:#-1}"; }
+xh() { [[ -z "$1" ]] && return ||  xxd "${@: -1}" | head "${@: 1:#-1}"; }
 # alias fzf-h='print -z $(builtin fc -n -l 1|fzf --height=50% --tac --prompt="Command from history > " --preview="print {}" --preview-window="down:3:wrap")'
 # bindkey -s '^h' "fzf-h\n"
 cmd_picker_select() {
@@ -379,6 +474,10 @@ alias fzf-w='find /opt/lists -type f -name "*.txt"|fzf'
 # ────────────────────────────────────────
 #  Docker Management
 # ────────────────────────────────────────
+alias d="docker"
+alias dbl="docker build"
+alias dcl="docker compose logs"
+alias dco="docker compose"
 alias dockit='docker run --rm -it -v /tmp:/tmp -v "$PWD":/skahost -w /skahost'
 alias dex='docker exec -it $(docker ps | grep -vF "CONTAINER ID" | fzf | cut -d" " -f1)'
 alias dexr='docker exec -it -u root $(docker ps | grep -vF "CONTAINER ID" | fzf | cut -d" " -f1)'
@@ -468,3 +567,24 @@ alias dphp7='dockit php:7.4' # Arch suffers from "too new libraries" making it h
 
 ## Openssl certificates
 alias read-crt='openssl x509 -text -noout -in'
+
+
+## Extract
+extract() {
+  if [[ -f $1 ]]; then
+    case $1 in
+      *.tar.bz2|*.tbz2) tar xjf "$1" ;;
+      *.tar.gz|*.tgz)   tar xzf "$1" ;;
+      *.bz2)            bunzip2 "$1" ;;
+      *.rar)            unrar x "$1" ;;
+      *.gz)             gunzip "$1"  ;;
+      *.tar)            tar xvf "$1" ;;
+      *.zip)            unzip "$1"   ;;
+      *.Z)              uncompress "$1" ;;
+      *.7z)             7z x "$1"    ;;
+      *)                echo "'$1' cannot be extracted" ;;
+    esac
+  else
+    echo "'$1' is not a valid file"
+  fi
+}

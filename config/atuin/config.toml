@@ -322,11 +322,11 @@ enabled = true
 
 ## Width of the tmux popup window
 ## Can be a percentage, or integer (e.g. "100" means 100 characters wide)
-# width = "80%"
+width = "80%"
 
 ## Height of the tmux popup window
 ## Can be a percentage, or integer (e.g. "100" means 100 lines tall)
-# height = "60%"
+height = "80%"
 
 [ui]
 ## Columns to display in the interactive search, from left to right.
