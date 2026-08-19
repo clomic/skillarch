@@ -148,6 +148,7 @@ alias -g -- -h='-h 2>&1 | bat -plhelp'
 export FZF_DEFAULT_OPTS='--height 80% --layout=reverse --border=rounded --prompt="  " --pointer="  " --preview-window=right:65%:wrap:border-left'
 export FZF_DEFAULT_COMMAND='fd --type f --hidden --strip-cwd-prefix --exclude .git --exclude .venv --exclude node_modules'
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+
 # Deduplicated PATH setup
 typeset -U path
 path=(

@@ -15,3 +15,6 @@ pomdtr.excalidraw-editor
 trailofbits.weaudit
 yzane.markdown-pdf
 zobo.php-intellisense
+catppuccin.catppuccin-vsc
+catppuccin.catppuccin-vsc-icons
+tamasfe.even-better-toml

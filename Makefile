@@ -144,7 +144,7 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 			} ; \
 		done ; \
 	done
-	mise exec -- go env -w "GOPATH=/home/$$USER/.local/go"
+	mise exec -- go env -w "GOPATH=$$HOME/.local/go"
 	eval "$$(mise activate bash)" || true
 
 	# Install uv tools
