@@ -114,6 +114,7 @@ load_cached_init oh-my-posh init zsh --config "$XDG_CONFIG_HOME/ohmyposh/clomic.
 load_cached_init zoxide init zsh
 load_cached_init atuin init zsh --disable-up-arrow
 load_cached_init register-python-argcomplete --no-defaults exegol
+load_cached_init wt config shell init zsh
 
 # === Aliases, Hooks & Helpers ===
 [[ -f ~/.my_aliases ]] && source ~/.my_aliases
