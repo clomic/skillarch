@@ -11,16 +11,6 @@ export GPG_TTY=$TTY
 # Dedicated Ripgrep config
 export RIPGREP_CONFIG_PATH="$XDG_CONFIG_HOME/ripgrep/ripgreprc"
 
-# Deduplicated PATH setup
-typeset -U path
-path=(
-  $HOME/.local/bin
-  $HOME/.fzf/bin
-  $path
-  $HOME/.pdtm/go/bin
-)
-path=($^path(N-/))
-export PATH
 
 # === History ===
 HISTFILE=~/.zsh_history
@@ -158,3 +148,13 @@ alias -g -- -h='-h 2>&1 | bat -plhelp'
 export FZF_DEFAULT_OPTS='--height 80% --layout=reverse --border=rounded --prompt="  " --pointer="  " --preview-window=right:65%:wrap:border-left'
 export FZF_DEFAULT_COMMAND='fd --type f --hidden --strip-cwd-prefix --exclude .git --exclude .venv --exclude node_modules'
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+# Deduplicated PATH setup
+typeset -U path
+path=(
+  $HOME/.local/bin
+  $HOME/.fzf/bin
+  $path
+  $HOME/.pdtm/go/bin
+)
+path=($^path(N-/))
+export PATH
