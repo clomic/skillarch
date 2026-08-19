@@ -22,7 +22,11 @@ ERR  = echo -e "$(C_ERR)✖  $(1)$(C_RST)" >&2
 STEP = echo -e "$(C_BOLD)$(C_INFO)==>  [$(1)/$(2)]$(C_RST) $(C_INFO)$(3)...$(C_RST)"
 DONE = echo -e "\n$(C_OK)✓ Done - $(1)$(C_RST)\n"
 
+HOMECONFIG = "$(HOME_CONFIG)"
+
 define ska-link
+	# Check if directory exists and create it if not
+	[[ ! -d $(dirname $(2)) ]] && mkdir -p $(dirname $(2))
 	# Backup existing file (if not already a symlink) and create symlink
 	[[ -f $(2) && ! -L $(2) ]] && mv $(2) $(2).skabak || true
 	ln -sf $(1) $(2)
@@ -125,18 +129,22 @@ install-base: sanity-check ## Install base packages
 
 install-cli-tools: sanity-check ## Install CLI tools & runtimes
 	$(call INFO,Installing CLI tools & runtimes...)
-	$(PACMAN_INSTALL) base-devel bison bzip2 ca-certificates cloc cmake dos2unix expect ffmpeg foremost gdb gnupg htop bottom hwinfo icu inotify-tools iproute2 jq llvm lsof ltrace make mlocate mplayer ncurses net-tools ngrep nmap openssh openssl parallel perl-image-exiftool pkgconf python-virtualenv re2c readline ripgrep rlwrap socat sqlite sshpass tmate tor traceroute trash-cli tree unzip vbindiff xsel xz yay zip veracrypt git-delta viu qsv asciinema htmlq neovim glow jless websocat superfile gron eza fastfetch bat sysstat cronie tree-sitter bc
-	$(call ska-link,/opt/skillarch/config/ripgreprc,$$HOME/.config/ripgrep/ripgreprc)
+	$(PACMAN_INSTALL) base-devel bison bzip2 ca-certificates cloc cmake dos2unix expect ffmpeg foremost gdb gnupg htop lazygit bottom hwinfo icu inotify-tools iproute2 jq llvm lsof ltrace make mlocate mplayer ncurses net-tools ngrep nmap openssh openssl parallel perl-image-exiftool pkgconf python-virtualenv re2c readline ripgrep rlwrap socat sqlite sshpass tmate tor traceroute trash-cli tree unzip vbindiff xsel xz yay zip veracrypt git-delta viu qsv asciinema htmlq neovim glow jless websocat superfile gron eza fastfetch bat sysstat cronie tree-sitter bc
+	$(call ska-link,/opt/skillarch/config/ripgreprc,$(HOME_CONFIG)/ripgrep/ripgreprc)
 	[[ ! -f ~/.gdbinit-gef.py ]] && curl -fsSL -o ~/.gdbinit-gef.py https://raw.githubusercontent.com/hugsy/gef/main/gef.py && echo "source ~/.gdbinit-gef.py" >> ~/.gdbinit || echo "gef already installed"
 	# nvim config
-	[[ ! -d ~/.config/nvim ]] && git clone --depth=1 https://github.com/LazyVim/starter ~/.config/nvim || true
-	$(call ska-link,/opt/skillarch/config/nvim/init.lua,$$HOME/.config/nvim/init.lua)
+	[[ ! -d $(HOME_CONFIG)/nvim ]] && git clone --depth=1 https://github.com/LazyVim/starter $(HOME_CONFIG)/nvim || true
+	$(call ska-link,/opt/skillarch/config/nvim/init.lua,$(HOME_CONFIG)/nvim/init.lua)
 	nvim --headless +"Lazy! sync" +qa >/dev/null # Download and update plugins
+
+	# lazygit config
+	[[ ! -d $(HOME_CONFIG)/lazygit ]] && mkdir -p "$(HOME_CONFIG)/lazygit"
+	$(call ska-link,/opt/skillarch/config/lazygit/config.yml,$(HOME_CONFIG)/lazygit/config.yml)
 
 	# Install mise and all php-build dependencies
 	$(PACMAN_INSTALL) mise libedit libffi libjpeg-turbo libpcap libpng libxml2 libzip postgresql-libs php-gd
 	# mise self-update # Currently broken, wait for upstream fix, pinged on 17/03/2025
-	for package in uv usage pdm rust terraform golang python nodejs opencode oh-my-posh; do \
+	for package in uv usage pdm rust terraform golang python nodejs opencode zoxide atuin; do \
 		for attempt in 1 2 3; do \
 			mise use -g "$$package@latest" && break || { \
 				$(call WARN,mise install $$package failed (attempt $$attempt/3)$(comma) retrying in 5s...) ; \
@@ -159,29 +167,32 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 	mise prune -q || true
 	$(call DONE,CLI tools & runtimes installed!)
 
-install-shell: sanity-check ## Install shell, zsh, oh-my-zsh, fzf, tmux
+install-shell: sanity-check ## Install shell, zsh, oh-my-posh, fzf, tmux
 	$(call INFO,Installing shell & dotfiles...)
 # 	# Install and Configure zsh
 	$(PACMAN_INSTALL) zsh
 	$(call ska-link,/opt/skillarch/config/zshenv,$$HOME/.zshenv)
 	$(call ska-link,/opt/skillarch/config/zshrc,$$HOME/.zshrc)
 	sh -c "$$(curl -s https://ohmyposh.dev/install.sh)" || true
-	[[ ! -d "$$XDG_CONFIG_HOME/ohmyposh" ]] && mkdir -p "$$XDG_CONFIG_HOME/ohmyposh"
-	$(call ska-link,/opt/skillarch/config/oh-my-posh/skillarch.toml,$$XDG_CONFIG_HOME/ohmyposh/skillarch.toml)
+	$(call ska-link,/opt/skillarch/config/oh-my-posh/skillarch.toml,$(HOME_CONFIG)/ohmyposh/skillarch.toml)
 	ZINIT_HOME="$$HOME/.local/share/zinit/zinit.git"
 	[[ ! -d "$$ZINIT_HOME" ]] && { \
 		mkdir -p "$$(dirname "$$ZINIT_HOME")"; \
 		git clone --depth=1 https://github.com/zdharma-continuum/zinit.git "$$ZINIT_HOME" || true; \
 	} || { git -C "$$ZINIT_HOME" pull -q || true; }
-	[[ ! -d "$$XDG_CONFIG_HOME/fsh/" ]] && curl -sSO --create-dirs --output-dir "$$XDG_CONFIG_HOME/fsh" https://raw.githubusercontent.com/catppuccin/zsh-fsh/refs/heads/main/themes/catppuccin-macchiato.ini || true
+	[[ ! -d "$(HOME_CONFIG)/fsh/" ]] && curl -sSO --create-dirs --output-dir "$(HOME_CONFIG)/fsh" https://raw.githubusercontent.com/catppuccin/zsh-fsh/refs/heads/main/themes/catppuccin-macchiato.ini || true
 
 	[[ ! -d ~/.ssh ]] && mkdir ~/.ssh && chmod 700 ~/.ssh || true # Must exist for ssh-agent to work
 
 	# Install and configure fzf, tmux, vim
 	[[ ! -d "$$HOME/.fzf" ]] && git clone --depth=1 https://github.com/junegunn/fzf "$$HOME/.fzf" && "$$HOME/.fzf/install" --all || true
-	[[ ! -d "$$XDG_CONFIG_HOME/tmux" ]] && mkdir -p "$$XDG_CONFIG_HOME/tmux"
-	$(call ska-link,/opt/skillarch/config/tmux.conf,$$XDG_CONFIG_HOME/tmux/tmux.conf)
+	$(call ska-link,/opt/skillarch/config/tmux.conf,$(HOME_CONFIG)/tmux/tmux.conf)
 	$(call ska-link,/opt/skillarch/config/vimrc,$$HOME/.vimrc)
+
+	# Atuin config
+	eval "$$(atuin init zsh)" 2>/dev/null || true
+	atuin import auto
+	$(call ska-link,/opt/skillarch/config/atuin/config.toml,$(HOME_CONFIG)/atuin/config.toml)
 
 	# Set the default user shell to zsh
 	sudo chsh -s /usr/bin/zsh "$$USER" # Logout required to be applied
@@ -212,47 +223,42 @@ install-gui: sanity-check ## Install i3, polybar, kitty, rofi, picom, KDE Plasma
 	# it usually fails silently. Write kdeglobals + GTK configs directly as fallback.
 	plasma-apply-colorscheme BreezeDark 2>/dev/null || true
 	plasma-apply-wallpaperimage /opt/skillarch/assets/bg.jpg 2>/dev/null || true
-	mkdir -p ~/.config ~/.config/gtk-3.0 ~/.config/gtk-4.0
+	mkdir -p $(HOME_CONFIG)/gtk-3.0 $(HOME_CONFIG)/gtk-4.0
 	# kdeglobals - force BreezeDark color scheme + Breeze icons for all KDE/Qt apps
-	kwriteconfig6 --file ~/.config/kdeglobals --group General --key ColorScheme BreezeDark 2>/dev/null || true
-	kwriteconfig6 --file ~/.config/kdeglobals --group General --key Name "Breeze Dark" 2>/dev/null || true
-	kwriteconfig6 --file ~/.config/kdeglobals --group Icons --key Theme breeze-dark 2>/dev/null || true
-	kwriteconfig6 --file ~/.config/kdeglobals --group KDE --key LookAndFeelPackage org.kde.breezedark.desktop 2>/dev/null || true
+	kwriteconfig6 --file $(HOME_CONFIG)/kdeglobals --group General --key ColorScheme BreezeDark 2>/dev/null || true
+	kwriteconfig6 --file $(HOME_CONFIG)/kdeglobals --group General --key Name "Breeze Dark" 2>/dev/null || true
+	kwriteconfig6 --file $(HOME_CONFIG)/kdeglobals --group Icons --key Theme breeze-dark 2>/dev/null || true
+	kwriteconfig6 --file $(HOME_CONFIG)/kdeglobals --group KDE --key LookAndFeelPackage org.kde.breezedark.desktop 2>/dev/null || true
 	# GTK 3/4 - sync dark theme so GTK apps (Firefox, etc.) also go dark
-	echo -e '[Settings]\ngtk-theme-name=Breeze-Dark\ngtk-icon-theme-name=breeze-dark\ngtk-application-prefer-dark-theme=true' > ~/.config/gtk-3.0/settings.ini
-	echo -e '[Settings]\ngtk-theme-name=Breeze-Dark\ngtk-icon-theme-name=breeze-dark\ngtk-application-prefer-dark-theme=true' > ~/.config/gtk-4.0/settings.ini
+	echo -e '[Settings]\ngtk-theme-name=Breeze-Dark\ngtk-icon-theme-name=breeze-dark\ngtk-application-prefer-dark-theme=true' > $(HOME_CONFIG)/gtk-3.0/settings.ini
+	echo -e '[Settings]\ngtk-theme-name=Breeze-Dark\ngtk-icon-theme-name=breeze-dark\ngtk-application-prefer-dark-theme=true' > $(HOME_CONFIG)/gtk-4.0/settings.ini
 	echo "export QT_QPA_PLATFORMTHEME=kde" > ~/.xprofile # Ensures Qt apps read kdeglobals under i3 (not just Plasma)
 	echo "export XDG_SESSION_TYPE=x11" >> ~/.xprofile # Ensure other other apps rely on x11 instead of wayland
 	# -- MIME defaults: image=eog, video/audio=vlc, pdf/html=chrome, text=kate, dir=thunar --
-	# GTK file managers (Thunar, Nautilus, etc.) and xdg-open read ~/.config/mimeapps.list.
+	# GTK file managers (Thunar, Nautilus, etc.) and xdg-open read $(HOME_CONFIG)/mimeapps.list.
 	# We use Thunar instead of Dolphin because KIO's portal-based launcher hangs under i3.
-	printf '%s\n' '[Default Applications]' 'image/png=org.gnome.eog.desktop' 'image/jpeg=org.gnome.eog.desktop' 'image/gif=org.gnome.eog.desktop' 'image/webp=org.gnome.eog.desktop' 'image/bmp=org.gnome.eog.desktop' 'image/tiff=org.gnome.eog.desktop' 'image/svg+xml=org.gnome.eog.desktop' 'video/mp4=vlc.desktop' 'video/x-matroska=vlc.desktop' 'video/webm=vlc.desktop' 'video/quicktime=vlc.desktop' 'video/x-msvideo=vlc.desktop' 'audio/mpeg=vlc.desktop' 'audio/ogg=vlc.desktop' 'audio/flac=vlc.desktop' 'audio/x-wav=vlc.desktop' 'audio/vnd.wave=vlc.desktop' 'application/pdf=google-chrome.desktop' 'text/html=google-chrome.desktop' 'x-scheme-handler/http=google-chrome.desktop' 'x-scheme-handler/https=google-chrome.desktop' 'x-scheme-handler/about=google-chrome.desktop' 'x-scheme-handler/unknown=google-chrome.desktop' 'x-scheme-handler/mailto=google-chrome.desktop' 'text/plain=org.kde.kate.desktop' 'inode/directory=thunar.desktop' > ~/.config/mimeapps.list
+	printf '%s\n' '[Default Applications]' 'image/png=org.gnome.eog.desktop' 'image/jpeg=org.gnome.eog.desktop' 'image/gif=org.gnome.eog.desktop' 'image/webp=org.gnome.eog.desktop' 'image/bmp=org.gnome.eog.desktop' 'image/tiff=org.gnome.eog.desktop' 'image/svg+xml=org.gnome.eog.desktop' 'video/mp4=vlc.desktop' 'video/x-matroska=vlc.desktop' 'video/webm=vlc.desktop' 'video/quicktime=vlc.desktop' 'video/x-msvideo=vlc.desktop' 'audio/mpeg=vlc.desktop' 'audio/ogg=vlc.desktop' 'audio/flac=vlc.desktop' 'audio/x-wav=vlc.desktop' 'audio/vnd.wave=vlc.desktop' 'application/pdf=google-chrome.desktop' 'text/html=google-chrome.desktop' 'x-scheme-handler/http=google-chrome.desktop' 'x-scheme-handler/https=google-chrome.desktop' 'x-scheme-handler/about=google-chrome.desktop' 'x-scheme-handler/unknown=google-chrome.desktop' 'x-scheme-handler/mailto=google-chrome.desktop' 'text/plain=org.kde.kate.desktop' 'inode/directory=thunar.desktop' > $(HOME_CONFIG)/mimeapps.list
 	# Pin default taskbar launchers (systemsettings, chrome, thunar, alacritty)
-	mkdir -p ~/.config
-	PLASMA_RC=~/.config/plasma-org.kde.plasma.desktop-appletsrc ; \
+	PLASMA_RC=$(HOME_CONFIG)/plasma-org.kde.plasma.desktop-appletsrc ; \
 	if [[ -f "$$PLASMA_RC" ]]; then \
 		sed -i 's|^launchers=.*|launchers=applications:systemsettings.desktop,applications:google-chrome.desktop,applications:thunar.desktop,applications:Alacritty.desktop|' "$$PLASMA_RC" ; \
 	fi
 
 	# i3 config
-	[[ ! -d ~/.config/i3 ]] && mkdir -p ~/.config/i3 || true
-	$(call ska-link,/opt/skillarch/config/i3/config,$$HOME/.config/i3/config)
+	$(call ska-link,/opt/skillarch/config/i3/config,$(HOME_CONFIG)/i3/config)
 
 	# polybar config
-	[[ ! -d ~/.config/polybar ]] && mkdir -p ~/.config/polybar || true
-	$(call ska-link,/opt/skillarch/config/polybar/config.ini,$$HOME/.config/polybar/config.ini)
-	$(call ska-link,/opt/skillarch/config/polybar/launch.sh,$$HOME/.config/polybar/launch.sh)
+	$(call ska-link,/opt/skillarch/config/polybar/config.ini,$(HOME_CONFIG)/polybar/config.ini)
+	$(call ska-link,/opt/skillarch/config/polybar/launch.sh,$(HOME_CONFIG)/polybar/launch.sh)
 
 	# rofi config
-	[[ ! -d ~/.config/rofi ]] && mkdir -p ~/.config/rofi || true
-	$(call ska-link,/opt/skillarch/config/rofi/config.rasi,$$HOME/.config/rofi/config.rasi)
+	$(call ska-link,/opt/skillarch/config/rofi/config.rasi,$(HOME_CONFIG)/rofi/config.rasi)
 
 	# picom config
-	$(call ska-link,/opt/skillarch/config/picom.conf,$$HOME/.config/picom.conf)
+	$(call ska-link,/opt/skillarch/config/picom.conf,$(HOME_CONFIG)/picom/picom.conf)
 
 	# kitty config
-	[[ ! -d ~/.config/kitty ]] && mkdir -p ~/.config/kitty || true
-	$(call ska-link,/opt/skillarch/config/kitty/kitty.conf,$$HOME/.config/kitty/kitty.conf)
+	$(call ska-link,/opt/skillarch/config/kitty/kitty.conf,$(HOME_CONFIG)/kitty/kitty.conf)
 
 	# touchpad config
 	[[ ! -d /etc/X11/xorg.conf.d ]] && sudo mkdir -p /etc/X11/xorg.conf.d || true
@@ -275,14 +281,13 @@ install-gui-tools: sanity-check ## Install GUI apps (Chrome, VSCode, Ghidra, etc
 	sudo ln -sf /usr/bin/google-chrome-stable /usr/local/bin/gog
 	# Flameshot 14 dropped native X11 capture in favor of xdg-desktop-portal,
 	# which has no working Screenshot backend under i3/X11. Force legacy mode.
-	mkdir -p ~/.config/flameshot
-	$(call ska-link,/opt/skillarch/config/flameshot/flameshot.ini,$$HOME/.config/flameshot/flameshot.ini)
+	$(call ska-link,/opt/skillarch/config/flameshot/flameshot.ini,$(HOME_CONFIG)/flameshot/flameshot.ini)
 	$(call DONE,GUI applications installed!)
 
 install-offensive: sanity-check ## Install offensive & security tools
 	$(call INFO,Installing offensive tools...)
 	ska_clone() { local pkg=$${1##*/}; [[ ! -d "/opt/$$pkg" ]] && git clone --depth=1 "$$1" "/tmp/$$pkg" && sudo mv "/tmp/$$pkg" "/opt/$$pkg" || true ; }
-	$(PACMAN_INSTALL) metasploit fx lazygit fq gitleaks jdk21-openjdk hashcat bettercap bore
+	$(PACMAN_INSTALL) metasploit fx fq gitleaks jdk21-openjdk hashcat bettercap bore
 	for pkg in ffuf gau waybackurls fabric-ai-bin caido-desktop caido-cli; do yay --noconfirm --needed -S "$$pkg" || $(call WARN,Failed to install $$pkg$(comma) continuing...); done
 
 	# HExHTTP: HTTP header vuln/cache-poisoning scanner - clone + isolated venv + PATH shim.
@@ -380,9 +385,7 @@ install-clomic: sanity-check ## Install clomic tools
 		sudo cp /opt/skillarch/config/exegol/load_user_setup.sh $$HOME/.exegol/my-resources/setup/
 	}
 
-# 	$(call ska-link,/opt/skillarch/config/clomic.zsh-theme,$$HOME/.oh-my-zsh/themes/clomic.zsh-theme)
-
-	[[ ! -d "$$XDG_CONFIG_HOME/tmux/plugins/catppuccin" ]] && git clone --depth=1 https://github.com/catppuccin/tmux.git "$$XDG_CONFIG_HOME/tmux/plugins/catppuccin/tmux" || true
+	[[ ! -d "$(HOME_CONFIG)/tmux/plugins/catppuccin" ]] && git clone --depth=1 https://github.com/catppuccin/tmux.git "$(HOME_CONFIG)/tmux/plugins/catppuccin/tmux" || true
 
 	sudo ln -sf /opt/skillarch/config/systemd/resolved.conf /etc/systemd/resolved.conf
 	sudo ln -sf /opt/skillarch/config/minicom/minirc.dfl /etc/minirc.dfl
@@ -398,7 +401,7 @@ install-clomic: sanity-check ## Install clomic tools
 		sudo mv /tmp/cyberchef /opt/cyberchef;
 	}
 
-	for package in opengrep bun rtk npm:@earendil-works/pi-coding-agent zoxide atuin gh hunkdiff yazi; do \
+	for package in opengrep bun rtk npm:@earendil-works/pi-coding-agent gh hunkdiff yazi; do \
 		for attempt in 1 2 3; do \
 			mise use -g "$$package@latest" && break || { \
 				$(call WARN,mise install $$package failed (attempt $$attempt/3)$(comma) retrying in 5s...) ; \
@@ -423,32 +426,19 @@ install-clomic: sanity-check ## Install clomic tools
 			pi install "$$package"
 		}
 	done
-	pi update --all
-
-	# Atuin config
-	eval "$$(atuin init zsh)" 2>/dev/null || true
-	atuin import auto
 	atuin hook install pi
-	$(call ska-link,/opt/skillarch/config/atuin/config.toml,$$HOME/.config/atuin/config.toml)
+	pi update --all
 
 	# gh-dash
 	gh extension install dlvhdr/gh-dash
-	[[ ! -d $$HOME/.config/gh-dash ]] && mkdir -p "$$HOME/.config/gh-dash"
-	$(call ska-link,/opt/skillarch/config/gh-dash/config.yml,$$HOME/.config/gh-dash/config.yml)
-
-	# lazygit config
-	[[ ! -d $$HOME/.config/lazygit ]] && mkdir -p "$$HOME/.config/lazygit"
-	$(call ska-link,/opt/skillarch/config/lazygit/config.yml,$$HOME/.config/lazygit/config.yml)
+	$(call ska-link,/opt/skillarch/config/gh-dash/config.yml,$(HOME_CONFIG)/gh-dash/config.yml)
 
 	# hunkdiff config
-	[[ ! -d $$HOME/.config/hunk ]] && mkdir -p "$$HOME/.config/hunk"
-	$(call ska-link,/opt/skillarch/config/hunk/config.yml,$$HOME/.config/hunk/config.yml)
+	$(call ska-link,/opt/skillarch/config/hunk/config.yml,$(HOME_CONFIG)/hunk/config.yml)
 
 	# yazi config
-	[[ ! -d $$HOME/.config/yazi ]] && mkdir -p "$$HOME/.config/yazi"
-	$(call ska-link,/opt/skillarch/config/yazi/theme.toml,$$HOME/.config/yazi/theme.toml)
-	$(call ska-link,/opt/skillarch/config/yazi/Catppuccin-macchiato.toml,$$HOME/.config/yazi/Catppuccin-macchiato.toml)
-
+	$(call ska-link,/opt/skillarch/config/yazi/theme.toml,$(HOME_CONFIG)/yazi/theme.toml)
+	$(call ska-link,/opt/skillarch/config/yazi/Catppuccin-macchiato.toml,$(HOME_CONFIG)/yazi/Catppuccin-macchiato.toml)
 
 	$(call DONE,clomic tools installed!)
 
@@ -563,9 +553,8 @@ cloud: sanity-check ## (Standalone) Install KasmVNC + cloud-init for cloud/remot
 	yay --noconfirm --needed -S kasmvncserver-bin || $(call WARN,Failed to install kasmvncserver-bin$(comma) continuing...)
 
 	# -- KasmVNC config --
-	mkdir -p ~/.vnc
-	$(call ska-link,/opt/skillarch/config/kasmvnc.yaml,$$HOME/.vnc/kasmvnc.yaml)
-	$(call ska-link,/opt/skillarch/config/vnc-xstartup,$$HOME/.vnc/xstartup)
+	$(call ska-link,/opt/skillarch/config/kasmvnc.yaml,$(HOME_CONFIG)/vnc/kasmvnc.yaml)
+	$(call ska-link,/opt/skillarch/config/vnc-xstartup,$(HOME_CONFIG)/vnc/xstartup)
 	# Self-signed SSL cert (one-time)
 	[[ ! -f ~/.vnc/self.pem ]] && openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
 		-keyout ~/.vnc/self.key -out ~/.vnc/self.pem -subj "/CN=vnc" 2>/dev/null && chmod 600 ~/.vnc/self.key || true
@@ -734,11 +723,11 @@ test: ## Validate installation (smoke tests)
 	ska_check "subfinder"   "which subfinder || [[ -f ~/.pdtm/go/bin/subfinder ]]"
 	ska_check "gef"         "[[ -f ~/.gdbinit-gef.py ]]"
 	$(call BOLD,\n--- Shell & Config ---)
-	ska_check "oh-my-zsh"  "[[ -d ~/.oh-my-zsh ]]"
+	ska_check "oh-my-posh"  "oh-my-posh --version"
 	ska_check "zshrc link" "[[ -L ~/.zshrc ]]"
-	ska_check "tmux.conf"  "[[ -L ~/.config/tmux/tmux.conf ]]"
+	ska_check "tmux.conf"  "[[ -L $(HOME_CONFIG)/tmux/tmux.conf ]]"
 	ska_check "vimrc"      "[[ -L ~/.vimrc ]]"
-	ska_check "nvim init"  "[[ -L ~/.config/nvim/init.lua ]]"
+	ska_check "nvim init"  "[[ -L $(HOME_CONFIG)/nvim/init.lua ]]"
 	ska_check "ssh dir"    "[[ -d ~/.ssh ]]"
 	$(call BOLD,\n--- Runtimes (mise) ---)
 	ska_check "python"     "mise exec -- python --version"
@@ -784,9 +773,9 @@ test-lite: ## Validate lite Docker image install
 	ska_check "httpx"     "which httpx || [[ -f ~/.pdtm/go/bin/httpx ]]"
 	ska_check "gef"       "[[ -f ~/.gdbinit-gef.py ]]"
 	$(call BOLD,\n--- Shell & Config ---)
-	ska_check "oh-my-zsh" "[[ -d ~/.oh-my-zsh ]]"
+	ska_check "oh-my-posh" "oh-my-posh --version"
 	ska_check "zshrc"     "[[ -L ~/.zshrc ]]"
-	ska_check "nvim init" "[[ -L ~/.config/nvim/init.lua ]]"
+	ska_check "nvim init" "[[ -L $(HOME_CONFIG)/nvim/init.lua ]]"
 	$(call BOLD,\n--- Runtimes ---)
 	ska_check "python"    "mise exec -- python --version"
 	ska_check "node"      "mise exec -- node --version"
@@ -819,13 +808,13 @@ test-full: test ## Validate full Docker image install (runs test + extras)
 		ska_check "$$bin" "which $$bin"
 	done
 	$(call BOLD,\n--- GUI Config Symlinks ---)
-	ska_check "i3 config"      "[[ -L ~/.config/i3/config ]]"
-	ska_check "polybar config" "[[ -L ~/.config/polybar/config.ini ]]"
-	ska_check "polybar launch" "[[ -L ~/.config/polybar/launch.sh ]]"
-	ska_check "kitty config"   "[[ -L ~/.config/kitty/kitty.conf ]]"
-	ska_check "picom config"   "[[ -L ~/.config/picom.conf ]]"
-	ska_check "rofi config"    "[[ -L ~/.config/rofi/config.rasi ]]"
-	ska_check "flameshot config" "[[ -L ~/.config/flameshot/flameshot.ini ]]"
+	ska_check "i3 config"      "[[ -L $(HOME_CONFIG)/i3/config ]]"
+	ska_check "polybar config" "[[ -L $(HOME_CONFIG)/polybar/config.ini ]]"
+	ska_check "polybar launch" "[[ -L $(HOME_CONFIG)/polybar/launch.sh ]]"
+	ska_check "kitty config"   "[[ -L $(HOME_CONFIG)/kitty/kitty.conf ]]"
+	ska_check "picom config"   "[[ -L $(HOME_CONFIG)/picom/picom.conf ]]"
+	ska_check "rofi config"    "[[ -L $(HOME_CONFIG)/rofi/config.rasi ]]"
+	ska_check "flameshot config" "[[ -L $(HOME_CONFIG)/flameshot/flameshot.ini ]]"
 	$(call BOLD,\n--- Wordlists ---)
 	ska_check "/opt/lists"        "[[ -d /opt/lists ]]"
 	ska_check "rockyou.txt"       "[[ -f /opt/lists/rockyou.txt ]]"
@@ -871,7 +860,7 @@ doctor: ## Diagnose system health & common issues
 	# Broken symlinks
 	$(call BOLD,--- Broken Symlinks (config) ---)
 	BROKEN=""
-	for link in ~/.zshrc ~/.config/tmux/tmux.conf ~/.vimrc ~/.config/nvim/init.lua ~/.config/i3/config ~/.config/polybar/config.ini ~/.config/polybar/launch.sh ~/.config/kitty/kitty.conf ~/.config/picom.conf ~/.config/rofi/config.rasi ~/.config/flameshot/flameshot.ini; do
+	for link in ~/.zshrc $(HOME_CONFIG)/tmux/tmux.conf ~/.vimrc $(HOME_CONFIG)/nvim/init.lua $(HOME_CONFIG)/i3/config $(HOME_CONFIG)/polybar/config.ini $(HOME_CONFIG)/polybar/launch.sh $(HOME_CONFIG)/kitty/kitty.conf $(HOME_CONFIG)/picom/picom.conf $(HOME_CONFIG)/rofi/config.rasi $(HOME_CONFIG)/flameshot/flameshot.ini; do
 		if [[ -L "$$link" ]] && [[ ! -e "$$link" ]]; then
 			echo -e "  $(C_ERR)[BROKEN]$(C_RST) $$link -> $$(readlink $$link)"
 			BROKEN="yes"
@@ -939,7 +928,7 @@ backup: ## Backup current configs before overwriting
 	BACKUP_DIR="$$HOME/.skillarch-backup-$$(date +%Y%m%d-%H%M%S)"
 	mkdir -p "$$BACKUP_DIR"
 	$(call INFO,Backing up configs to $$BACKUP_DIR)
-	for file in ~/.zshrc ~/.config/tmux/tmux.conf ~/.vimrc ~/.config/nvim/init.lua ~/.config/i3/config ~/.config/polybar/config.ini ~/.config/polybar/launch.sh ~/.config/kitty/kitty.conf ~/.config/picom.conf ~/.config/rofi/config.rasi ~/.config/flameshot/flameshot.ini /etc/X11/xorg.conf.d/30-touchpad.conf; do
+	for file in ~/.zshrc $(HOME_CONFIG)/tmux/tmux.conf ~/.vimrc $(HOME_CONFIG)/nvim/init.lua $(HOME_CONFIG)/i3/config $(HOME_CONFIG)/polybar/config.ini $(HOME_CONFIG)/polybar/launch.sh $(HOME_CONFIG)/kitty/kitty.conf $(HOME_CONFIG)/picom/picom.conf $(HOME_CONFIG)/rofi/config.rasi $(HOME_CONFIG)/flameshot/flameshot.ini /etc/X11/xorg.conf.d/30-touchpad.conf; do
 		if [[ -f "$$file" ]] || [[ -L "$$file" ]]; then
 			DEST="$$BACKUP_DIR/$$(basename $$file)"
 			cp -L "$$file" "$$DEST" 2>/dev/null && echo "  Backed up: $$file" || true
