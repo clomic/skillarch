@@ -126,11 +126,11 @@ install-base: sanity-check ## Install base packages
 install-cli-tools: sanity-check ## Install CLI tools & runtimes
 	$(call INFO,Installing CLI tools & runtimes...)
 	$(PACMAN_INSTALL) base-devel bison bzip2 ca-certificates cloc cmake dos2unix expect ffmpeg foremost gdb gnupg htop bottom hwinfo icu inotify-tools iproute2 jq llvm lsof ltrace make mlocate mplayer ncurses net-tools ngrep nmap openssh openssl parallel perl-image-exiftool pkgconf python-virtualenv re2c readline ripgrep rlwrap socat sqlite sshpass tmate tor traceroute trash-cli tree unzip vbindiff xsel xz yay zip veracrypt git-delta viu qsv asciinema htmlq neovim glow jless websocat superfile gron eza fastfetch bat sysstat cronie tree-sitter bc
-	$(call ska-link,/opt/skillarch/config/ripgreprc,$$XDH_CONFIG_HOME/ripgrep/ripgreprc)
+	$(call ska-link,/opt/skillarch/config/ripgreprc,$$HOME/.config/ripgrep/ripgreprc)
 	[[ ! -f ~/.gdbinit-gef.py ]] && curl -fsSL -o ~/.gdbinit-gef.py https://raw.githubusercontent.com/hugsy/gef/main/gef.py && echo "source ~/.gdbinit-gef.py" >> ~/.gdbinit || echo "gef already installed"
 	# nvim config
 	[[ ! -d ~/.config/nvim ]] && git clone --depth=1 https://github.com/LazyVim/starter ~/.config/nvim || true
-	$(call ska-link,/opt/skillarch/config/nvim/init.lua,$$XDH_CONFIG_HOME/nvim/init.lua)
+	$(call ska-link,/opt/skillarch/config/nvim/init.lua,$$HOME/.config/nvim/init.lua)
 	nvim --headless +"Lazy! sync" +qa >/dev/null # Download and update plugins
 
 	# Install mise and all php-build dependencies
@@ -236,23 +236,23 @@ install-gui: sanity-check ## Install i3, polybar, kitty, rofi, picom, KDE Plasma
 
 	# i3 config
 	[[ ! -d ~/.config/i3 ]] && mkdir -p ~/.config/i3 || true
-	$(call ska-link,/opt/skillarch/config/i3/config,$$XDH_CONFIG_HOME/i3/config)
+	$(call ska-link,/opt/skillarch/config/i3/config,$$HOME/.config/i3/config)
 
 	# polybar config
 	[[ ! -d ~/.config/polybar ]] && mkdir -p ~/.config/polybar || true
-	$(call ska-link,/opt/skillarch/config/polybar/config.ini,$$XDH_CONFIG_HOME/polybar/config.ini)
-	$(call ska-link,/opt/skillarch/config/polybar/launch.sh,$$XDH_CONFIG_HOME/polybar/launch.sh)
+	$(call ska-link,/opt/skillarch/config/polybar/config.ini,$$HOME/.config/polybar/config.ini)
+	$(call ska-link,/opt/skillarch/config/polybar/launch.sh,$$HOME/.config/polybar/launch.sh)
 
 	# rofi config
 	[[ ! -d ~/.config/rofi ]] && mkdir -p ~/.config/rofi || true
-	$(call ska-link,/opt/skillarch/config/rofi/config.rasi,$$XDH_CONFIG_HOME/rofi/config.rasi)
+	$(call ska-link,/opt/skillarch/config/rofi/config.rasi,$$HOME/.config/rofi/config.rasi)
 
 	# picom config
-	$(call ska-link,/opt/skillarch/config/picom.conf,$$XDH_CONFIG_HOME/picom.conf)
+	$(call ska-link,/opt/skillarch/config/picom.conf,$$HOME/.config/picom.conf)
 
 	# kitty config
 	[[ ! -d ~/.config/kitty ]] && mkdir -p ~/.config/kitty || true
-	$(call ska-link,/opt/skillarch/config/kitty/kitty.conf,$$XDH_CONFIG_HOME/kitty/kitty.conf)
+	$(call ska-link,/opt/skillarch/config/kitty/kitty.conf,$$HOME/.config/kitty/kitty.conf)
 
 	# touchpad config
 	[[ ! -d /etc/X11/xorg.conf.d ]] && sudo mkdir -p /etc/X11/xorg.conf.d || true
@@ -276,7 +276,7 @@ install-gui-tools: sanity-check ## Install GUI apps (Chrome, VSCode, Ghidra, etc
 	# Flameshot 14 dropped native X11 capture in favor of xdg-desktop-portal,
 	# which has no working Screenshot backend under i3/X11. Force legacy mode.
 	mkdir -p ~/.config/flameshot
-	$(call ska-link,/opt/skillarch/config/flameshot/flameshot.ini,$$XDH_CONFIG_HOME/flameshot/flameshot.ini)
+	$(call ska-link,/opt/skillarch/config/flameshot/flameshot.ini,$$HOME/.config/flameshot/flameshot.ini)
 	$(call DONE,GUI applications installed!)
 
 install-offensive: sanity-check ## Install offensive & security tools
@@ -429,25 +429,25 @@ install-clomic: sanity-check ## Install clomic tools
 	eval "$$(atuin init zsh)" 2>/dev/null || true
 	atuin import auto
 	atuin hook install pi
-	$(call ska-link,/opt/skillarch/config/atuin/config.toml,$$XDH_CONFIG_HOME/atuin/config.toml)
+	$(call ska-link,/opt/skillarch/config/atuin/config.toml,$$HOME/.config/atuin/config.toml)
 
 	# gh-dash
 	gh extension install dlvhdr/gh-dash
 	[[ ! -d $$XDH_CONFIG_HOME/gh-dash ]] && mkdir -p "$$XDH_CONFIG_HOME/gh-dash"
-	$(call ska-link,/opt/skillarch/config/gh-dash/config.yml,$$XDH_CONFIG_HOME/gh-dash/config.yml)
+	$(call ska-link,/opt/skillarch/config/gh-dash/config.yml,$$HOME/.config/gh-dash/config.yml)
 
 	# lazygit config
 	[[ ! -d $$XDH_CONFIG_HOME/lazygit ]] && mkdir -p "$$XDH_CONFIG_HOME/lazygit"
-	$(call ska-link,/opt/skillarch/config/lazygit/config.yml,$$XDH_CONFIG_HOME/lazygit/config.yml)
+	$(call ska-link,/opt/skillarch/config/lazygit/config.yml,$$HOME/.config/lazygit/config.yml)
 
 	# hunkdiff config
 	[[ ! -d $$XDH_CONFIG_HOME/hunk ]] && mkdir -p "$$XDH_CONFIG_HOME/hunk"
-	$(call ska-link,/opt/skillarch/config/hunk/config.yml,$$XDH_CONFIG_HOME/hunk/config.yml)
+	$(call ska-link,/opt/skillarch/config/hunk/config.yml,$$HOME/.config/hunk/config.yml)
 
 	# yazi config
 	[[ ! -d $$XDH_CONFIG_HOME/yazi ]] && mkdir -p "$$XDH_CONFIG_HOME/yazi"
-	$(call ska-link,/opt/skillarch/config/yazi/theme.toml,$$XDH_CONFIG_HOME/yazi/theme.toml)
-	$(call ska-link,/opt/skillarch/config/yazi/Catppuccin-macchiato.toml,$$XDH_CONFIG_HOME/yazi/Catppuccin-macchiato.toml)
+	$(call ska-link,/opt/skillarch/config/yazi/theme.toml,$$HOME/.config/yazi/theme.toml)
+	$(call ska-link,/opt/skillarch/config/yazi/Catppuccin-macchiato.toml,$$HOME/.config/yazi/Catppuccin-macchiato.toml)
 
 
 	$(call DONE,clomic tools installed!)
