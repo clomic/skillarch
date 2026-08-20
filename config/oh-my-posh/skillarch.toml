@@ -33,6 +33,7 @@ alignment = "right"
 filler = "<p:grey>─</>"
 force = true
 
+[[blocks.segments]]
 
 #
 # === Path + Git + Prompt
