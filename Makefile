@@ -185,8 +185,9 @@ install-shell: sanity-check ## Install shell, zsh, oh-my-posh, fzf, tmux
 
 	# Install and configure fzf, tmux, vim
 	[[ ! -d "$$HOME/.fzf" ]] && git clone --depth=1 https://github.com/junegunn/fzf "$$HOME/.fzf" && "$$HOME/.fzf/install" --all || true
-	$(call ska-link,/opt/skillarch/config/tmux.conf,$(HOME_CONFIG)/tmux/tmux.conf)
+	$(call ska-link,/opt/skillarch/config/tmux/tmux.conf,$(HOME_CONFIG)/tmux/tmux.conf)
 	$(call ska-link,/opt/skillarch/config/vimrc,$$HOME/.vimrc)
+	$(call ska-link,/opt/skillarch/config/fontconfig/fonts.conf,$(HOME_CONFIG)/fontconfig/fonts.conf)
 
 	# Atuin config
 	eval "$$(atuin init zsh)" 2>/dev/null || true
