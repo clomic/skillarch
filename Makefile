@@ -436,6 +436,9 @@ install-clomic: sanity-check ## Install clomic tools
 	gh extension install dlvhdr/gh-dash
 	$(call ska-link,/opt/skillarch/config/gh-dash/config.yml,$(HOME_CONFIG)/gh-dash/config.yml)
 
+	# herdr config
+	$(call ska-link,/opt/skillarch/config/herdr/config.toml,$(HOME_CONFIG)/herdr/config.toml)
+
 	# hunkdiff config
 	$(call ska-link,/opt/skillarch/config/hunk/config.yml,$(HOME_CONFIG)/hunk/config.yml)
 
