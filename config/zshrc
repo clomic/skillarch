@@ -91,10 +91,6 @@ zinit wait lucid for \
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=8"
 ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
-zstyle ':completion:*' matcher-list 'm:{[:lower:][:upper:]-_}={[:upper:][:lower:]_-}' 'r:|=*' 'l:|=* r:|=*'
-zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
-zstyle ':completion:*' menu select
-
 (( $+commands[fast-theme] )) && fast-theme XDG:catppuccin-macchiato -q
 zle_highlight=('paste:none')
 
@@ -105,6 +101,10 @@ load_cached_init atuin init zsh --disable-up-arrow
 load_cached_init register-python-argcomplete --no-defaults exegol
 # load_cached_init ~/.local/bin/oh-my-posh init zsh --config ~/.config//oh-my-posh/skillarch.toml
 load_cached_init ~/.local/bin/oh-my-posh init zsh --config ~/.config/oh-my-posh/clomic.toml
+
+zstyle ':completion:*' matcher-list 'm:{[:lower:][:upper:]-_}={[:upper:][:lower:]_-}' 'r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' menu select
 
 # === Aliases, Hooks & Helpers ===
 [[ -f /opt/skillarch/config/aliases ]] && source /opt/skillarch/config/aliases
