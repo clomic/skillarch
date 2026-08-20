@@ -82,7 +82,8 @@ zinit light zsh-users/zsh-autosuggestions
 # Defered plugins
 zinit wait lucid for \
   atinit"zicompinit; zicdreplay" \
-  atload'(( $+commands[wt] )) && eval "$(wt config shell init zsh)"' \
+  atload'(( $+commands[uv] )) && eval "$(uv generate-shell-completion zsh)";
+         (( $+commands[wt] )) && eval "$(wt config shell init zsh)"' \
     zdharma-continuum/fast-syntax-highlighting \
     zsh-users/zsh-completions
 

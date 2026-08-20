@@ -400,7 +400,7 @@ install-clomic: sanity-check ## Install clomic tools
 		sudo mv /tmp/cyberchef /opt/cyberchef;
 	}
 
-	for package in opengrep bun rtk npm:@earendil-works/pi-coding-agent gh hunkdiff yazi; do \
+	for package in opengrep bun rtk npm:@earendil-works/pi-coding-agent gh hunkdiff yazi worktrunk herdr; do \
 		for attempt in 1 2 3; do \
 			mise use -g "$$package@latest" && break || { \
 				$(call WARN,mise install $$package failed (attempt $$attempt/3)$(comma) retrying in 5s...) ; \
