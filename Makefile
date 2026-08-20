@@ -384,7 +384,7 @@ install-clomic: sanity-check ## Install clomic tools
 		curl -sL $(curl -s https://api.github.com/repos/eza-community/eza/releases/latest | grep 'browser_download_url.*musl.tar.gz'|grep -o 'https://[^"]*') -o /tmp/eza-latest.tgz && tar zxf /tmp/eza-latest.tgz -C /tmp && mv /tmp/eza $$HOME/.exegol/my-resources/bin/ && rm /tmp/eza-latest.tgz
 		curl -sL $$(curl -s https://api.github.com/repos/dathere/qsv/releases/latest | grep 'browser_download_url.*musl.zip'|grep -o 'https://[^"]*') -o /tmp/qsv-latest.zip && 7z x -y -o/tmp /tmp/qsv-latest.zip qsvlite>/dev/null&& mv /tmp/qsvlite $$HOME/.exegol/my-resources/bin/qsv && rm /tmp/qsv-latest.zip
 		sudo cp /opt/skillarch/config/exegol/aliases $$HOME/.exegol/my-resources/setup/zsh
-		sudo cp /opt/skillarch/config/tmux.conf $$HOME/.exegol/my-resources/setup/tmux/.tmux.conf
+		sudo cp /opt/skillarch/config/tmux/tmux.conf $$HOME/.exegol/my-resources/setup/tmux/.tmux.conf
 		sudo cp /opt/skillarch/config/exegol/load_user_setup.sh $$HOME/.exegol/my-resources/setup/
 	}
 
