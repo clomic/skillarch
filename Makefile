@@ -193,6 +193,9 @@ install-shell: sanity-check ## Install shell, zsh, oh-my-posh, fzf, tmux
 	atuin import auto
 	$(call ska-link,/opt/skillarch/config/atuin/config.toml,$(HOME_CONFIG)/atuin/config.toml)
 
+	# bat config
+	$(call ska-link,/opt/skillarch/config/bat/config,$(HOME_CONFIG)/bat/config)
+	
 	# Set the default user shell to zsh
 	sudo chsh -s /usr/bin/zsh "$$USER" # Logout required to be applied
 	$(call DONE,Shell & dotfiles installed!)
