@@ -130,7 +130,7 @@ install-base: sanity-check ## Install base packages
 install-cli-tools: sanity-check ## Install CLI tools & runtimes
 	$(call INFO,Installing CLI tools & runtimes...)
 	$(PACMAN_INSTALL) base-devel bison bzip2 ca-certificates cloc cmake dos2unix expect ffmpeg foremost gdb gnupg htop lazygit bottom hwinfo icu inotify-tools iproute2 jq llvm lsof ltrace make mlocate mplayer ncurses net-tools ngrep nmap openssh openssl parallel perl-image-exiftool pkgconf python-virtualenv re2c readline ripgrep rlwrap socat sqlite sshpass tmate tor traceroute trash-cli tree unzip vbindiff xsel xz yay zip veracrypt git-delta viu qsv asciinema htmlq neovim glow jless websocat superfile gron eza fastfetch bat sysstat cronie tree-sitter bc
-	$(call ska-link,/opt/skillarch/config/ripgreprc,$(HOME_CONFIG)/ripgrep/ripgreprc)
+	$(call ska-link,/opt/skillarch/config/ripgrep/ripgreprc,$(HOME_CONFIG)/ripgrep/ripgreprc)
 	[[ ! -f ~/.gdbinit-gef.py ]] && curl -fsSL -o ~/.gdbinit-gef.py https://raw.githubusercontent.com/hugsy/gef/main/gef.py && echo "source ~/.gdbinit-gef.py" >> ~/.gdbinit || echo "gef already installed"
 	# nvim config
 	[[ ! -d $(HOME_CONFIG)/nvim ]] && git clone --depth=1 https://github.com/LazyVim/starter $(HOME_CONFIG)/nvim || true
