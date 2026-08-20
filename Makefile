@@ -196,6 +196,8 @@ install-shell: sanity-check ## Install shell, zsh, oh-my-posh, fzf, tmux
 
 	# bat config
 	$(call ska-link,/opt/skillarch/config/bat/config,$(HOME_CONFIG)/bat/config)
+	[[ ! -d $$HOME/.local/share/zinit/completions ]] && mkdir -p $$HOME/.local/share/zinit/completions
+	bat --completion zsh > $$HOME/.local/share/zinit/completions/_bat
 	
 	# Set the default user shell to zsh
 	sudo chsh -s /usr/bin/zsh "$$USER" # Logout required to be applied

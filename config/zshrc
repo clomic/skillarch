@@ -67,10 +67,12 @@ load_cached_init() {
     "$bin_path" "$@" > "$cache_file"
   fi
   source "$cache_file"
+  ln -sf "$cache_file" "${XDG_DATA_HOME}/zinit/completions/_$(basename $cmd)"
 }
 
 # Loading CLI tools & completions before Zinit
 load_cached_init mise activate zsh
+source "${XDG_DATA_HOME}/zinit/completions/_mise"
 
 # === Zinit Plugins ===
 ZINIT_HOME="${XDG_DATA_HOME}/zinit/zinit.git"
@@ -101,6 +103,13 @@ load_cached_init atuin init zsh --disable-up-arrow
 load_cached_init register-python-argcomplete --no-defaults exegol
 # load_cached_init ~/.local/bin/oh-my-posh init zsh --config ~/.config//oh-my-posh/skillarch.toml
 load_cached_init ~/.local/bin/oh-my-posh init zsh --config ~/.config/oh-my-posh/clomic.toml
+
+PI_VERSION=$(p==pi; p=${p:A}; [[ $p =~ '([0-9]+\.[0-9]+\.[0-9]+)' ]] && print $MATCH)
+if [[ ! -f "${cache_dir}/pi-${PI_VERSION}.zsh" ]]; then
+  rm -f "${cache_dir}/pi-*.zsh"
+  bunx pi-completion zsh > "${cache_dir}/pi-${PI_VERSION}.zsh"
+  ln -sf "${cache_dir}/pi-${PI_VERSION}.zsh" "${XDG_DATA_HOME}/zinit/completions/_pi"
+fi
 
 zstyle ':completion:*' matcher-list 'm:{[:lower:][:upper:]-_}={[:upper:][:lower:]_-}' 'r:|=*' 'l:|=* r:|=*'
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
