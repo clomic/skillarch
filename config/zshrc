@@ -56,7 +56,7 @@ local cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/inits"
 
 # Init function with cache invalidation
 load_cached_init() {
-  local cmd="$1" cache_file="$cache_dir/$1.zsh"
+  local cmd="$1" cache_file="$cache_dir/$(basename $1).zsh"
   shift
 
   local bin_path="$(whence -p "$cmd")"
@@ -81,8 +81,9 @@ zinit light zsh-users/zsh-autosuggestions
 
 # Defered plugins
 zinit wait lucid for \
-  atinit"zicompinit; zicdreplay" \
-  atload'(( $+commands[wt] )) && eval "$(wt config shell init zsh)"' \
+  atinit"zicompinit; zicdreplay;" \
+  atload' (( $+commands[wt] )) && eval "$(wt config shell init zsh)";
+          (( $+commands[uv] )) && eval "$(uv generate-shell-completion zsh)"' \
     zdharma-continuum/fast-syntax-highlighting \
     zsh-users/zsh-completions
 
@@ -99,11 +100,11 @@ zle_highlight=('paste:none')
 
 load_cached_init dircolors -b
 load_cached_init fzf --zsh
-# load_cached_init oh-my-posh init zsh --config "$XDG_CONFIG_HOME/ohmyposh/skillarch.toml"
-load_cached_init oh-my-posh init zsh --config "$XDG_CONFIG_HOME/ohmyposh/clomic.toml"
 load_cached_init zoxide init zsh
 load_cached_init atuin init zsh --disable-up-arrow
 load_cached_init register-python-argcomplete --no-defaults exegol
+# load_cached_init ~/.local/bin/oh-my-posh init zsh --config "$XDG_CONFIG_HOME/ohmyposh/skillarch.toml"
+load_cached_init ~/.local/bin/oh-my-posh init zsh --config ~/.config/oh-my-posh/clomic.toml
 
 # === Aliases, Hooks & Helpers ===
 [[ -f /opt/skillarch/config/aliases ]] && source /opt/skillarch/config/aliases

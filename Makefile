@@ -173,7 +173,7 @@ install-shell: sanity-check ## Install shell, zsh, oh-my-posh, fzf, tmux
 	$(call ska-link,/opt/skillarch/config/zshenv,$$HOME/.zshenv)
 	$(call ska-link,/opt/skillarch/config/zshrc,$$HOME/.zshrc)
 	sh -c "$$(curl -s https://ohmyposh.dev/install.sh)" || true
-	$(call ska-link,/opt/skillarch/config/oh-my-posh/skillarch.toml,$(HOME_CONFIG)/ohmyposh/skillarch.toml)
+	$(call ska-link,/opt/skillarch/config/oh-my-posh/skillarch.toml,$(HOME_CONFIG)/oh-my-posh/skillarch.toml)
 	ZINIT_HOME="$$HOME/.local/share/zinit/zinit.git"
 	[[ ! -d "$$ZINIT_HOME" ]] && { \
 		mkdir -p "$$(dirname "$$ZINIT_HOME")"; \
