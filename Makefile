@@ -23,6 +23,7 @@ STEP = echo -e "$(C_BOLD)$(C_INFO)==>  [$(1)/$(2)]$(C_RST) $(C_INFO)$(3)...$(C_R
 DONE = echo -e "\n$(C_OK)✓ Done - $(1)$(C_RST)\n"
 
 HOME_CONFIG = "$$HOME/.config"
+DATA_HOME = "$$HOME/.local/share"
 
 define ska-link
 	# Check if directory exists and create it if not
@@ -129,7 +130,7 @@ install-base: sanity-check ## Install base packages
 
 install-cli-tools: sanity-check ## Install CLI tools & runtimes
 	$(call INFO,Installing CLI tools & runtimes...)
-	$(PACMAN_INSTALL) base-devel bison bzip2 ca-certificates cloc cmake dos2unix expect ffmpeg foremost gdb gnupg htop lazygit bottom hwinfo icu inotify-tools iproute2 jq llvm lsof ltrace make mlocate mplayer ncurses net-tools ngrep nmap openssh openssl parallel perl-image-exiftool pkgconf python-virtualenv re2c readline ripgrep rlwrap socat sqlite sshpass tmate tor traceroute trash-cli tree unzip vbindiff xsel xz yay zip veracrypt git-delta viu qsv asciinema htmlq neovim glow jless websocat superfile gron eza fastfetch bat sysstat cronie tree-sitter bc
+	$(PACMAN_INSTALL) base-devel bison bzip2 ca-certificates cloc cmake dos2unix expect ffmpeg foremost gdb gnupg htop lazygit bottom hwinfo icu inotify-tools iproute2 jq llvm lsof ltrace make mlocate mplayer ncurses net-tools ngrep nmap openssh openssl parallel perl-image-exiftool pkgconf python-virtualenv re2c readline ripgrep rlwrap socat sqlite sshpass tmate tor traceroute trash-cli tree unzip vbindiff xsel xz yay zip veracrypt git-delta viu qsv asciinema htmlq neovim glow jless websocat superfile gron eza fastfetch bat sysstat cronie tree-sitter bc fd
 	$(call ska-link,/opt/skillarch/config/ripgrep/ripgreprc,$(HOME_CONFIG)/ripgrep/ripgreprc)
 	[[ ! -f ~/.gdbinit-gef.py ]] && curl -fsSL -o ~/.gdbinit-gef.py https://raw.githubusercontent.com/hugsy/gef/main/gef.py && echo "source ~/.gdbinit-gef.py" >> ~/.gdbinit || echo "gef already installed"
 	# nvim config
@@ -152,7 +153,7 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 		done ; \
 	done
 	mise exec -- go env -w "GOPATH=$$HOME/.local/go"
-	eval "$$(mise activate bash)" || true
+	eval "$$(mise env bash)" || true
 
 	# Install uv tools
 	for package in argcomplete bypass-url-parser exegol pre-commit sqlmap wafw00f yt-dlp defaultcreds-cheat-sheet; do
@@ -163,7 +164,9 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 	done
 	uv tool upgrade --all || true
 	mise up -q || true
-	mise prune -q || true
+	mise prune -y -q || true
+
+	[[ ! -d "$(HOME_CONFIG)/zsh/completions" ]] && mkdir -p "$(HOME_CONFIG)/zsh/completions"
 	$(call DONE,CLI tools & runtimes installed!)
 
 install-shell: sanity-check ## Install shell, zsh, oh-my-posh, fzf, tmux
@@ -174,17 +177,24 @@ install-shell: sanity-check ## Install shell, zsh, oh-my-posh, fzf, tmux
 	$(call ska-link,/opt/skillarch/config/zshrc,$$HOME/.zshrc)
 	sh -c "$$(curl -s https://ohmyposh.dev/install.sh)" || true
 	$(call ska-link,/opt/skillarch/config/oh-my-posh/skillarch.toml,$(HOME_CONFIG)/oh-my-posh/skillarch.toml)
-	ZINIT_HOME="$$HOME/.local/share/zinit/zinit.git"
-	[[ ! -d "$$ZINIT_HOME" ]] && { \
-		mkdir -p "$$(dirname "$$ZINIT_HOME")"; \
-		git clone --depth=1 https://github.com/zdharma-continuum/zinit.git "$$ZINIT_HOME" || true; \
-	} || { git -C "$$ZINIT_HOME" pull -q || true; }
-	[[ ! -d "$(HOME_CONFIG)/fsh/" ]] && curl -sSO --create-dirs --output-dir "$(HOME_CONFIG)/fsh" https://raw.githubusercontent.com/catppuccin/zsh-fsh/refs/heads/main/themes/catppuccin-macchiato.ini || true
 
+	[[ ! -d "$(DATA_HOME)/zsh-defer" ]] && git clone --depth=1 https://github.com/romkatv/zsh-defer.git "$(DATA_HOME)/zsh-defer" || \
+		{ git -C "$(DATA_HOME)/zsh-defer" pull -q || true; }
+
+	[[ ! -d "$(DATA_HOME)/zsh-autosuggestions" ]] && git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions.git "$(DATA_HOME)/zsh-autosuggestions" || \
+		{ git -C "$(DATA_HOME)/zsh-autosuggestions" pull -q || true; }
+
+	[[ ! -d "$(DATA_HOME)/zsh-defer" ]] && git clone --depth=1 https://github.com/zdharma-continuum/fast-syntax-highlighting.git "$(DATA_HOME)/fast-syntax-highlighting" || \
+		{ git -C "$(DATA_HOME)/fast-syntax-highlighting" pull -q || true; }
+
+	[[ ! -d "$(HOME_CONFIG)/fsh/" ]] && curl -sSO --create-dirs --output-dir "$(HOME_CONFIG)/fsh" https://raw.githubusercontent.com/catppuccin/zsh-fsh/refs/heads/main/themes/catppuccin-macchiato.ini || true
+	
+	[[ ! -d "$(HOME_CONFIG)/zsh/completions" ]] && mkdir -p "$(HOME_CONFIG)/zsh/completions"
 	[[ ! -d ~/.ssh ]] && mkdir ~/.ssh && chmod 700 ~/.ssh || true # Must exist for ssh-agent to work
 
 	# Install and configure fzf, tmux, vim
 	[[ ! -d "$$HOME/.fzf" ]] && git clone --depth=1 https://github.com/junegunn/fzf "$$HOME/.fzf" && "$$HOME/.fzf/install" --all || true
+	
 	$(call ska-link,/opt/skillarch/config/tmux/tmux.conf,$(HOME_CONFIG)/tmux/tmux.conf)
 	$(call ska-link,/opt/skillarch/config/vimrc,$$HOME/.vimrc)
 	$(call ska-link,/opt/skillarch/config/fontconfig/fonts.conf,$(HOME_CONFIG)/fontconfig/fonts.conf)
@@ -196,11 +206,10 @@ install-shell: sanity-check ## Install shell, zsh, oh-my-posh, fzf, tmux
 
 	# bat config
 	$(call ska-link,/opt/skillarch/config/bat/config,$(HOME_CONFIG)/bat/config)
-	[[ ! -d $$HOME/.local/share/zinit/completions ]] && mkdir -p $$HOME/.local/share/zinit/completions
-	bat --completion zsh > $$HOME/.local/share/zinit/completions/_bat
 	
 	# Set the default user shell to zsh
 	sudo chsh -s /usr/bin/zsh "$$USER" # Logout required to be applied
+	zsh -c "source ~/.zshrc && rebuild-zsh-cache"
 	$(call DONE,Shell & dotfiles installed!)
 
 install-docker: sanity-check ## Install Docker & Docker Compose

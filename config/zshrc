@@ -5,23 +5,36 @@ export BROWSER=google-chrome-stable
 export PAGER="bat -p --color auto"
 export TERMINAL=kitty
 export TERM="xterm-256color"
-
 export GPG_TTY=$TTY
-
-# Dedicated Ripgrep config
 export RIPGREP_CONFIG_PATH="$XDG_CONFIG_HOME/ripgrep/ripgreprc"
 
-# === History ===
+typeset -U path
+path=(
+  $HOME/.local/bin
+  $HOME/.local/go/bin
+  $HOME/.fzf/bin
+  $HOME/.pdtm/go/bin
+  $path
+)
+
+path=($^path(N-/))
+export PATH
+
+fpath=(
+  $XDG_CONFIG_HOME/zsh/completions
+  $fpath
+)
+
+
+# === History & Shell Options ===
 HISTFILE=~/.zsh_history
 HISTSIZE=100000
 SAVEHIST=100000
 setopt APPEND_HISTORY SHARE_HISTORY HIST_IGNORE_DUPS HIST_IGNORE_SPACE HIST_EXPIRE_DUPS_FIRST HIST_FIND_NO_DUPS
-
-# === Shell Options ===
 setopt extended_glob null_glob AUTOCD NUMERIC_GLOB_SORT
 
 # === Keybindings & Line Editor ===
-bindkey -e # Emacs mode
+bindkey -e
 
 bindkey '^[[1~' beginning-of-line    # Home
 bindkey '^[[H'  beginning-of-line    # Home
@@ -31,14 +44,12 @@ bindkey '^[[F'  end-of-line          # End
 bindkey '^[[5~' up-line-or-history   # PageUp
 bindkey '^[[6~' down-line-or-history # PageDown
 bindkey '^?'    backward-delete-char # Backspace
-
 bindkey '^[[1;5C' forward-word       # Ctrl + Right
 bindkey '^[[1;5D' backward-word      # Ctrl + Left
 
 autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
 zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search
-
 bindkey '^[[A' up-line-or-beginning-search
 bindkey '^[[B' down-line-or-beginning-search
 
@@ -48,122 +59,112 @@ bindkey '^X^E' edit-command-line
 bindkey '^p' history-search-backward
 bindkey '^n' history-search-forward
 
-# === Cache Setup ===
-local cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/inits"
-[[ -d "$cache_dir" ]] || mkdir -p "$cache_dir"
+# === Fast Static Cache Loading ===
+# (( $+functions[compdef] )) || compdef() { : } # Temporary stub
+local main_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/all_inits.zsh"
 
-(( $+functions[compdef] )) || compdef() { : }
+[[ -f "$main_cache" ]] && source "$main_cache"
 
-# Init function with cache invalidation
-load_cached_init() {
-  local cmd="$1" cache_file="$cache_dir/$(basename $1).zsh"
-  shift
+rebuild-zsh-cache() {
+  local cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+  mkdir -p "$cache_dir"
+  echo "Rebuilding consolidated Zsh cache..."
 
-  local bin_path="$(whence -p "$cmd")"
-  [[ -n "$bin_path" ]] || return 1
+  {
+    echo '(( $+functions[compdef] )) || compdef() { : }'
+    (( $+commands[mise] )) && mise env zsh
+    (( $+commands[fzf] )) && fzf --zsh
+    (( $+commands[zoxide] )) && zoxide init zsh
+    (( $+commands[atuin] )) && atuin init zsh --disable-up-arrow
+    (( $+commands[exegol] )) && register-python-argcomplete --no-defaults exegol
+    (( $+commands[oh-my-posh] )) && oh-my-posh init zsh --config ~/.config/oh-my-posh/clomic.toml; echo
+    # (( $+commands[oh-my-posh] )) && oh-my-posh init zsh --config ~/.config/oh-my-posh/skillarch.  toml; echo
+    (( $+commands[uv] )) && uv generate-shell-completion zsh
+    (( $+commands[wt] )) && wt config shell init zsh
+  } > "$main_cache"
+  zcompile "$main_cache"
 
-  # Rebuild if cache is missing or binary is newer
-  if [[ ! -f "$cache_file" || "$bin_path" -nt "$cache_file" ]]; then
-    "$bin_path" "$@" > "$cache_file"
-  fi
-  source "$cache_file"
-  ln -sf "$cache_file" "${XDG_DATA_HOME}/zinit/completions/_$(basename $cmd)"
+  dircolors -p > ~/.cache/zsh/dircolors
+  
+  (( $+commands[carapace] )) && ~/.local/go/bin/carapace _carapace zsh > "$cache_dir/carapace.zsh"
+  zcompile "$cache_dir/carapace.zsh"
+
+  echo "Cache rebuilt successfully into $main_cache!"
 }
 
-# Loading CLI tools & completions before Zinit
-load_cached_init mise activate zsh
-source "${XDG_DATA_HOME}/zinit/completions/_mise"
+# === Load zsh-defer ===
+[[ -f ~/.local/share/zsh-defer/zsh-defer.plugin.zsh ]] && source ~/.local/share/zsh-defer/zsh-defer.plugin.zsh
 
-# === Zinit Plugins ===
-ZINIT_HOME="${XDG_DATA_HOME}/zinit/zinit.git"
-source "$ZINIT_HOME/zinit.zsh"
+# === Load Plugins (via zsh-defer) ===
+_load_plugins() {
+  ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+  zle_highlight=('paste:none')
+  
+  [[ -f ~/.local/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && \
+    source ~/.local/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
-# Direct load to prevent first-prompt render delay
-zinit light zsh-users/zsh-autosuggestions
+  [[ -f ~/.local/share/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh ]] && \
+    source ~/.local/share/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+}
+(( $+functions[zsh-defer] )) && zsh-defer _load_plugins || _load_plugins
 
-# Defered plugins
-zinit wait lucid for \
-  atinit"zicompinit; zicdreplay" \
-  atload'(( $+commands[uv] )) && eval "$(uv generate-shell-completion zsh)";
-         (( $+commands[wt] )) && eval "$(wt config shell init zsh)"' \
-    zdharma-continuum/fast-syntax-highlighting \
-    zsh-users/zsh-completions
-
-# Completion styling & Autosuggestions
-ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=8"
-ZSH_AUTOSUGGEST_STRATEGY=(history completion)
-
-(( $+commands[fast-theme] )) && fast-theme XDG:catppuccin-macchiato -q
-zle_highlight=('paste:none')
-
-load_cached_init dircolors -b
-load_cached_init fzf --zsh
-load_cached_init zoxide init zsh
-load_cached_init atuin init zsh --disable-up-arrow
-load_cached_init register-python-argcomplete --no-defaults exegol
-# load_cached_init ~/.local/bin/oh-my-posh init zsh --config ~/.config//oh-my-posh/skillarch.toml
-load_cached_init ~/.local/bin/oh-my-posh init zsh --config ~/.config/oh-my-posh/clomic.toml
-
-PI_VERSION=$(p==pi; p=${p:A}; [[ $p =~ '([0-9]+\.[0-9]+\.[0-9]+)' ]] && print $MATCH)
-if [[ ! -f "${cache_dir}/pi-${PI_VERSION}.zsh" ]]; then
-  rm -f "${cache_dir}/pi-*.zsh"
-  bunx pi-completion zsh > "${cache_dir}/pi-${PI_VERSION}.zsh"
-  ln -sf "${cache_dir}/pi-${PI_VERSION}.zsh" "${XDG_DATA_HOME}/zinit/completions/_pi"
+# === Completion Styling ===
+autoload -Uz compinit
+local zcompdump="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
+if [[ -n "$zcompdump(#qN.m+1)" ]]; then
+  compinit -i -d "$zcompdump"
+  { zcompile "$zcompdump" } &!
+else
+  compinit -C -i -d "$zcompdump"
 fi
 
+
 zstyle ':completion:*' matcher-list 'm:{[:lower:][:upper:]-_}={[:upper:][:lower:]_-}' 'r:|=*' 'l:|=* r:|=*'
-zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' list-colors ''
 zstyle ':completion:*' menu select
+local carapace_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/carapace.zsh"
+[[ -f "$carapace_cache" ]] && source "$carapace_cache"
 
-# === Aliases, Hooks & Helpers ===
-[[ -f /opt/skillarch/config/aliases ]] && source /opt/skillarch/config/aliases
-[[ -f ~/.my_aliases ]] && source ~/.my_aliases
+# === Helpers, Aliases & FZF ===
+if [[ -r ~/.cache/zsh/dircolors ]]; then
+  eval "$(dircolors -b ~/.cache/zsh/dircolors)"
+fi
 
-# Colored man/help pages via bat
+export FZF_DEFAULT_OPTS='--height 80% --layout=reverse --border=rounded --prompt="  " --pointer="  " --preview-window=right:65%:wrap:border-left'
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --strip-cwd-prefix --exclude .git --exclude .venv --exclude node_modules'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+
 man() { GROFF_NO_SGR=1 MANPAGER="sh -c 'col -bx | bat -plman'" command man "$@"; }
 
 _help_accept_line() {
     local original="$BUFFER"
     local -a words
-    local i
-
-    # Parse the line like Zsh
     words=("${(z)original}")
 
-    # Not enough parameters to contain --help
-    (( ${#words} < 2 )) && {
-        zle .accept-line
-        return
-    }
+    (( ${#words} < 2 )) && { zle .accept-line; return; }
 
-    # Look for ten exact match for --help
     for (( i = 2; i <= ${#words}; i++ )); do
         if [[ "${words[i]}" == "--help" ]]; then
-            # Avoid a double transformation
             if [[ "$original" != *'| bat -plhelp'* ]]; then
                 BUFFER="${original} 2>&1 | bat -plhelp"
             fi
             break
         fi
     done
-
     zle .accept-line
 }
 
 zle -N accept-line _help_accept_line
 alias -g -- -h='-h 2>&1 | bat -plhelp'
 
-export FZF_DEFAULT_OPTS='--height 80% --layout=reverse --border=rounded --prompt="  " --pointer="  " --preview-window=right:65%:wrap:border-left'
-export FZF_DEFAULT_COMMAND='fd --type f --hidden --strip-cwd-prefix --exclude .git --exclude .venv --exclude node_modules'
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+# Intégration différée des aliases annexes
+_load_aliases() {
+  [[ -f /opt/skillarch/config/aliases ]] && source /opt/skillarch/config/aliases
+  [[ -f ~/.my_aliases ]] && source ~/.my_aliases
+}
+(( $+functions[zsh-defer] )) && zsh-defer _load_aliases || _load_aliases
 
-# Deduplicated PATH setup
-typeset -U path
 path=(
-  $HOME/.local/bin
-  $HOME/.fzf/bin
+  $HOME/.local/go/bin
   $path
-  $HOME/.pdtm/go/bin
 )
-path=($^path(N-/))
-export PATH
