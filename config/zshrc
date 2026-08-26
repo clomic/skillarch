@@ -83,7 +83,7 @@ rebuild-zsh-cache() {
   zcompile "$main_cache"
 
   dircolors -p > ~/.cache/zsh/dircolors
-  
+
   (( $+commands[carapace] )) && ~/.local/go/bin/carapace _carapace zsh > "$cache_dir/carapace.zsh"
   zcompile "$cache_dir/carapace.zsh"
 
@@ -97,7 +97,7 @@ rebuild-zsh-cache() {
 _load_plugins() {
   ZSH_AUTOSUGGEST_STRATEGY=(history completion)
   zle_highlight=('paste:none')
-  
+
   [[ -f ~/.local/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && \
     source ~/.local/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
