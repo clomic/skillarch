@@ -325,9 +325,21 @@ install-offensive: sanity-check ## Install offensive & security tools
 	wait
 
 	# Install GitHub binary releases -- gobypass403 & wpprobe (sequential)
-	( wget -q "$$(curl -sL https://api.github.com/repos/slicingmelon/gobypass403/releases/latest | jq -r '.assets[] | select(.name | contains("linux_amd64")) | .browser_download_url')" -O /tmp/gobypass403 \
+	# Resolve the latest asset WITHOUT the api.github.com endpoint (60 req/h unauthenticated
+	# limit -- flaky on shared CI runner IPs). The github.com /releases/latest redirect gives
+	# the tag, then /expanded_assets/<tag> lists the real asset href (no API budget spent, no
+	# token needed). Scraping the href handles per-project version-in-name quirks (v-prefix etc).
+	gh_latest_asset() { \
+		local repo="$$1" pat="$$2" tag path ; \
+		tag=$$(curl -sI "https://github.com/$$repo/releases/latest" | sed -nE 's#^location:.*/tag/([^[:space:]]+).*#\1#Ip' | tr -d '\r') ; \
+		[[ -z "$$tag" ]] && return 1 ; \
+		path=$$(curl -sL "https://github.com/$$repo/releases/expanded_assets/$$tag" | grep -oE "/$$repo/releases/download/[^\"]*$$pat[^\"]*" | grep -viE 'sig|sha|checksum|\.txt' | head -n1) ; \
+		[[ -z "$$path" ]] && return 1 ; \
+		echo "https://github.com$$path" ; \
+	}
+	( wget -q "$$(gh_latest_asset slicingmelon/gobypass403 linux_amd64)" -O /tmp/gobypass403 \
 		&& chmod +x /tmp/gobypass403 && sudo mv /tmp/gobypass403 /usr/local/bin/gobypass403 ) || true
-	( wget -q "$$(curl -sL https://api.github.com/repos/Chocapikk/wpprobe/releases/latest | jq -r '.assets[] | select(.name | test("linux_amd64")) | .browser_download_url')" -O /tmp/wpprobe \
+	( wget -q "$$(gh_latest_asset Chocapikk/wpprobe linux_amd64)" -O /tmp/wpprobe \
 		&& chmod +x /tmp/wpprobe && sudo mv /tmp/wpprobe /usr/local/bin/wpprobe \
 		&& wpprobe update-db ) || true
 
