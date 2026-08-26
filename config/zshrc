@@ -7,16 +7,15 @@ export TERMINAL=kitty
 export TERM="xterm-256color"
 export GPG_TTY=$TTY
 export RIPGREP_CONFIG_PATH="$XDG_CONFIG_HOME/ripgrep/ripgreprc"
+export ATUIN_TMUX_POPUP=false
 
 typeset -U path
 path=(
   $HOME/.local/bin
-  $HOME/.local/go/bin
   $HOME/.fzf/bin
   $HOME/.pdtm/go/bin
   $path
 )
-
 path=($^path(N-/))
 export PATH
 
@@ -60,7 +59,6 @@ bindkey '^p' history-search-backward
 bindkey '^n' history-search-forward
 
 # === Fast Static Cache Loading ===
-# (( $+functions[compdef] )) || compdef() { : } # Temporary stub
 local main_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/all_inits.zsh"
 
 [[ -f "$main_cache" ]] && source "$main_cache"
@@ -72,7 +70,7 @@ rebuild-zsh-cache() {
 
   {
     echo '(( $+functions[compdef] )) || compdef() { : }'
-    (( $+commands[mise] )) && mise env zsh
+    (( $+commands[mise] )) && { mise env|rg -v PATH;mise activate --shims; }
     (( $+commands[fzf] )) && fzf --zsh
     (( $+commands[zoxide] )) && zoxide init zsh
     (( $+commands[atuin] )) && atuin init zsh --disable-up-arrow
@@ -119,11 +117,12 @@ else
 fi
 
 
-zstyle ':completion:*' matcher-list 'm:{[:lower:][:upper:]-_}={[:upper:][:lower:]_-}' 'r:|=*' 'l:|=* r:|=*'
-zstyle ':completion:*' list-colors ''
-zstyle ':completion:*' menu select
 local carapace_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/carapace.zsh"
 [[ -f "$carapace_cache" ]] && source "$carapace_cache"
+zstyle ':completion:*' matcher-list 'm:{[:lower:][:upper:]-_}={[:upper:][:lower:]_-}' 'r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' menu select
+compdef _cd cd
 
 # === Helpers, Aliases & FZF ===
 if [[ -r ~/.cache/zsh/dircolors ]]; then
@@ -166,5 +165,6 @@ _load_aliases() {
 
 path=(
   $HOME/.local/go/bin
+  $HOME/.cache/.bun/bin
   $path
 )

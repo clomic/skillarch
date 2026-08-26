@@ -1,0 +1,9 @@
+{
+  "carapace": {
+    "Description": "green",
+    "FlagArg": "yellow",
+    "Highlight12": "inverse",
+    "KeywordAmbiguous": "q",
+    "Value": "yellow"
+  }
+}

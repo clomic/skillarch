@@ -144,7 +144,7 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 	# Install mise and all php-build dependencies
 	$(PACMAN_INSTALL) mise libedit libffi libjpeg-turbo libpcap libpng libxml2 libzip postgresql-libs php-gd
 	# mise self-update # Currently broken, wait for upstream fix, pinged on 17/03/2025
-	for package in uv usage pdm rust terraform golang python nodejs opencode zoxide atuin; do \
+	for package in uv usage pdm rust terraform golang python nodejs opencode zoxide atuin carapace; do \
 		for attempt in 1 2 3; do \
 			mise use -g "$$package@latest" && break || { \
 				$(call WARN,mise install $$package failed (attempt $$attempt/3)$(comma) retrying in 5s...) ; \
@@ -152,8 +152,8 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 			} ; \
 		done ; \
 	done
-	mise exec -- go env -w "GOPATH=$$HOME/.local/go"
-	eval "$$(mise env bash)" || true
+	mise exec -- go env -w "GOPATH=$$HOME/.local/go/bin"
+	eval "$$(mise env)" || true
 
 	# Install uv tools
 	for package in argcomplete bypass-url-parser exegol pre-commit sqlmap wafw00f yt-dlp defaultcreds-cheat-sheet; do
@@ -167,6 +167,9 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 	mise prune -y -q || true
 
 	[[ ! -d "$(HOME_CONFIG)/zsh/completions" ]] && mkdir -p "$(HOME_CONFIG)/zsh/completions"
+	# carapace config
+	$(call ska-link,/opt/skillarch/config/carapace/styles.json,$(HOME_CONFIG)/carapace/styles.json)
+
 	$(call DONE,CLI tools & runtimes installed!)
 
 install-shell: sanity-check ## Install shell, zsh, oh-my-posh, fzf, tmux
