@@ -29,8 +29,9 @@ fpath=(
 HISTFILE=~/.zsh_history
 HISTSIZE=100000
 SAVEHIST=100000
-setopt APPEND_HISTORY SHARE_HISTORY HIST_IGNORE_DUPS HIST_IGNORE_SPACE HIST_EXPIRE_DUPS_FIRST HIST_FIND_NO_DUPS
-setopt extended_glob null_glob AUTOCD NUMERIC_GLOB_SORT
+setopt APPEND_HISTORY SHARE_HISTORY HIST_IGNORE_DUPS HIST_IGNORE_SPACE HIST_EXPIRE_DUPS_FIRST HIST_FIND_NO_DUPS histverify extendedhistory
+setopt extended_glob AUTOCD NUMERIC_GLOB_SORT
+setopt AUTOPUSHD PUSHD_IGNORE_DUPS PUSHD_MINUS
 
 # === Keybindings & Line Editor ===
 bindkey -e
@@ -155,6 +156,9 @@ _help_accept_line() {
 
 zle -N accept-line _help_accept_line
 alias -g -- -h='-h 2>&1 | bat -plhelp'
+
+# SSH-agent
+export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
 
 # Intégration différée des aliases annexes
 _load_aliases() {
