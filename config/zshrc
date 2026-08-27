@@ -84,7 +84,7 @@ rebuild-zsh-cache() {
 
   dircolors -p > ~/.cache/zsh/dircolors
 
-  (( $+commands[carapace] )) && ~/.local/go/bin/carapace _carapace zsh > "$cache_dir/carapace.zsh"
+  (( $+commands[carapace] )) && carapace _carapace zsh > "$cache_dir/carapace.zsh"
   zcompile "$cache_dir/carapace.zsh"
 
   echo "Cache rebuilt successfully into $main_cache!"

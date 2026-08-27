@@ -187,7 +187,7 @@ install-shell: sanity-check ## Install shell, zsh, oh-my-posh, fzf, tmux
 	[[ ! -d "$(DATA_HOME)/zsh-autosuggestions" ]] && git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions.git "$(DATA_HOME)/zsh-autosuggestions" || \
 		{ git -C "$(DATA_HOME)/zsh-autosuggestions" pull -q || true; }
 
-	[[ ! -d "$(DATA_HOME)/zsh-defer" ]] && git clone --depth=1 https://github.com/zdharma-continuum/fast-syntax-highlighting.git "$(DATA_HOME)/fast-syntax-highlighting" || \
+	[[ ! -d "$(DATA_HOME)/fast-syntax-highlighting" ]] && git clone --depth=1 https://github.com/zdharma-continuum/fast-syntax-highlighting.git "$(DATA_HOME)/fast-syntax-highlighting" || \
 		{ git -C "$(DATA_HOME)/fast-syntax-highlighting" pull -q || true; }
 
 	[[ ! -d "$(HOME_CONFIG)/fsh/" ]] && curl -sSO --create-dirs --output-dir "$(HOME_CONFIG)/fsh" https://raw.githubusercontent.com/catppuccin/zsh-fsh/refs/heads/main/themes/catppuccin-macchiato.ini || true
@@ -202,6 +202,7 @@ install-shell: sanity-check ## Install shell, zsh, oh-my-posh, fzf, tmux
 	$(call ska-link,/opt/skillarch/config/vimrc,$$HOME/.vimrc)
 	$(call ska-link,/opt/skillarch/config/fontconfig/fonts.conf,$(HOME_CONFIG)/fontconfig/fonts.conf)
 
+	eval "$$(mise activate --shims)" || true
 	# Atuin config
 	eval "$$(atuin init zsh)" 2>/dev/null || true
 	atuin import auto
@@ -438,7 +439,7 @@ install-clomic: sanity-check ## Install clomic tools
 			} ; \
 		done ; \
 	done
-	eval "$$(mise activate bash)" || true
+	eval "$$(mise activate --shims)" || true
 
 	# Install uv tools
 	for package in aliasr unblob updog yq; do
