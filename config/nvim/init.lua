@@ -32,3 +32,6 @@ vim.api.nvim_create_autocmd("BufEnter", {
   pattern = "*",
   callback = set_transparency,
 })
+
+vim.opt.spell = true
+vim.opt.spelllang = { "en", "fr" }

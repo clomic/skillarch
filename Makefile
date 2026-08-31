@@ -194,6 +194,7 @@ install-shell: sanity-check ## Install shell, zsh, oh-my-posh, fzf, tmux
 	
 	[[ ! -d "$(HOME_CONFIG)/zsh/completions" ]] && mkdir -p "$(HOME_CONFIG)/zsh/completions"
 	[[ ! -d ~/.ssh ]] && mkdir ~/.ssh && chmod 700 ~/.ssh || true # Must exist for ssh-agent to work
+	systemctl --user enable --now ssh-agent.socket
 
 	# Install and configure fzf, tmux, vim
 	[[ ! -d "$$HOME/.fzf" ]] && git clone --depth=1 https://github.com/junegunn/fzf "$$HOME/.fzf" && "$$HOME/.fzf/install" --all || true

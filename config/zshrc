@@ -44,8 +44,41 @@ bindkey '^[[F'  end-of-line          # End
 bindkey '^[[5~' up-line-or-history   # PageUp
 bindkey '^[[6~' down-line-or-history # PageDown
 bindkey '^?'    backward-delete-char # Backspace
-bindkey '^[[1;5C' forward-word       # Ctrl + Right
-bindkey '^[[1;5D' backward-word      # Ctrl + Left
+
+FULLWORDCHARS="*?_-.,[]~=/&:;!#$%^(){}<>'\""
+backward-full-word() { WORDCHARS=$FULLWORDCHARS zle .backward-word ; }
+backward-sub-word() { WORDCHARS="" zle .backward-word ; }
+forward-full-word() { WORDCHARS=$FULLWORDCHARS zle .forward-word ; }
+forward-sub-word() { WORDCHARS="" zle .forward-word ; }
+backward-kill-full-word() { WORDCHARS=$FULLWORDCHARS zle .backward-kill-word ; }
+backward-kill-sub-word() { WORDCHARS="" zle .backward-kill-word ; }
+forward-kill-full-word() { WORDCHARS=$FULLWORDCHARS zle .kill-word ; }
+forward-kill-sub-word() { WORDCHARS="" zle .kill-word ; }
+
+zle -N backward-full-word
+zle -N backward-sub-word
+zle -N forward-full-word
+zle -N forward-sub-word
+zle -N backward-kill-full-word
+zle -N backward-kill-sub-word
+zle -N forward-kill-full-word
+zle -N forward-kill-sub-word
+
+# Jumping:
+bindkey "^[^b"    backward-full-word       # Ctrl + Alt + B
+bindkey '^[[1;7D' backward-full-word       # Ctrl + Alt + Left
+bindkey "^[b"     backward-sub-word        # Alt + B
+bindkey '^[[1;5D' backward-sub-word        # Ctrl + Left
+bindkey "^[f"     forward-sub-word         # Alt + F
+bindkey '^[[1;5C' forward-sub-word         # Ctrl + Right
+bindkey "^[^f"    forward-full-word        # Ctrl + Alt + F
+bindkey '^[[1;7C' forward-full-word        # Ctrl + Alt + Right
+# Deleting:
+bindkey "^[^h"    backward-kill-sub-word   # Ctrl + Alt + H
+bindkey "^w"      backward-kill-full-word  # Ctrl + W
+bindkey "^[d"     forward-kill-sub-word    # Alt + D
+bindkey "^[^d"    forward-kill-full-word   # Ctrl + Alt + D
+
 
 autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
 zle -N up-line-or-beginning-search
@@ -58,6 +91,7 @@ zle -N edit-command-line
 bindkey '^X^E' edit-command-line
 bindkey '^p' history-search-backward
 bindkey '^n' history-search-forward
+autoload -Uz zmv
 
 # === Fast Static Cache Loading ===
 local main_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/all_inits.zsh"
@@ -159,6 +193,7 @@ alias -g -- -h='-h 2>&1 | bat -plhelp'
 
 # SSH-agent
 export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
+# for key in ~/.ssh/id_*; do [[ -f "$key" ]] && ssh-add "$key" 2>/dev/null; done; unset key
 
 # Intégration différée des aliases annexes
 _load_aliases() {

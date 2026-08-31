@@ -442,4 +442,3 @@
 |zip|Package and compress files|
 |zmv|`zmv '(*).log' '$1.txt'` `zmv -W '*.log' '*.txt'`|
 |zsh|Z shell — powerful interactive shell|
-
