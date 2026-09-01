@@ -136,7 +136,7 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 	# nvim config
 	[[ ! -d $(HOME_CONFIG)/nvim ]] && git clone --depth=1 https://github.com/LazyVim/starter $(HOME_CONFIG)/nvim || true
 	$(call ska-link,/opt/skillarch/config/nvim/init.lua,$(HOME_CONFIG)/nvim/init.lua)
-	nvim --headless +"Lazy! sync" +qa >/dev/null # Download and update plugins
+	nvim --headless --cmd "let g:loaded_spellfile_plugin = 1" +"Lazy! sync" +qa >/dev/null # Download and update plugins
 
 	# lazygit config
 	$(call ska-link,/opt/skillarch/config/lazygit/config.yml,$(HOME_CONFIG)/lazygit/config.yml)
