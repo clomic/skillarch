@@ -29,7 +29,7 @@ exec_always --no-startup-id dex --autostart --environment i3
 exec_always --no-startup-id feh --bg-scale /opt/skillarch/assets/bg-2.png
 exec_always --no-startup-id ~/.config/polybar/launch.sh &> /var/tmp/polybar.log
 exec_always --no-startup-id pgrep --exact VBoxService &> /dev/null && killall VBoxClient ; VBoxClient-all
-#exec_always --no-startup-id bash -c "killall -q picom ; grep -qF hypervisor /proc/cpuinfo || picom"
+exec_always --no-startup-id bash -c "killall -q picom ; grep -qF hypervisor /proc/cpuinfo || picom"
 exec_always --no-startup-id i3-battery-popup
 exec_always --no-startup-id /usr/bin/spice-vdagent
 exec_always --no-startup-id /usr/lib/polkit-kde-authentication-agent-1
@@ -220,9 +220,9 @@ for_window [floating] resize set 1536 864, move position 192 108
 
 
 # HELP
-bindsym $mod+h exec kitty --title "Help: SkillArch Bindings" zsh -ic "ska-help-bindings"
-bindsym $mod+Shift+h exec kitty --title "Help: SkillArch Aliases" zsh -ic "ska-help-aliases"
-bindsym $mod+Control+h exec kitty --title "Help: SkillArch packages" zsh -ic "ska-help-packages"
+bindsym $mod+h exec --no-startup-id kitty --title "Help: SkillArch Bindings" zsh -ic "ska-help-bindings"
+bindsym $mod+Shift+h exec --no-startup-id kitty --title "Help: SkillArch Aliases" zsh -ic "ska-help-aliases"
+bindsym $mod+Control+h exec --no-startup-id kitty --title "Help: SkillArch packages" zsh -ic "ska-help-packages"
 
 # Proxy
 bindsym $mod+Control+p exec caido --no-sandbox &> /dev/null &

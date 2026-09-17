@@ -15,9 +15,190 @@ unalias zi 2>/dev/null
 # ────────────────────────────────────────
 alias ska='/opt/skillarch'
 alias skao='/opt/skillarch-original'
-alias ska-help-bindings='i3-msg -t get_config | grep -vF "#bindsym" | grep -oP "bindsym .*" | sort | fzf --layout=reverse-list'
-alias ska-help-aliases='alias | fzf --layout=reverse-list'
-alias ska-help-packages="{ pacman -Q|awk '{print\$1}'; uv tool list|awk '/^-/ {print\$2}'; mise ls|awk '/latest/ {print\$1}'; }|sort -u|fzf --layout=reverse-list"
+alias ska-help-bindings='i3-msg -t get_config|rg -oP "^\s*\Kbindsym .*"|sort|fzf --layout=reverse-list --height=~99% --highlight-line --no-info --padding=0 --border=none'
+alias ska-help-aliases="alias|sed $'s/=/\t/'|column -ts $'\t' -N 'Alias,Command'|fzf --input-border=horizontal --header-first --header='Help: SkillArch Aliases' --header-lines=1 --height=~99% --highlight-line --no-info --padding=0 --border=none"
+
+
+ska-tools() {
+    # Générateur qui envoie les données au fil de l'eau (streamed)
+    _ska_tools_stream() {
+        # # 1. MISE
+        printf '\033[1;38;5;152m󰏖  MISE\033[0m\t\t\theader\n'
+
+        local tmp_mise=$(mktemp) tmp_registry=$(mktemp)
+
+        if mise ls --json > "$tmp_mise" 2>/dev/null &&
+           mise registry --json > "$tmp_registry" 2>/dev/null; then
+
+            jq -rn --slurpfile installed "$tmp_mise" --slurpfile registry "$tmp_registry" '
+                def short_name: split(":")[-1] | split("/")[-1];
+                def normalize: ascii_downcase | gsub("[-_.]"; "-");
+                def description($name):
+                    [$registry[0] | to_entries[]
+                        | select(
+                            ((.value.short // "") | normalize) == ($name | normalize)
+                            or any(.value.aliases[]?; normalize == ($name | normalize))
+                            or any(.value.bins[]?; normalize == ($name | normalize))
+                        )
+                        | .value.description // ""
+                    ][0] // "";
+
+                $installed[0]
+                | to_entries[]
+                | select(.value[0].installed == true)
+                | .key as $name
+                | ($name | short_name) as $short
+                | [$short, "mise", description($short), "tool"]
+                | @tsv
+            ' 2>/dev/null | sort -u
+        fi
+
+        rm -f "$tmp_mise" "$tmp_registry"
+
+
+        # 2. UV
+        printf '\033[1;38;5;152m  UV\033[0m\t\t\theader\n'
+
+        local tool_dir=$(uv tool dir 2>/dev/null)
+
+        if [[ -d "$tool_dir" ]]; then
+            for env in "$tool_dir"/*(N); do
+                [[ -d "$env" ]] || continue
+
+                local package="${env:t}"
+                local normalized="${package//-/_}"
+                local dist_info=("$env"/**/${normalized}-*dist-info(N[1]))
+
+                [[ -d "$dist_info" && -f "$dist_info/METADATA" ]] || continue
+
+                awk -F': ' '
+                    /^Name:/    { name=$2 }
+                    /^Summary:/ { summary=$2 }
+                    END {
+                        printf "%s\tuv\t%s\ttool\n", name, summary
+                    }
+                ' "$dist_info/METADATA"
+            done | sort -u
+        fi
+
+
+        # 3. PACMAN / WHATIS
+        printf '\033[1;38;5;152m  PACMAN\033[0m\t\t\theader\n'
+
+        setopt local_options nullglob
+
+        typeset -A pkg_info whatis_db
+        local db_dir="/var/lib/pacman/local"
+
+        eval "$(LC_ALL=C whatis -w '*' 2>/dev/null |
+            awk -F ' - ' '{
+                split($1, a, " ");
+                bin = a[1];
+                desc = $2;
+
+                gsub(/\r|\n|\t/, " ", desc);
+                gsub(/'\''/, "'\''\\'\'''\''", desc);
+
+                if (bin != "" && desc != "")
+                    print "whatis_db[" bin "]=\x27" desc "\x27";
+            }')"
+
+        eval "$(python3 -c '
+        import os, glob
+
+        db_dir = "/var/lib/pacman/local"
+
+        for pkg_dir in glob.glob(os.path.join(db_dir, "*")):
+            desc_file = os.path.join(pkg_dir, "desc")
+            files_file = os.path.join(pkg_dir, "files")
+
+            pkg, desc = "", ""
+
+            if os.path.isfile(desc_file):
+                with open(desc_file, "r", encoding="utf-8", errors="ignore") as f:
+                    lines = [line.strip() for line in f]
+
+                    if "%NAME%" in lines:
+                        pkg = lines[lines.index("%NAME%") + 1]
+
+                    if "%DESC%" in lines:
+                        desc = lines[lines.index("%DESC%") + 1]
+
+            if pkg and os.path.isfile(files_file):
+                desc_clean = (
+                    desc
+                    .replace("'\''", "'\''\\'\'''\''")
+                    .replace("\t", " ")
+                    .replace("\n", " ")
+                )
+
+                with open(files_file, "r", encoding="utf-8", errors="ignore") as f:
+                    for line in f:
+                        line = line.strip()
+
+                        if line.startswith("usr/bin/") or line.startswith("bin/"):
+                            parts = line.split("/")
+
+                            if len(parts) == 3 and parts[2]:
+                                print(
+                                    f"pkg_info[{parts[2]}]=\x27"
+                                    f"{pkg}|{desc_clean}"
+                                    f"\x27"
+                                )
+        ')"
+
+        fd -t f . /usr/bin |
+        while read -r bin; do
+            local b_name="${bin:t}"
+            local w_desc="${whatis_db[$b_name]}"
+            local p_info="${pkg_info[$b_name]}"
+            local pkg="${p_info%%|*}"
+            local p_desc="${p_info#*|}"
+            local final_desc="${w_desc:-${p_desc:-No description available}}"
+
+            printf "%s\t%s\t%s\ttool\n" \
+                "$b_name" \
+                "${pkg:-standalone}" \
+                "$final_desc"
+        done | sort -u
+    }
+
+
+    local selected
+
+    selected=$(
+        _ska_tools_stream |
+        fzf \
+            --ansi \
+            --color='fg+:#fab387,pointer:#fab387,gutter:#313244,preview-label:#94e2d5,preview-fg:#89dceb,spinner:#f5e0dc' \
+            --height=100% \
+            --no-info \
+            --layout=reverse \
+            --border=rounded \
+            --border-label=' ⏳ Loading tools... ' \
+            --border-label-pos=2 \
+            --prompt='❯ ' \
+            --pointer='▶' \
+            --header='CTRL-/ preview • ENTER select • ESC quit' \
+            --delimiter=$'\t' \
+            --with-nth='1' \
+            --preview-label-pos=3 \
+            --preview='[[ "{4}" == tool ]] && printf "%s\n" "{3}"' \
+            --preview-window='down:3:25%:wrap-word:border-top' \
+            --preview-wrap-sign='' \
+            --bind='ctrl-/:toggle-preview' \
+            --bind='load:change-border-label( SkillArch tools )' \
+            --bind='enter:transform:[[ "{4}" == header ]] && echo ignore || echo accept' \
+            --bind='focus:transform-preview-label:[[ "{4}" == tool ]] && printf "[ \033[1m%s\033[0m | \033[2m(\033[3m%s\033[23m)\033[0m ]" {1} {2}'
+    )
+
+    if [[ -n "$selected" ]]; then
+        print -z -- "${selected%%$'\t'*}"
+    fi
+}
+
+alias ska-help-packages=ska-tools
+# alias ska-help-packages="{ pacman -Q|awk '{print\$1}'; uv tool list|awk '/^-/ {print\$2}'; mise ls|awk '/latest/ {print\$1}'; }|sort -u|fzf --layout=reverse-list --height=~99% --highlight-line --no-info --padding=0 --border=none"
 alias ska-update-simple='ska && make update && make install && source ~/.zshrc'
 ska-update-advanced() {
     # Interactive upstream-merge workflow for forked SkillArch setups.

@@ -432,13 +432,13 @@ install-clomic: sanity-check ## Install clomic tools
 		sudo mv /tmp/cyberchef /opt/cyberchef;
 	}
 
-	for package in opengrep bun rtk npm:@earendil-works/pi-coding-agent gh hunkdiff yazi worktrunk herdr; do \
-		for attempt in 1 2 3; do \
-			mise use -g "$$package@latest" && break || { \
-				$(call WARN,mise install $$package failed (attempt $$attempt/3)$(comma) retrying in 5s...) ; \
-				sleep 5 ; \
-			} ; \
-		done ; \
+	for package in opengrep bun rtk pi gh hunkdiff yazi worktrunk herdr; do
+		for attempt in 1 2 3; do
+			mise use -g "$$package@latest" && break || {
+				$(call WARN,mise install $$package failed (attempt $$attempt/3)$(comma) retrying in 5s...)
+				sleep 5
+			}
+		done
 	done
 	eval "$$(mise activate --shims)" || true
 
@@ -452,10 +452,13 @@ install-clomic: sanity-check ## Install clomic tools
 
 	# Install pi agent packages
 	for package in npm:context-mode npm:pi-mcp-adapter npm:pi-subagents git:github.com/DietrichGebert/ponytail git:github.com/otahontas/pi-coding-agent-catppuccin; do
-		pi install "$$package" || {
-			$(call WARN,Retrying $$package install...)
-			pi install "$$package"
-		}
+		for attempt in 1 2 3; do
+			pi install "$$package" && break || {
+				$(call WARN,pi install $$package failed (attempt $$attempt/3)$(fomma) retrying in 5s...)
+				pi install "$$package"
+				sleep 5
+			}
+		done
 	done
 	atuin hook install pi
 	pi update --all

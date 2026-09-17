@@ -17,4 +17,4 @@
 --smart-case
 
 # colors will be passed after pipe
---color=always
+--color=auto

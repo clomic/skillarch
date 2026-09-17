@@ -9,6 +9,7 @@ export GPG_TTY=$TTY
 export RIPGREP_CONFIG_PATH="$XDG_CONFIG_HOME/ripgrep/ripgreprc"
 export ATUIN_TMUX_POPUP=false
 
+
 typeset -U path
 path=(
   $HOME/.local/bin
@@ -164,11 +165,16 @@ if [[ -r ~/.cache/zsh/dircolors ]]; then
   eval "$(dircolors -b ~/.cache/zsh/dircolors)"
 fi
 
-export FZF_DEFAULT_OPTS='--height 80% --layout=reverse --border=rounded --prompt="  " --pointer="  " --preview-window=right:65%:wrap:border-left'
+export FZF_DEFAULT_OPTS="--height 80% --layout=reverse --border=rounded --prompt='  ' --pointer='  ' --preview-window=right:65%:wrap:border-left \
+  --color='bg+:#313244,bg:#1E1E2E,spinner:#F5E0DC,hl:#F38BA8' \
+  --color='fg:#CDD6F4,header:#F38BA8,info:#CBA6F7,pointer:#F5E0DC' \
+  --color='marker:#B4BEFE,fg+:#CDD6F4,prompt:#CBA6F7,hl+:#F38BA8' \
+  --color='selected-bg:#45475A' \
+  --color='border:#6C7086,label:#CDD6F4'"
 export FZF_DEFAULT_COMMAND='fd --type f --hidden --strip-cwd-prefix --exclude .git --exclude .venv --exclude node_modules'
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 
-man() { GROFF_NO_SGR=1 MANPAGER="sh -c 'col -bx | bat -plman'" command man "$@"; }
+man() { GROFF_NO_SGR=1 MANPAGER="sh -c 'col -bx | bat -plman --paging auto'" command man "$@"; }
 
 _help_accept_line() {
     local original="$BUFFER"
@@ -180,7 +186,7 @@ _help_accept_line() {
     for (( i = 2; i <= ${#words}; i++ )); do
         if [[ "${words[i]}" == "--help" ]]; then
             if [[ "$original" != *'| bat -plhelp'* ]]; then
-                BUFFER="${original} 2>&1 | bat -plhelp"
+                BUFFER="${original} 2>&1 | bat -plhelp --paging auto"
             fi
             break
         fi
@@ -189,7 +195,7 @@ _help_accept_line() {
 }
 
 zle -N accept-line _help_accept_line
-alias -g -- -h='-h 2>&1 | bat -plhelp'
+alias -g -- -h='-h 2>&1 | bat -plhelp --paging auto'
 
 # SSH-agent
 export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
@@ -197,10 +203,15 @@ export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
 
 # Intégration différée des aliases annexes
 _load_aliases() {
-  [[ -f /opt/skillarch/config/aliases ]] && source /opt/skillarch/config/aliases
-  [[ -f ~/.my_aliases ]] && source ~/.my_aliases
+    [[ -f /opt/skillarch/config/aliases ]] && source /opt/skillarch/config/aliases
+    [[ -f ~/.my_aliases ]] && source ~/.my_aliases
 }
-(( $+functions[zsh-defer] )) && zsh-defer _load_aliases || _load_aliases
+
+if [[ -n "$ZSH_EXECUTION_STRING" ]] then
+    source /opt/skillarch/config/aliases
+else
+    (( $+functions[zsh-defer] )) && zsh-defer _load_aliases || _load_aliases;
+fi
 
 path=(
   $HOME/.local/go/bin
