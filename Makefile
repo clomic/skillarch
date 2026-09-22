@@ -461,7 +461,8 @@ install-clomic: sanity-check ## Install clomic tools
 		done
 	done
 	atuin hook install pi
-	pi update --all
+	mise upgrade pi
+	pi update --extensions
 
 	# gh-dash
 	gh extension install dlvhdr/gh-dash
