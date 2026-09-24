@@ -416,6 +416,7 @@ install-clomic: sanity-check ## Install clomic tools
 		sudo cp /opt/skillarch/config/exegol/load_user_setup.sh $$HOME/.exegol/my-resources/setup/
 	}
 
+	[[ ! -d "$(HOME_CONFIG)/tmux/plugins/tpm" ]] && git clone --depth=1 https://github.com/tmux-plugins/tpm "$(HOME_CONFIG)/tmux/plugins/tpm" || true
 	[[ ! -d "$(HOME_CONFIG)/tmux/plugins/catppuccin" ]] && git clone --depth=1 https://github.com/catppuccin/tmux.git "$(HOME_CONFIG)/tmux/plugins/catppuccin/tmux" || true
 
 	sudo ln -sf /opt/skillarch/config/systemd/resolved.conf /etc/systemd/resolved.conf
