@@ -201,6 +201,18 @@ alias -g -- -h='-h 2>&1 | bat -plhelp --paging auto'
 export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
 # for key in ~/.ssh/id_*; do [[ -f "$key" ]] && ssh-add "$key" 2>/dev/null; done; unset key
 
+ssh() {
+  [[ -z $TMUX ]] && { command ssh "$@"; return; }
+  local u h real
+  read -r u h < <(command ssh -G "$@" 2>/dev/null | awk '$1=="user"{u=$2} $1=="hostname"{h=$2} END{print u, h}')
+  real=$(getent hosts "$h" | awk 'NR==1{print $2}')
+  tmux set-option -p @ssh_target "$u@${real:-$h}" \; refresh-client -S
+  command ssh "$@"
+  local rc=$?
+  tmux set-option -p -u @ssh_target \; refresh-client -S
+  return $rc
+}
+
 # Intégration différée des aliases annexes
 _load_aliases() {
     [[ -f /opt/skillarch/config/aliases ]] && source /opt/skillarch/config/aliases
