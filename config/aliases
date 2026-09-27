@@ -13,8 +13,8 @@ unalias zi 2>/dev/null
 # ────────────────────────────────────────
 #  SkillArch Helpers
 # ────────────────────────────────────────
-alias ska='/opt/skillarch'
-alias skao='/opt/skillarch-original'
+alias ska='cd /opt/skillarch'
+alias skao='cd /opt/skillarch-original'
 alias ska-help-bindings='i3-msg -t get_config|rg -oP "^\s*\Kbindsym .*"|sort|fzf --layout=reverse-list --height=~99% --highlight-line --no-info --padding=0 --border=none'
 alias ska-help-aliases="alias|sed $'s/=/\t/'|column -ts $'\t' -N 'Alias,Command'|fzf --input-border=horizontal --header-first --header='Help: SkillArch Aliases' --header-lines=1 --height=~99% --highlight-line --no-info --padding=0 --border=none"
 

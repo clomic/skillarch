@@ -105,8 +105,21 @@ install-base: sanity-check ## Install base packages
 	# Init keyring only if needed
 	[[ ! -d /etc/pacman.d/gnupg ]] && sudo pacman-key --init || true
 	sudo pacman --noconfirm -Sc
-	sudo rm -rf /var/cache/pacman/pkg/download-* 2>/dev/null
-	sudo pacman --noconfirm -Syu
+	if ! sudo pacman --noconfirm -Syu; then
+		# Arch retired this 32-bit PAM/audit stack from multilib. Its orphaned
+		# audit=... pin can block the system upgrade after audit is bumped.
+		# Remove it only when the leaf is unavailable in sync repos and is an orphan.
+		if pacman -Qq lib32-libcap > /dev/null 2>&1 \
+			&& ! pacman -Si lib32-libcap > /dev/null 2>&1 \
+			&& pacman -Qdtq | grep -Fxq lib32-libcap; then
+			$(call WARN,Removing retired orphaned 32-bit PAM/audit packages blocking the upgrade...)
+			sudo pacman --noconfirm -Rns lib32-libcap
+			sudo pacman --noconfirm -Su
+		else
+			$(call ERR,System upgrade failed and no known automatic migration applies)
+			exit 1
+		fi
+	fi
 	$(PACMAN_INSTALL) git vim tmux wget curl archlinux-keyring
 
 	# Add chaotic-aur: download keyring+mirrorlist in parallel, install locally (avoids slow HKP keyserver)
@@ -312,7 +325,7 @@ install-offensive: sanity-check ## Install offensive & security tools
 	# HExHTTP: HTTP header vuln/cache-poisoning scanner - clone + isolated venv + PATH shim.
 	# Upstream pyproject entrypoint is broken (hexhttp.py not packaged); bypass with a direct wrapper.
 	ska_clone https://github.com/c0dejump/HExHTTP && sudo chown -R "$$USER:$$USER" /opt/HExHTTP || true
-	[[ -d /opt/HExHTTP ]] && git -C /opt/HExHTTP/ pull -q && uv venv --allow-existing -q /opt/HExHTTP/.venv && uv pip install -q -p /opt/HExHTTP/.venv /opt/HExHTTP || true
+	[[ -d /opt/HExHTTP ]] && git -C /opt/HExHTTP/ pull -q && mise exec -- uv venv --allow-existing -q /opt/HExHTTP/.venv && mise exec -- uv pip install -q -p /opt/HExHTTP/.venv /opt/HExHTTP || true
 	sudo tee /usr/local/bin/hexhttp > /dev/null <<-'SHIM'
 		#!/usr/bin/env bash
 		exec /opt/HExHTTP/.venv/bin/python /opt/HExHTTP/hexhttp.py "$$@"
@@ -342,8 +355,14 @@ install-offensive: sanity-check ## Install offensive & security tools
 	( wget -q "$$(gh_latest_asset slicingmelon/gobypass403 linux_amd64)" -O /tmp/gobypass403 \
 		&& chmod +x /tmp/gobypass403 && sudo mv /tmp/gobypass403 /usr/local/bin/gobypass403 ) || true
 	( wget -q "$$(gh_latest_asset Chocapikk/wpprobe linux_amd64)" -O /tmp/wpprobe \
-		&& chmod +x /tmp/wpprobe && sudo mv /tmp/wpprobe /usr/local/bin/wpprobe \
-		&& wpprobe update-db ) || true
+		&& chmod +x /tmp/wpprobe && sudo mv /tmp/wpprobe /usr/local/bin/wpprobe ) \
+		|| $(call WARN,Failed to update WPProbe$(comma) continuing...)
+	# ~/.local/bin precedes /usr/local/bin; replace a stale user-local binary with
+	# a backed-up symlink so both interactive use and database refresh run the update.
+	if [[ -x /usr/local/bin/wpprobe ]]; then
+		$(call ska-link,/usr/local/bin/wpprobe,$$HOME/.local/bin/wpprobe)
+		/usr/local/bin/wpprobe update-db || $(call WARN,WPProbe database update failed$(comma) continuing...)
+	fi
 
 	# massdns: required by shuffledns (PD tool) - Build from source into ~/.local/bin
 	ska_clone https://github.com/blechschmidt/massdns && make -C /opt/massdns 2>/dev/null && cp /opt/massdns/bin/massdns $$HOME/.local/bin/ || true
@@ -957,7 +976,7 @@ list-tools: ## List installed offensive tools & versions
 	ska_ver "wireshark"  "wireshark --version 2>&1 | head -1"
 	$(call BOLD,\n--- uv Tools ---)
 	eval "$$(mise activate bash)" || true
-	uv tool list 2>/dev/null | grep -v '-' | pr -o2 -t || echo "  uv not available"
+	mise exec -- uv tool list 2>/dev/null | grep -v '-' | pr -o2 -t || echo "  uv not available"
 	$(call BOLD,\n--- Pdtm Tools ---)
 	## ls ~/.pdtm/go/bin/ 2>/dev/null | while read -r tool; do echo "  %$$tool"; echo "$$($$tool --version 2>&1|tail -1)"; done || echo "  pdtm not installed"
 	pdtm 2>&1 | awk '/^[0-9]+\./ {gsub(/\033\[[0-9;]*[mK]/, ""); sub(/^[0-9]+\./, " "); print}'  || echo "  pdtm not installed"
