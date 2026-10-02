@@ -20,7 +20,6 @@ alias ska-help-aliases="alias|sed $'s/=/\t/'|column -ts $'\t' -N 'Alias,Command'
 
 
 ska-tools() {
-    # Générateur qui envoie les données au fil de l'eau (streamed)
     _ska_tools_stream() {
         # # 1. MISE
         printf '\033[1;38;5;152m󰏖  MISE\033[0m\t\t\theader\n'
@@ -62,22 +61,31 @@ ska-tools() {
         local tool_dir=$(uv tool dir 2>/dev/null)
 
         if [[ -d "$tool_dir" ]]; then
+            local env package normalized summary s
+            local -a dist_info scripts
+
             for env in "$tool_dir"/*(N); do
                 [[ -d "$env" ]] || continue
 
-                local package="${env:t}"
-                local normalized="${package//-/_}"
-                local dist_info=("$env"/**/${normalized}-*dist-info(N[1]))
+                package="${env:t}"
+                normalized="${package//-/_}"
+                dist_info=("$env"/**/(#i)${normalized}-*dist-info(N[1]))
 
                 [[ -d "$dist_info" && -f "$dist_info/METADATA" ]] || continue
 
-                awk -F': ' '
-                    /^Name:/    { name=$2 }
-                    /^Summary:/ { summary=$2 }
-                    END {
-                        printf "%s\tuv\t%s\ttool\n", name, summary
-                    }
-                ' "$dist_info/METADATA"
+                summary=$(awk -F': ' '/^Summary:/ { print $2; exit }' "$dist_info/METADATA")
+
+                scripts=( ${(f)"$(awk '
+                    /^\[console_scripts\]/ { f=1; next }
+                    /^\[/                  { f=0 }
+                    f && /=/               { sub(/[ \t]*=.*/, ""); print }
+                ' "$dist_info/entry_points.txt" 2>/dev/null)"} )
+
+                (( ${#scripts} )) || scripts=( "$package" )
+
+                for s in $scripts; do
+                    printf "%s\tuv\t%s\ttool\n" "$s" "$summary"
+                done
             done | sort -u
         fi
 
@@ -183,13 +191,13 @@ ska-tools() {
             --delimiter=$'\t' \
             --with-nth='1' \
             --preview-label-pos=3 \
-            --preview='[[ "{4}" == tool ]] && printf "%s\n" "{3}"' \
+            --preview='[[ {4} == tool ]] && printf "%s\n" {3}' \
             --preview-window='down:3:25%:wrap-word:border-top' \
             --preview-wrap-sign='' \
             --bind='ctrl-/:toggle-preview' \
             --bind='load:change-border-label( SkillArch tools )' \
-            --bind='enter:transform:[[ "{4}" == header ]] && echo ignore || echo accept' \
-            --bind='focus:transform-preview-label:[[ "{4}" == tool ]] && printf "[ \033[1m%s\033[0m | \033[2m(\033[3m%s\033[23m)\033[0m ]" {1} {2}'
+            --bind='enter:transform:[[ {4} == header ]] && echo ignore || echo accept' \
+            --bind='focus:transform-preview-label:[[ {4} == tool ]] && printf "[ \033[1m%s\033[0m | \033[2m(\033[3m%s\033[23m)\033[0m ]" {1} {2}'
     )
 
     if [[ -n "$selected" ]]; then
