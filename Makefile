@@ -412,6 +412,7 @@ install-wordlists: sanity-check ## Install wordlists (SecLists, rockyou, etc.)
 	ska_clone_list https://github.com/Karanxa/Bug-Bounty-Wordlists &
 	ska_clone_list https://github.com/tarraschk/richelieu &
 	ska_clone_list https://github.com/p0dalirius/webapp-wordlists &
+	ska_clone_list https://github.com/six2dez/OneListForAll &
 	wait
 	$(call DONE,Wordlists installed!)
 
