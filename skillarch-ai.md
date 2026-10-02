@@ -67,6 +67,7 @@ make clean              # Docker-only: clear caches (pacman, yay, pip, mise, go,
 | `ska-sudo-unlock` | Reset faillock after 3 bad sudo attempts |
 | `ska-vnc` | Prompt for VNC password, set it, start KasmVNC on :1 |
 | `ska-vbox-install-guestutils` | Install VirtualBox guest utils |
+| `rebuild-zsh-cache` | Rebuild and zcompile consolidated Zsh init cache (`~/.cache/zsh/all_inits.zsh`) |
 | `fastfetch` / `neofetch` / `hifetch` | fastfetch with SkillArch logo |
 
 ### Editors & Navigation
@@ -82,6 +83,8 @@ make clean              # Docker-only: clear caches (pacman, yay, pip, mise, go,
 | `dl` | `cd ~/Downloads` |
 | `da` | `cd /DATA` |
 | `cdtmp` | `pushd $(mktemp -d)` |
+| `z <dir>` | Smart directory jump (zoxide frecency) |
+| `zi` | Interactive fuzzy directory selection (zoxide + fzf) |
 | `ff` | `find . -iname "*<arg>*"` |
 
 ### File Management
@@ -368,8 +371,11 @@ make clean              # Docker-only: clear caches (pacman, yay, pip, mise, go,
 | `/opt/pypotomux` | laluka/pypotomux | tmux session multiplexer |
 | `/opt/HExHTTP` | c0dejump/HExHTTP | HTTP header vuln / cache-poisoning scanner (isolated venv, `hexhttp -u https://target.tld/`) |
 
-### Runtimes (mise)
-`python` (latest), `nodejs` (latest), `golang` (latest), `rust` (latest), `uv`, `pdm`, `terraform`
+### Runtimes & CLI Tools (mise)
+- **Runtimes**: `python` (latest), `nodejs` (latest), `golang` (latest), `rust` (latest)
+- **Dev & Package Managers**: `uv`, `pdm`, `terraform`
+- **Shell Productivity**: `zoxide` (smart cd), `atuin` (history search & sync), `carapace` (multi-shell completion), `usage`, `opencode`
+- **Discovery**: `pdtm` (`aqua:projectdiscovery/pdtm`)
 
 ---
 
@@ -531,6 +537,10 @@ dexr                                   # same, as root
 
 - `ska-help-aliases` — interactive fzf search of all aliases (use it!)
 - `ska-help-bindings` — interactive fzf search of all i3 keybindings
+- `z <dir>` / `zi` — smart directory jump powered by zoxide + fzf
+- `atuin` (`Ctrl+R`) — rich sqlite-backed command history search
+- `carapace` — multi-shell context-aware completions
+- `rebuild-zsh-cache` — re-generate compiled Zsh startup cache when new tools/shims are added
 - `source ~/.myaliases` — private aliases for secrets/tokens (never commit this file)
 - Kitty rectangle select: `ctrl+alt+click/drag`
 - Keyboard layout is AZERTY by default; workspace numbers use `&éàçèù-_çà`

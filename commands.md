@@ -8,11 +8,13 @@
 |7zp|Un7zip with password|
 |aix|AI exploitation tool|
 |alacritty|GPU-accelerated terminal emulator|
+|aliasr|Shell alias manager and discoverability helper|
 |alterx|Fast subdomain permutation engine|
 |arandr|Visual frontend for XRandR (screen layout)|
 |args_to_stdin|Convert Args to stdin|
 |asciinema|Record and share terminal sessions|
 |asnmap|ASN to IP range mapping|
+|atuin|Magical shell history sync and search backed by SQLite|
 |audacity|Multi-track audio editor|
 |b|bat (A cat(1) clone with syntax highlighting and Git integration)|
 |b32|Encode into Base32|
@@ -40,10 +42,13 @@
 |brightnessctl|Control screen brightness from CLI|
 |brutespray|Default credentials brute-forcer from nmap output|
 |btm|Graphical system monitor for terminal (bottom)|
+|bun|Ultra-fast JavaScript & TypeScript runtime, bundler, and package manager|
+|bypass-url-parser|Tool for testing HTTP 403/401 bypass techniques|
 |c|Open Visual Studio Code|
 |C|Open current folder in Visual Studio Code|
 |caido-cli|Caido HTTP toolkit CLI|
 |caido-desktop|Caido HTTP toolkit desktop app|
+|carapace|Multi-shell command-line completions generator and engine|
 |cargo|Rust package manager and build tool|
 |cchef|Open local CyberChef|
 |cdncheck|CDN / WAF detection utility|
@@ -77,6 +82,7 @@
 |dcarbonyl|Chrome in Terminal|
 |ddroopescan|Docker: droope/droopescan — Drupal scanner|
 |defaultcreds|Default credentials lookup tool|
+|defaultcreds-cheat-sheet|Default credentials database search and lookup utility|
 |delta|Syntax-highlighting pager for git/diff output|
 |dex|fzf-select container + exec into it|
 |dexr|fzf-select container + exec as root|
@@ -135,12 +141,13 @@
 |expect|Automate interactive CLI applications|
 |exsta|`exegol start`|
 |exsto|`exegol stop`|
+|extract|Universal archive extractor for tar, gz, bz2, zip, 7z, and more|
 |eza|Modern ls replacement with colors and icons|
 |fab|`fabric-ai -s` (AI-powered text processing)|
 |fabric-ai|AI-powered text processing & automation|
 |fastfetch|fastfetch with SkillArch logo|
 |feh|Lightweight image viewer|
-|ff|`find . -iname "*<arg>*"` |
+|ff|`find . -iname "*<arg>*"`|
 |ffmpeg|Record, convert and stream audio/video|
 |ffuf|Fast web fuzzer (Fuzz Faster U Fool)|
 |filezilla|FTP, FTPS and SFTP client|
@@ -173,10 +180,16 @@
 |get-du|`du -hd1 2>/dev/null`|
 |get-homoglyph|Show homoglyph-confusable characters, e.g. `get-homoglyph '*'` → ⁎٭∗𐌟|
 |get-ip|Public IP via ipinfo.io|
+|get-ip|Public IP via ipinfo.io|
+|get-ip-cpy|Public IP address is copied into the Clipboard and not displayed|
 |get-ip-cpy|Public IP address is copied into the Clipboard and not displayed|
 |get-meteo|`curl wttr.in` weather|
+|get-meteo|`curl wttr.in` weather|
+|get-pid-click|Click a window to get its PID|
 |get-pid-click|Click a window to get its PID|
 |get-pid-ps|fzf-select process to get PID|
+|get-pid-ps|fzf-select process to get PID|
+|get-shell-size|Get numbers of rows and cols in current shell|
 |get-shell-size|Get numbers of rows and cols in current shell|
 |getcan|Generate a Canary with the current unix timestamp in nanosecond (e.g. skanary1778607587707828891)|
 |getcaninfo|get time from canary (`getcaninfo skanary1778607587707828891` or `getcaninfo 1778607587707828891` → 2026-05-12 19:39:47.707828891)|
@@ -189,12 +202,8 @@
 |getinfo-leakix|LeakIX hostname/IP graph lookup|
 |getinfo-virustotal|Open VirusTotal for domain|
 |getinfo-wayback|Wayback Machine URL enumeration|
-|get-ip|Public IP via ipinfo.io|
-|get-ip-cpy|Public IP address is copied into the Clipboard and not displayed|
-|get-meteo|`curl wttr.in` weather|
-|get-pid-click|Click a window to get its PID|
-|get-pid-ps|fzf-select process to get PID|
-|get-shell-size|Get numbers of rows and cols in current shell|
+|gh|GitHub official command-line interface|
+|gh-dash|Terminal dashboard extension for GitHub pull requests and issues|
 |ghex|GNOME hex editor|
 |ghidra|Software reverse engineering suite (NSA)|
 |git|Distributed version control system|
@@ -206,6 +215,7 @@
 |glow|Render Markdown in the terminal|
 |go|The Go programming language toolchain|
 |gobypass403|403 Bypass scanner|
+|gog|Launch Google Chrome Stable|
 |gowitness|Screenshot websites using Chrome Headless|
 |gparted|GNOME partition editor|
 |gpg|GNU Privacy Guard (encryption & signing)|
@@ -214,6 +224,7 @@
 |gron|Flatten JSON into grep-friendly assignments|
 |guvcview|GTK UVC webcam viewer|
 |hashcat|Advanced password recovery (CPU/GPU)|
+|herdr|Multi-agent orchestration CLI for coding assistants|
 |hex2c|Convert Hex to C hex string (e.g. `hex2c 909090` → \x90\x90\x90)|
 |hex2py|Convert Hex into a Python hex array (e.g. `hex2py 909090` → [0x90, 0x90, 0x90])|
 |hexd|Decode Hex to ASCII string (e.g. `hexe 536b696c6c41726368` → SkillArch)|
@@ -227,6 +238,7 @@
 |htmlunescape|Convert HTML Entities back to characters (e.g. `&amp;` → `&`)|
 |htop|Interactive process viewer|
 |httpx|HTTP probing and fingerprinting|
+|hunkdiff|Interactive terminal diff viewer by Git hunks|
 |hwinfo|Probe and display hardware info|
 |i3|Tiling window manager|
 |i3lock|Simple screen locker for i3|
@@ -253,6 +265,7 @@
 |konsole|KDE terminal emulator|
 |l|`eza -l --group-directories-first --icons`|
 |la|`l -a`|
+|laa|List files including . and .. (eza -laa)|
 |latinToUtf8|Convert Latin-1 to UTF-8, e.g. `fromHex 48e920e761207661203f \| latinToUtf8` → "Hé ça va ?"|
 |lazygit|Simple terminal UI for git commands|
 |lfu|ffuf + save JSON + auto-filter results|
@@ -268,11 +281,13 @@
 |mcrypt-enc|Encrypt file with a random password (auto-copied to clipboard)|
 |md5|MD5 Hash|
 |meld|Visual diff and merge tool|
+|minicom|Friendly serial communication and terminal emulation program|
 |mplayer|CLI media player|
 |msfconsole|Metasploit Framework console|
 |msfvenom|Metasploit payload generator and encoder|
 |naabu|Fast port scanner (SYN/CONNECT)|
 |nc|`ncat`|
+|ncdu|Disk usage analyzer with an ncurses interface|
 |ncl|`ncat -lnvp` (listen)|
 |neofetch|fastfetch with SkillArch logo|
 |ngrep|Network grep — match patterns in packet payloads|
@@ -291,17 +306,22 @@
 |nuclei|Fast vulnerability scanner based on templates|
 |nvim|Hyperextensible Vim-based text editor (neovim)|
 |obs|Open Broadcaster Software — screen recording & streaming|
+|obsidian|Markdown-based personal knowledge base and note-taking application|
 |okular|KDE document / PDF viewer|
 |opencode|AI-powered coding assistant (CLI agent)|
+|opengrep|Open-source static code analysis (SAST) engine (Semgrep fork)|
 |opensnitch|Interactive application firewall (GUI daemon)|
 |openssl|Cryptography and SSL/TLS toolkit|
 |p|python|
 |parallel|Build and execute commands in parallel|
 |paste|Paste from clipboard|
+|pbzip2|Parallel implementation of the bzip2 file compressor|
 |pdm|Modern Python package and dependency manager|
 |pdtm|ProjectDiscovery tool manager|
 |phpggc|PHP unserialize gadget chain library & CLI|
+|pi|AI coding agent harness with extension and MCP support|
 |picom|X11 compositor (transparency, shadows, animations)|
+|pigz|Parallel implementation of gzip for multi-core compression|
 |plasma-desktop|KDE Plasma desktop environment|
 |polybar|Highly customizable status bar|
 |pre-commit|Git hook framework for code quality checks|
@@ -321,16 +341,20 @@
 |qsu|`qsv sort -u`|
 |qsv|Fast CSV toolkit (query, index, slice, stats)|
 |read-crt|Read X509 certificate|
+|rebuild-zsh-cache|Recompile and consolidate Zsh startup scripts into binary cache|
 |rg|Recursively search directories (ripgrep)|
 |rlwrap|Readline wrapper — history for any REPL|
 |rm|`trash-put` (safe delete)|
 |rofi|Window switcher, app launcher and dmenu replacement|
+|rtk|Runtime toolkit command-line interface|
 |rustc|The Rust compiler|
+|sagemath|Open-source mathematics software system (crypto, algebra)|
 |sdi|`watch iostat -h` (Show Disk IO)|
 |searchsploit|Exploit-DB offline search tool|
 |semgrep|Static analysis for security & correctness|
 |sha1|SHA1 Hash|
 |sha256|SHA256 Hash|
+|shellcheck|Static analysis tool for shell scripts (sh/bash)|
 |show-disk-io|`watch iostat -h`|
 |show-open-ports|Show all listening ports (TCP + UDP)|
 |shuffledns|DNS brute-forcer with resolver shuffling|
@@ -340,6 +364,7 @@
 |ska-help-bindings|fzf fuzzy-search i3 keybindings|
 |ska-help-packages|fzf fuzzy-search installed pacman packages|
 |ska-sudo-unlock|Reset faillock after 3 bad sudo attempts|
+|ska-tools|Streamed fzf selector across all installed pacman, uv, and mise tools|
 |ska-update-advanced|Interactive upstream-merge for forks (commit local → fetch → preview → merge → push → reapply, all Y/n-prompted)|
 |ska-update-simple|`ska && make update && make install`|
 |ska-vbox-install|Install Virtualbox package|
@@ -365,6 +390,7 @@
 |t2|eza tree depth 2|
 |t3|eza tree depth 3|
 |ta|tmux attach|
+|tailscale|Zero-config mesh VPN powered by WireGuard|
 |te|trash-empty|
 |terraform|Infrastructure as Code tool|
 |thunar|Xfce file manager|
@@ -391,6 +417,7 @@
 |unicodeencode|`unicodeencode "Windows 🪟 vs Linux 🐧"` → Windows \u1fa9f vs Linux \u1f427|
 |unicodeencodeall|`unicodeencodeall 'SkillArch🚀'` → \u0053\u006b\u0069\u006c\u006c\u0041\u0072\u0063\u0068\u1f680|
 |unzip|Extract and list ZIP archives|
+|updog|Simple HTTP file server replacement for Python SimpleHTTPServer with upload support|
 |upload|Upload file to 0x0.st|
 |urld|URL decode (e.g. `urld "%53%6b%69%6c%6c%41%72%63%68"` → SkillArch)|
 |urldecode|URL decode (e.g. `urldecode "%53%6b%69%6c%6c%41%72%63%68"` → SkillArch)|
@@ -409,9 +436,9 @@
 |uv|Ultra-fast Python package and project manager|
 |uva|`uv add --script` (Update a script with a lib (mytool.py added_lib) or w/ requirements.txt (mytool.py -r requirements.txt))|
 |uvp|`uv pip install`|
-|uvreq|`uv pip install -r requirements.txt`|
 |uvpwn|`uvx --with pwntools python` (Run a python script using pwn lib)|
 |uvr|`uv run`|
+|uvreq|`uv pip install -r requirements.txt`|
 |uvv|`uv venv .venv && source .venv/bin/activate`|
 |v|nvim|
 |vbindiff|Visual binary diff tool|
@@ -428,7 +455,9 @@
 |wifi-nmtui|Text User Interface for controlling NetworkManager (Wifi)|
 |wireshark|Network protocol analyzer|
 |wk|Wireshark as root|
+|worktrunk|Fast Git worktree switcher and management tool|
 |wpprobe|WordPress vulnerability scanner|
+|wt|Fast Git worktree switcher and management tool (alias for worktrunk)|
 |xclip|Command-line interface to X clipboard|
 |xmlescape|Convert characters to HTML Entities (e.g. `&` → `&amp;`)|
 |xmlunescape|Convert HTML Entities back to characters (e.g. `&amp;` → `&`)|
@@ -436,9 +465,14 @@
 |xorh|`xorh "key_in_hex" "hex_string"` or `echo "hex_string" \| xorh "key_in_hex"`|
 |xxh|xxd last_arg \| head rest_args, e.g. `xxh -n -20 file` == `xxd file \| head -n -20`|
 |yay|AUR helper (pacman wrapper)|
+|yazi|Blazing-fast terminal file manager written in Rust|
+|yq|Portable command-line YAML, JSON, and XML processor|
 |yt-dlp|Download videos / audio from YouTube et al.|
 |yt-dlp-likes|Download Youtube Favorites Videos to MP3|
 |yt-mp3|Extract audio (in MP3) from Youtube link|
+|z|Jump to frecent directory via zoxide|
+|zi|Interactive directory jump using zoxide and fzf|
 |zip|Package and compress files|
 |zmv|`zmv '(*).log' '$1.txt'` `zmv -W '*.log' '*.txt'`|
+|zoxide|Smarter cd command inspired by z and autojump|
 |zsh|Z shell — powerful interactive shell|

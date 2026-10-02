@@ -346,7 +346,7 @@ openssl-1.1 kasmvncserver-bin
 com.obsproject.Studio
 
 # Mise tools
-uv usage pdm rust terraform golang python nodejs opencode pdtm (aqua:projectdiscovery/pdtm)
+uv usage pdm rust terraform golang python nodejs opencode zoxide atuin carapace pdtm (aqua:projectdiscovery/pdtm)
 
 # Source builds (into ~/bin)
 blechschmidt/massdns (required by shuffledns)
