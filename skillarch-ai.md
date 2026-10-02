@@ -7,13 +7,13 @@
 ## Environment
 
 - **OS**: CachyOS (Arch Linux, performance-tuned)
-- **Shell**: Zsh + Oh-My-Zsh + Powerlevel10k (`af-magic` theme)
+- **Shell**: Zsh + Oh-My-Posh (`skillarch.toml`) + zsh-defer + Fast-Syntax-Highlighting (Catppuccin) + Atuin + Carapace + FZF
 - **WM/DE**: i3-gaps + Polybar + Rofi + Picom + Kitty terminal + KDE Plasma X11
 - **Editors**: Neovim (LazyVim), VS Code (`code`)
 - **Install root**: `/opt/skillarch/` — all dotfiles symlinked from here
 - **Data root**: `/DATA/` — long-lived user data
 - **Wordlists**: `/opt/lists/`
-- **Offensive tools**: mix of pacman, yay, pdtm, uv, go, GitHub releases, git clones
+- **Offensive tools**: mix of pacman, yay, mise, pdtm, uv, go, GitHub releases, git clones
 
 ---
 
@@ -23,13 +23,18 @@
 make install            # Full install (~15 min), logs to /var/tmp/skillarch-install_<date>.log
 make install-base       # Repo setup, pacman config, chaotic-aur, /DATA dir
 make install-cli-tools  # CLI tools, mise runtimes (Python/Node/Go/Rust), uv tools, neovim+LazyVim
-make install-shell      # Zsh, oh-my-zsh, fzf, tmux, vim, dotfile symlinks
+make install-shell      # Zsh, oh-my-posh, fzf, tmux, vim, dotfile symlinks
 make install-docker     # Docker + Docker Compose, user added to docker group
 make install-gui        # i3, polybar, kitty, rofi, picom, KDE Plasma, touchpad config
 make install-gui-tools  # Chrome, VSCode, Ghidra, Discord, VLC, Wireshark
 make install-offensive  # Metasploit, ffuf, pdtm tools, go binaries, GitHub releases, cloned tools
 make install-wordlists  # All wordlists to /opt/lists/
 make install-hardening  # opensnitch (installed, opt-in)
+make install-clomic     # Extended tools: obsidian, tailscale, cyberchef, mise (pi, yazi, hunkdiff, herdr), uv tools, pi extensions
+make install-sysreptor  # SysReptor pentest reporting (docker compose) in /opt/sysreptor
+make install-vmware     # Open-VM-Tools (VMware guest tools & shared folders)
+make opti-btrfs         # Disable CoW (chattr +C) on heavy I/O dirs (VMs, Docker, cache) for Btrfs
+make cloud-export       # Export cloud VM image/bundle
 make update             # git pull + prompt to re-run make install
 make cloud              # (Standalone, NOT in make install) KasmVNC + cloud-init for cloud/remote desktop
 make test               # Full smoke tests
@@ -315,17 +320,36 @@ make clean              # Docker-only: clear caches (pacman, yay, pip, mise, go,
 `bat`, `eza`, `fzf`, `ripgrep`, `fd`, `jq`, `glow`, `jless`, `gron`, `htmlq`, `qsv`, `viu`, `superfile`, `fastfetch`, `asciinema`, `bottom`, `htop`, `tmux`, `git-delta`, `lazygit`, `fq`, `fx`, `websocat`, `cloc`, `tree`, `rlwrap`, `parallel`, `tmate`, `trash-cli`, `sysstat`, `inotify-tools`
 
 ### Security / Offensive (pacman)
-`metasploit` (msfconsole, msfvenom), `hashcat`, `bettercap`, `nmap`, `wireshark-qt`, `ghidra`, `gdb+gef`, `gitleaks`, `opensnitch`, `bore` (TCP NAT tunnel — `bore local <PORT> --to bore.pub`)
+`metasploit` (msfconsole, msfvenom), `hashcat`, `bettercap`, `nmap`, `wireshark-qt`, `ghidra`, `gdb+gef`, `gitleaks`, `opensnitch`, `bore` (TCP NAT tunnel — `bore local <PORT> --to bore.pub`), `jdk21-openjdk`
 
 ### Security / Offensive (yay/AUR)
-`ffuf`, `gau`, `waybackurls`, `fabric-ai-bin`, `caido-desktop`, `caido-cli`, `gobypass403` (GitHub release), `wpprobe` (GitHub release)
+`ffuf`, `gau`, `waybackurls`, `fabric-ai-bin`, `caido-desktop`, `caido-cli`
+
+### GitHub Binary Releases (/usr/local/bin)
+`hexhttp` (c0dejump/HExHTTP), `gobypass403` (slicingmelon/gobypass403), `wpprobe` (Chocapikk/wpprobe — symlinked to `~/.local/bin/wpprobe`), `gog` (symlink to `google-chrome-stable`)
+
+### GUI Tools (pacman / yay / flatpak)
+- **Browsers & Network**: `google-chrome` (`gog`), `torbrowser-launcher`, `filezilla`
+- **Editors & Dev**: `visual-studio-code-bin` (`code`), `meld`, `kompare`, `ghex`
+- **Reversing & Analysis**: `ghidra`, `wireshark-qt`
+- **System & File Management**: `thunar` (+ `thunar-archive-plugin`, `thunar-volman`, `tumbler`, `ffmpegthumbnailer`, `gvfs`, `file-roller`), `gparted`
+- **Media & Recording**: `vlc` (+ `vlc-plugin-ffmpeg`), `audacity`, `kdenlive`, `kamoso`, `com.obsproject.Studio` (Flatpak)
+- **Communication**: `signal-desktop`, `discord`
+- **Desktop & Utilities**: `flameshot`, `qbittorrent`, `emote`, `arandr`, `blueman`
 
 ### pdtm Tools (Project Discovery)
 `pdtm` itself is installed via mise (`aqua:projectdiscovery/pdtm`), then `pdtm -ia` pulls the tools below. `massdns` (built from source into `~/bin`) backs `shuffledns`.
 `aix`, `alterx`, `asnmap`, `cdncheck`, `chaos-client`, `cloudlist`, `cvemap`, `dnsx`, `httpx`, `interactsh-client`, `interactsh-server`, `katana`, `mapcidr`, `naabu`, `notify`, `nuclei`, `proxify`, `shuffledns`, `simplehttpserver`, `subfinder`, `tldfinder`, `tlsx`, `tunnelx`, `uncover`, `urlfinder`
 
 ### Python uv Tools
-`sqlmap`, `wafw00f`, `bypass-url-parser`, `exegol`, `opengrep`, `pre-commit`, `argcomplete`, `yt-dlp`, `defaultcreds-cheat-sheet`
+`sqlmap`, `wafw00f`, `bypass-url-parser`, `exegol`, `pre-commit`, `argcomplete`, `yt-dlp`, `defaultcreds-cheat-sheet`
+
+### Extended / Clomic Tools (`make install-clomic`)
+- **System Packages (pacman)**: `obsidian`, `tailscale`, `minicom`, `sagemath`, `shellcheck-bin`, `ncdu`, `numlockx`, `7zip`, `p7zip-gui`, `pigz`, `pbzip2`, `pocl`
+- **Runtimes & CLI (mise)**: `pi` (coding agent harness), `opengrep`, `bun`, `yazi` (terminal file manager), `hunkdiff`, `worktrunk`, `herdr`, `rtk`, `gh` (+ extension `gh-dash`)
+- **Python uv Tools**: `aliasr`, `unblob`, `updog`, `yq`
+- **Pi Extensions & Skills**: `npm:context-mode`, `npm:pi-subagents`, `npm:pi-mcp-adapter`, `git:github.com/DietrichGebert/ponytail`, `git:github.com/otahontas/pi-coding-agent-catppuccin`
+- **Web App**: `CyberChef` (offline web app in `/opt/cyberchef`)
 
 ### Go Tools (mise exec)
 `sns` (sw33tLie), `cook` (glitchedgitz), `brutespray` (x90skysn3k), `gowitness` (sensepost)
@@ -364,6 +388,8 @@ make clean              # Docker-only: clear caches (pacman, yay, pip, mise, go,
 | `Bug-Bounty-Wordlists/` | Karanxa/Bug-Bounty-Wordlists | Bug bounty paths |
 | `richelieu/` | tarraschk/richelieu | French passwords |
 | `webapp-wordlists/` | p0dalirius/webapp-wordlists | Web app specific lists |
+| `OneListForAll/` | six2dez/OneListForAll | All-in-one web wordlist |
+| `confusables.txt` | unicode.org | Unicode confusable characters (homoglyphs) |
 
 ---
 
@@ -407,9 +433,10 @@ All configs live in `/opt/skillarch/config/` and are symlinked into `$HOME`:
 | Symlink | Source |
 |---|---|
 | `~/.zshrc` | `config/zshrc` |
-| `~/.tmux.conf` | `config/tmux.conf` |
+| `~/.zshenv` | `config/zshenv` |
 | `~/.vimrc` | `config/vimrc` |
 | `~/.config/nvim/init.lua` | `config/nvim/init.lua` |
+| `~/.config/tmux/tmux.conf` | `config/tmux/tmux.conf` |
 | `~/.config/i3/config` | `config/i3/config` |
 | `~/.config/polybar/config.ini` | `config/polybar/config.ini` |
 | `~/.config/polybar/launch.sh` | `config/polybar/launch.sh` |
@@ -417,8 +444,24 @@ All configs live in `/opt/skillarch/config/` and are symlinked into `$HOME`:
 | `~/.config/picom.conf` | `config/picom.conf` |
 | `~/.config/rofi/config.rasi` | `config/rofi/config.rasi` |
 | `~/.config/flameshot/flameshot.ini` | `config/flameshot/flameshot.ini` |
+| `~/.config/ripgrep/ripgreprc` | `config/ripgrep/ripgreprc` |
+| `~/.config/lazygit/config.yml` | `config/lazygit/config.yml` |
+| `~/.config/carapace/styles.json` | `config/carapace/styles.json` |
+| `~/.config/oh-my-posh/skillarch.toml` | `config/oh-my-posh/skillarch.toml` |
+| `~/.config/fontconfig/fonts.conf` | `config/fontconfig/fonts.conf` |
+| `~/.config/atuin/config.toml` | `config/atuin/config.toml` |
+| `~/.config/bat/config` | `config/bat/config` |
+| `~/.local/bin/wpprobe` | `/usr/local/bin/wpprobe` |
+| `~/.config/gh-dash/config.yml` | `config/gh-dash/config.yml` |
+| `~/.config/herdr/config.toml` | `config/herdr/config.toml` |
+| `~/.config/hunk/config.yml` | `config/hunk/config.yml` |
+| `~/.config/yazi/theme.toml` | `config/yazi/theme.toml` |
+| `~/.config/yazi/Catppuccin-macchiato.toml` | `config/yazi/Catppuccin-macchiato.toml` |
 | `~/.vnc/kasmvnc.yaml` | `config/kasmvnc.yaml` |
+| `~/.vnc/xstartup` | `config/vnc-xstartup` |
 | `/etc/X11/xorg.conf.d/30-touchpad.conf` | `config/xorg.conf.d/30-touchpad.conf` |
+| `/etc/systemd/resolved.conf` | `config/systemd/resolved.conf` |
+| `/etc/minirc.dfl` | `config/minicom/minirc.dfl` |
 
 ---
 
