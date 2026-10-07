@@ -1027,6 +1027,7 @@ clean: ## Clean up system and remove unnecessary files
 	npm cache clean --force 2>/dev/null || true
 	mise cache clear || true
 	go clean -cache -modcache -i -r 2>/dev/null || true
+	sudo rm -rf /var/cache/pacman/pkg/download-* || true
 	sudo rm -rf /var/cache/* || true
 	rm -rf ~/.cache/* || true
 	sudo rm -rf /tmp/* || true
