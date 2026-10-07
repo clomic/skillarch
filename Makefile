@@ -308,7 +308,7 @@ install-gui-tools: sanity-check ## Install GUI apps (Chrome, VSCode, Ghidra, etc
 	# [[ ! -f /.dockerenv ]] && $(PACMAN_INSTALL) flatpak && flatpak install -y flathub com.obsproject.Studio || true
 	# Do not start services in docker
 
-	xargs -I{} code --install-extension {} --force < config/extensions.txt
+	NODE_NO_WARNINGS=1 xargs -I{} code --install-extension {} --force < config/extensions.txt
 	for pkg in fswebcam; do yay --noconfirm --needed -S "$$pkg" || $(call WARN,Failed to install $$pkg$(comma) continuing...); done
 	sudo ln -sf /usr/bin/google-chrome-stable /usr/local/bin/gog
 	# Flameshot 14 dropped native X11 capture in favor of xdg-desktop-portal,
