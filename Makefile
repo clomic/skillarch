@@ -429,8 +429,8 @@ install-clomic: sanity-check ## Install clomic tools
 	$(PACMAN_INSTALL) obsidian minicom sagemath 7zip ncdu numlockx shellcheck-bin tailscale p7zip-gui pigz pbzip2 pocl
 
 	[[ -d $$HOME/.exegol/my-resources ]] && {
-		curl -sL $(curl -s https://api.github.com/repos/eza-community/eza/releases/latest | grep 'browser_download_url.*musl.tar.gz'|grep -o 'https://[^"]*') -o /tmp/eza-latest.tgz && tar zxf /tmp/eza-latest.tgz -C /tmp && mv /tmp/eza $$HOME/.exegol/my-resources/bin/ && rm /tmp/eza-latest.tgz
-		curl -sL $$(curl -s https://api.github.com/repos/dathere/qsv/releases/latest | grep 'browser_download_url.*musl.zip'|grep -o 'https://[^"]*') -o /tmp/qsv-latest.zip && 7z x -y -o/tmp /tmp/qsv-latest.zip qsvlite>/dev/null&& mv /tmp/qsvlite $$HOME/.exegol/my-resources/bin/qsv && rm /tmp/qsv-latest.zip
+		curl -sL $$(curl -s https://api.github.com/repos/eza-community/eza/releases/latest | rg "browser_download_url.*$$(uname -m).*musl.tar.gz" | grep -o 'https://[^"]*') -o /tmp/eza-latest.tgz && tar zxf /tmp/eza-latest.tgz -C /tmp && mv /tmp/eza $$HOME/.exegol/my-resources/bin/ && rm /tmp/eza-latest.tgz
+		curl -sL $$(curl -s https://api.github.com/repos/dathere/qsv/releases/latest | rg "browser_download_url.*$$(uname -m).*musl.zip" | grep -o 'https://[^"]*') -o /tmp/qsv-latest.zip && 7z x -y -o/tmp /tmp/qsv-latest.zip qsvlite>/dev/null&& mv /tmp/qsvlite $$HOME/.exegol/my-resources/bin/qsv && rm /tmp/qsv-latest.zip
 		sudo cp /opt/skillarch/config/exegol/aliases $$HOME/.exegol/my-resources/setup/zsh
 		sudo cp /opt/skillarch/config/tmux/tmux.conf $$HOME/.exegol/my-resources/setup/tmux/.tmux.conf
 		sudo cp /opt/skillarch/config/exegol/load_user_setup.sh $$HOME/.exegol/my-resources/setup/
@@ -442,13 +442,13 @@ install-clomic: sanity-check ## Install clomic tools
 	sudo ln -sf /opt/skillarch/config/systemd/resolved.conf /etc/systemd/resolved.conf
 	sudo ln -sf /opt/skillarch/config/minicom/minirc.dfl /etc/minirc.dfl
 
-	[[ ! -d /opt/cyberchef || $$(grep -oP "CyberChef \Kv[0-9]+(\.[0-9]+)+" /opt/cyberchef/index.html) != $$(curl -s https://api.github.com/repos/gchq/CyberChef/releases/latest | jq -r '.tag_name') ]] && {
+	[[ ! -d /opt/cyberchef || $$(ls /opt/cyberchef/Cyber*.html | rg -oP "CyberChef_\Kv[0-9]+(\.[0-9]+)+") != $$(curl -s https://api.github.com/repos/gchq/CyberChef/releases/latest | jq -r '.tag_name') ]] && {
 		$(call INFO, Install or upgrade Cyberchef);
 		mkdir -p /tmp/cyberchef;
 		curl -sL $$(curl -s https://api.github.com/repos/gchq/CyberChef/releases/latest | jq -r '.assets[].browser_download_url') -o /tmp/cyberchef/cc.zip;
 		7z x -y -o/tmp/cyberchef /tmp/cyberchef/cc.zip >/dev/null;
 		rm /tmp/cyberchef/cc.zip /tmp/cyberchef/index.html.* || true;
-		mv /tmp/cyberchef/CyberChef*.html /tmp/cyberchef/index.html;
+		cp /tmp/cyberchef/CyberChef*.html /tmp/cyberchef/index.html;
 		[[ -d /opt/cyberchef ]] && sudo rm -rf /opt/cyberchef
 		sudo mv /tmp/cyberchef /opt/cyberchef;
 	}
@@ -481,6 +481,7 @@ install-clomic: sanity-check ## Install clomic tools
 			}
 		done
 	done
+	
 	atuin hook install pi
 	mise upgrade pi
 	pi update --extensions
@@ -1027,8 +1028,7 @@ clean: ## Clean up system and remove unnecessary files
 	npm cache clean --force 2>/dev/null || true
 	mise cache clear || true
 	go clean -cache -modcache -i -r 2>/dev/null || true
-	sudo rm -rf /var/cache/pacman/pkg/download-* || true
-	sudo rm -rf /var/cache/* || true
+	sudo rm -rf /var/cache/* 2>/dev/null || true
 	rm -rf ~/.cache/* || true
 	sudo rm -rf /tmp/* || true
 	sudo rm -rf /dev/shm/makepkg/* || true
