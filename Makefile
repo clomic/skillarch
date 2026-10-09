@@ -155,9 +155,9 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 	$(call ska-link,/opt/skillarch/config/lazygit/config.yml,$(HOME_CONFIG)/lazygit/config.yml)
 
 	# Install mise and all php-build dependencies
-	$(PACMAN_INSTALL) mise libedit libffi libjpeg-turbo libpcap libpng libxml2 libzip postgresql-libs php-gd
+	$(PACMAN_INSTALL) mise libedit libffi libjpeg-turbo libpcap libpng libxml2 libzip postgresql-libs php-gd opencode
 	# mise self-update # Currently broken, wait for upstream fix, pinged on 17/03/2025
-	for package in uv usage pdm rust terraform golang python nodejs opencode zoxide atuin carapace; do \
+	for package in uv usage pdm rust terraform golang python nodejs zoxide atuin carapace; do \
 		for attempt in 1 2 3; do \
 			mise use -g "$$package@latest" && break || { \
 				$(call WARN,mise install $$package failed (attempt $$attempt/3)$(comma) retrying in 5s...) ; \

@@ -106,6 +106,7 @@ rebuild-zsh-cache() {
 
   {
     echo '(( $+functions[compdef] )) || compdef() { : }'
+    (( $+commands[opencode] )) && opencode --completions zsh
     (( $+commands[mise] )) && { mise env|rg -v PATH;mise activate --shims; }
     (( $+commands[fzf] )) && fzf --zsh
     (( $+commands[zoxide] )) && zoxide init zsh
