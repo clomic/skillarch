@@ -140,9 +140,9 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 	nvim --headless +"Lazy! sync" +qa >/dev/null # Download and update plugins
 
 	# Install mise and all php-build dependencies
-	$(PACMAN_INSTALL) mise libedit libffi libjpeg-turbo libpcap libpng libxml2 libzip postgresql-libs php-gd
+	$(PACMAN_INSTALL) mise libedit libffi libjpeg-turbo libpcap libpng libxml2 libzip opencode postgresql-libs php-gd
 	# mise self-update # Currently broken, wait for upstream fix, pinged on 17/03/2025
-	for package in uv usage pdm rust terraform golang python nodejs opencode; do \
+	for package in uv usage pdm rust terraform golang python nodejs; do \
 		for attempt in 1 2 3; do \
 			mise use -g "$$package@latest" && break || { \
 				$(call WARN,mise install $$package failed (attempt $$attempt/3)$(comma) retrying in 5s...) ; \
