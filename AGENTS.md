@@ -50,7 +50,7 @@ Match the right `make install-*` target — Makefile is authoritative, then mirr
 3. If it exposes a useful CLI, add a smoke-test row in `make test` (and `test-lite` if it's CLI-lite-worthy).
 4. If it gets an alias, update [config/aliases](config/aliases) + the alias tables in both docs.
 
-Three places for one tool is by design — readme is user-facing, skillarch-ai is Claude-loadable, Makefile installs it. Don't skip any.
+Three places for one tool is by design — readme is user-facing, skillarch-ai is agent-loadable, Makefile installs it. Don't skip any.
 
 ---
 
