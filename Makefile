@@ -169,12 +169,18 @@ install-cli-tools: sanity-check ## Install CLI tools & runtimes
 	eval "$$(mise env)" || true
 
 	# Install uv tools
-	for package in argcomplete bypass-url-parser exegol pre-commit sqlmap wafw00f yt-dlp defaultcreds-cheat-sheet; do
+	for package in argcomplete bypass-url-parser pre-commit sqlmap wafw00f yt-dlp semgrep defaultcreds-cheat-sheet; do
 		uv tool install "$$package" || {
 			$(call WARN,Retrying $$package install...)
 			uv tool install -q "$$package"
 		}
 	done
+	# Exegol doesn't support python 3.15 yet
+	uv tool install --python 3.13 exegol || {
+		$(call WARN,Retrying exegol install...)
+		uv tool install -q --python 3.13 exegol
+	}
+
 	uv tool upgrade --all || true
 	mise up -q || true
 	mise prune -y -q || true
