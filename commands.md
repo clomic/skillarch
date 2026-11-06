@@ -257,7 +257,7 @@
 |jsonescape|`jsonescape '{"distrib": "SkillArch", "quote": "That'"'"'s awesome!"}'` → {\"distrib\": \"SkillArch\", \"quote\": \"That's awesome!\"}|
 |jsonunescape|`jsonunescape '{\"distrib\": \"SkillArch\", \"quote\": \"That'"'"'s awesome!\"}'` → {"distrib": "SkillArch", "quote": "That's awesome!"}|
 |kamoso|Webcam application (KDE)|
-|kasmvncserver|Stream KDE Plasma desktop via browser|
+|kasmvncserver|Stream Xfce desktop via browser|
 |katana|Next-gen crawling and spidering framework|
 |kdenlive|Non-linear video editor (KDE)|
 |killit|`sudo kill -KILL`|
@@ -383,6 +383,7 @@
 |ssh|OpenSSH remote login client|
 |ssh-yolo|SSH ignoring host key checks|
 |sshpass|Non-interactive SSH password authentication|
+|startxfce4|Start the click-friendly Xfce desktop session|
 |subfinder|Passive subdomain discovery tool|
 |suc|`sort \| uniq -c \| sort -h`|
 |suq|sort -u|

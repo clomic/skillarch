@@ -1,8 +1,10 @@
 #!/bin/sh
 export XDG_SESSION_TYPE=x11
+export XDG_SESSION_DESKTOP=xfce
+export XDG_CURRENT_DESKTOP=XFCE
 export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus
 
-# KasmVNC's Xvnc has no GLX — force Qt/KDE to use software rendering
+# KasmVNC's Xvnc has no GLX — force Qt/KDE apps to use software rendering
 export QT_QUICK_BACKEND=software
 export LIBGL_ALWAYS_SOFTWARE=1
 
@@ -13,9 +15,9 @@ xset s off 2>/dev/null || true
 xset s noblank 2>/dev/null || true
 xset -dpms 2>/dev/null || true
 
-# Propagate VNC env to systemd user session so KDE units find the right DISPLAY and rendering
-systemctl --user import-environment DISPLAY XAUTHORITY XDG_SESSION_TYPE QT_QUICK_BACKEND LIBGL_ALWAYS_SOFTWARE 2>/dev/null
+# Propagate VNC env to the systemd user session
+systemctl --user import-environment DISPLAY XAUTHORITY XDG_SESSION_TYPE XDG_SESSION_DESKTOP XDG_CURRENT_DESKTOP QT_QUICK_BACKEND LIBGL_ALWAYS_SOFTWARE 2>/dev/null
 # Unset Wayland vars to avoid confusion in X11 session
 systemctl --user unset-environment WAYLAND_DISPLAY 2>/dev/null
 
-exec startplasma-x11
+exec startxfce4

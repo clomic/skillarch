@@ -18,7 +18,7 @@
 [![](https://img.youtube.com/vi/HB1hxJgGoDo/0.jpg)](https://youtu.be/HB1hxJgGoDo)
 
 - First, download the `Desktop Edition` at https://cachyos.org/download/
-- Install it, pick the `Plasma` flavor (SkillArch runs i3 on top but reuses Plasma's session/settings stack)
+- Install it, pick the `Plasma` flavor (SkillArch installs i3 alongside Plasma and reuses KDE's settings and applications)
 - In the installer's bootloader step, **pick BIOS (legacy)**; keeps qcow/cloud-image compatibility straightforward; UEFI works but complicates exports
 - Then open `Console` and install SkillArch 🥂
 
@@ -84,7 +84,7 @@ make help
 #   install-cli-tools   Install CLI tools & runtimes
 #   install-shell       Install shell, zsh, oh-my-zsh, fzf, tmux
 #   install-docker      Install Docker & Docker Compose
-#   install-gui         Install i3, polybar, kitty, rofi, picom, KDE Plasma
+#   install-gui         Install i3, KDE Plasma, and Xfce for KasmVNC
 #   install-gui-tools   Install GUI apps (Chrome, VSCode, Ghidra, etc.)
 #   install-offensive   Install offensive & security tools
 #   install-wordlists   Install wordlists (SecLists, rockyou, etc.)
@@ -119,7 +119,7 @@ make help
 | `ska-sudo-unlock` | Unlock current user after 3 sudo fails |
 | `ska-update-simple` | Update SkillArch repo & starts install |
 | `ska-update-advanced` | Interactive upstream-merge for forks (prompts at each step) |
-| `ska-vnc` | Start KDE Plasma desktop via KasmVNC (browser at https://127.0.0.1:8443) |
+| `ska-vnc` | Start a click-friendly Xfce desktop via KasmVNC (browser at https://127.0.0.1:8443) |
 
 ### MISC Gotchas
 
@@ -334,7 +334,7 @@ bindsym $mod+c exec code
 
 ```bash
 # Pacman Packages
-arandr asciinema base-devel bat bettercap bison blueman bore bottom brightnessctl bzip2 ca-certificates cloc cmake visual-studio-code-bin curl discord dmenu docker docker-compose dos2unix dragon-drop-git dunst emote eza expect fastfetch feh ffmpeg filezilla flameshot foremost fq fx gdb ghex ghidra git git-delta gitleaks glow gnupg google-chrome gparted gron guvcview hashcat htmlq htop hwinfo xorg-server i3-gaps i3blocks i3lock i3lock-fancy-git i3status icu inotify-tools iproute2 jless jq kdenlive kitty kompare lazygit libedit libffi libjpeg-turbo libpcap libpng libreoffice-fresh libxml2 libzip llvm lsof ltrace make meld metasploit mise mlocate mplayer ncurses neovim net-tools ngrep nm-connection-editor nmap okular opencode opensnitch openssh openssl parallel perl-image-exiftool php-gd picom pkgconf polybar postgresql-libs python-virtualenv qbittorrent re2c readline ripgrep rlwrap rofi signal-desktop socat sqlite sshpass superfile sysstat tmate tmux tor torbrowser-launcher traceroute trash-cli tree unzip vbindiff veracrypt vim viu vlc vlc-plugin-ffmpeg flatpak websocat wget wireshark-qt xclip qsv xz yay zip zsh zsh-autosuggestions zsh-completions zsh-history-substring-search zsh-syntax-highlighting zsh-theme-powerlevel10k cronie tree-sitter audacity xorg-xhost archlinux-keyring jdk21-openjdk polkit-kde-agent kamoso plasma-desktop plasma-x11-session kwin-x11 konsole alacritty thunar thunar-archive-plugin thunar-volman tumbler ffmpegthumbnailer gvfs gvfs-mtp file-roller
+arandr asciinema base-devel bat bettercap bison blueman bore bottom brightnessctl bzip2 ca-certificates cachyos-kde-settings cloc cmake visual-studio-code-bin curl discord dmenu docker docker-compose dos2unix dragon-drop-git dunst emote eza expect fastfetch feh ffmpeg filezilla flameshot foremost fq fx gdb ghex ghidra git git-delta gitleaks glow gnupg google-chrome gparted gron guvcview hashcat htmlq htop hwinfo xorg-server i3-gaps i3blocks i3lock i3lock-fancy-git i3status icu inotify-tools iproute2 jless jq kdenlive kitty kompare lazygit libedit libffi libjpeg-turbo libpcap libpng libreoffice-fresh libxml2 libzip llvm lsof ltrace make meld metasploit mise mlocate mplayer ncurses neovim net-tools ngrep nm-connection-editor nmap okular opencode opensnitch openssh openssl parallel perl-image-exiftool php-gd picom pkgconf plasma-meta polybar postgresql-libs python-virtualenv qbittorrent re2c readline ripgrep rlwrap rofi signal-desktop socat sqlite sshpass superfile sysstat tmate tmux tor torbrowser-launcher traceroute trash-cli tree unzip vbindiff veracrypt vim viu vlc vlc-plugin-ffmpeg flatpak websocat wget wireshark-qt xclip qsv xfce4-appfinder xfce4-panel xfce4-session xfce4-settings xfce4-terminal xfdesktop xfwm4 xz yay zip zsh zsh-autosuggestions zsh-completions zsh-history-substring-search zsh-syntax-highlighting zsh-theme-powerlevel10k cronie tree-sitter audacity xorg-xhost archlinux-keyring jdk21-openjdk polkit-kde-agent kamoso plasma-desktop konsole alacritty thunar thunar-archive-plugin thunar-volman tumbler ffmpegthumbnailer gvfs gvfs-mtp file-roller
 
 # Yay packages
 ffuf gau waybackurls fswebcam caido-desktop caido-cli i3-battery-popup-git rofi-power-menu fabric-ai-bin
@@ -425,11 +425,11 @@ The following systemd services are installed but **disabled and stopped by defau
 
 > **Not part of `make install`** -- this is a standalone target for cloud/remote desktop VMs.
 
-Installs KasmVNC + cloud-init + SSH. KDE Plasma is installed by `make install-gui`. After `make cloud`, the `ska-vnc` alias starts a full KDE Plasma desktop accessible from a browser.
+Installs KasmVNC + cloud-init + SSH. After `make install-gui` and `make cloud`, the `ska-vnc` alias starts a conventional Xfce desktop in KasmVNC's X11 server, accessible from a browser and comfortable with mouse or touch input. Plasma remains available as the local Wayland desktop, and i3 remains available locally.
 
 | Service | Package | Start | Purpose |
 |---------|---------|-------|---------|
-| *(user-level)* | `kasmvncserver-bin` | `ska-vnc` | KDE Plasma desktop via browser (VNC over websocket) |
+| *(user-level)* | `kasmvncserver-bin` | `ska-vnc` | Xfce desktop via browser (VNC over websocket) |
 | `sshd` | `openssh` | auto-enabled | SSH access |
 | `cloud-init` | `cloud-init` | auto-enabled | VM auto-config (network, SSH keys, hostname) |
 
@@ -447,7 +447,7 @@ ssh -L 8443:localhost:8443 user@host
 vncserver -kill :1
 ```
 
-**How it works:** KasmVNC's Xvnc has no GLX extension, so KDE Plasma 6 can't use OpenGL. The `vnc-xstartup` script sets `QT_QUICK_BACKEND=software` to force Qt's software rasterizer. kwin runs without compositing but still manages windows and decorations.
+**How it works:** Plasma 6.8 no longer provides an X11 session, while KasmVNC provides an X server rather than a Wayland compositor. The `vnc-xstartup` script therefore starts Xfce for a familiar panel/menu/desktop workflow and forces software rendering for Qt/KDE applications because Xvnc has no GLX extension.
 
 ### Security
 
