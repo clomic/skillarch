@@ -9,6 +9,18 @@
 
 ---
 
+## Try the desktop in Docker
+
+On a Docker host with Compose and `/dev/udmabuf`, run:
+
+```bash
+git clone --depth 1 https://github.com/laluka/skillarch
+cd skillarch
+make docker-run-remote
+```
+
+Open [the Plasma desktop](http://localhost:8080/guacamole/). The first run downloads the full workstation image. Subsequent launches reuse it. For SSH forwarding and cleanup, see [Plasma browser desktop in Docker](#plasma-browser-desktop-in-docker).
+
 ## How To Install
 
 ### SIMPLE / NO-CUSTOMIZE / NO-BACKUP
@@ -84,12 +96,14 @@ make help
 #   install-cli-tools   Install CLI tools & runtimes
 #   install-shell       Install shell, zsh, oh-my-zsh, fzf, tmux
 #   install-docker      Install Docker & Docker Compose
-#   install-gui         Install i3, KDE Plasma, and Xfce for KasmVNC
+#   install-gui         Install i3 and KDE Plasma
+#   install-remote-desktop  Install Plasma's RDP server and capture dependencies
 #   install-gui-tools   Install GUI apps (Chrome, VSCode, Ghidra, etc.)
 #   install-offensive   Install offensive & security tools
 #   install-wordlists   Install wordlists (SecLists, rockyou, etc.)
 #   install-hardening   Install hardening tools (opensnitch)
-#   cloud               (Standalone) Install KasmVNC + cloud-init for cloud/remote desktop (NOT part of make install)
+#   cloud               (Standalone) Configure cloud-init and SSH for a cloud VM
+#   qcow2               Build and boot-check a local SkillArch qcow2 from BASE_IMAGE
 #   cloud-export        Export a libvirt VM to a clean qcow2 (for Proxmox/DO import)
 #   update              Update SkillArch (pull & prompt reinstall)
 #   test                Validate installation (smoke tests)
@@ -102,6 +116,8 @@ make help
 #   docker-build-full   Build full Docker image locally
 #   docker-run          Run lite Docker image locally
 #   docker-run-full     Run full Docker image locally
+#   docker-run-remote   Run the full image's Plasma desktop in a browser
+#   docker-stop-remote  Remove the browser desktop containers and session state
 #   clean               Clean up system and remove unnecessary files
 ```
 
@@ -119,7 +135,7 @@ make help
 | `ska-sudo-unlock` | Unlock current user after 3 sudo fails |
 | `ska-update-simple` | Update SkillArch repo & starts install |
 | `ska-update-advanced` | Interactive upstream-merge for forks (prompts at each step) |
-| `ska-vnc` | Start a click-friendly Xfce desktop via KasmVNC (browser at https://127.0.0.1:8443) |
+| `ska-remote` | Start the full Docker image's Plasma desktop in a browser |
 
 ### MISC Gotchas
 
@@ -134,9 +150,9 @@ make help
 
 ### VM Hosts
 
-> **GNOME Boxes is now the first-class citizen** 🥳: zero-config, dead-simple, "just works" with the SkillArch qcow image below. `virt-manager` (from `qemu-full`) remains a great power-user alternative. VirtualBox had too many regressions (not recommended anymore but still supported on a best-effort basis).
+> **GNOME Boxes is now the first-class citizen** 🥳: zero-config, dead-simple, "just works" with a locally built SkillArch qcow image. `virt-manager` (from `qemu-full`) remains a great power-user alternative. VirtualBox had too many regressions (not recommended anymore but still supported on a best-effort basis).
 
-- GNOME Boxes: `sudo pacman -S gnome-boxes` (not in SkillArch's default install), launch it, "New" → pick the downloaded qcow, done.
+- GNOME Boxes: `sudo pacman -S gnome-boxes` (not in SkillArch's default install), launch it, "New" → pick your local qcow, done.
 - `virt-manager`: `sudo pacman -S qemu-full virt-manager` then `virt-manager` → New VM → import existing qcow.
 - VirtualBox (legacy path):
   - `ska-vbox-install-guestutils`: auto-installs `virtualbox-guest-utils`
@@ -148,35 +164,31 @@ make help
     - Currently it's only started in i3 while not running in an hypervisor
     - In `~/config/i3/config` : `killall -q picom ; grep -qF hypervisor /proc/cpuinfo || picom`
 
-### Pre-Built SkillArch qcow (no install, just boot)
+### Build a SkillArch qcow2 locally
 
-I maintain a ready-to-boot SkillArch qcow2 image on a private basic-auth mirror. No install needed, just download and boot in GNOME Boxes / virt-manager / Proxmox / any qemu frontend.
+Start with the official Arch Linux x86_64 **cloudimg**. On an x86-64 KVM host install QEMU, cloud-localds, OpenSSH, Git and GNU coreutils. Allow 8 GiB of guest RAM plus host overhead. The builder grows a disposable overlay to 96 GiB, runs the installer, then boots a fresh overlay of the exported disk and checks cloud-init and SSH. The base stays available for another build. The guest receives the checked-out Git commit. Commit changes you want to test before starting a build. Choose an unused output filename.
 
 ```bash
-BASE='http://skillarch:mercilaluuu@bs.offenskill.com:42069/skillarch'
-
-# --- List available images ---
-curl -s -H 'Accept: application/json' "$BASE/" | jq -r '.[].name' | sort -r
-
-# --- Download the latest in one shot ---
-LATEST=$(curl -s -H 'Accept: application/json' "$BASE/" | jq -r '.[].name' | sort -r | head -1)
-echo "Downloading: $LATEST"
-wget --continue --user-agent='Mozilla/5.0 (X11; Linux x86_64)' "$BASE/$LATEST"
-echo "Downloaded: $LATEST"
+base=https://geo.mirror.pkgbuild.com/images/latest/Arch-Linux-x86_64-cloudimg.qcow2
+curl -fLO "$base"
+curl -fLO "$base.SHA256"
+sha256sum -c Arch-Linux-x86_64-cloudimg.qcow2.SHA256
+BASE_IMAGE="$PWD/Arch-Linux-x86_64-cloudimg.qcow2" OUTPUT="$PWD/skillarch.qcow2" make qcow2
+sha256sum -c skillarch.qcow2.sha256
 ```
 
-- Image is built from the cloud target (`make cloud`); KasmVNC + cloud-init + SSH already wired.
-- BIOS boot (not UEFI); import works everywhere without firmware fiddling.
-- Default user: `hacker`, password: `skillarch` ⚠️ **change it on first boot** (`passwd`) -- the image ships with a known password for convenience, do NOT expose it to the internet without changing it first.
-- Passwordless sudo enabled (cloud-init).
-- See the [Cloud Target](#cloud-target-standalone----make-cloud) section for how the image is produced (`make cloud-export` flattens snapshots, sparsifies, and sysprep's).
+New SkillArch qcow2 and Docker images use `hacker` / `offenskill` for local login. The root password is locked. Use `sudo` for administration and `passwd` to change the default.
+
+Choose **Plasma (Wayland)** or **i3** at the graphical login screen. Plasma starts with the KDE and Emote welcome screens already acknowledged.
+
+Supply an SSH key through cloud-init at first boot. The verification boot uses a fresh key and checks the installed Git revision, both desktop binaries, Docker, and SSH’s password-authentication settings. For a graphical smoke test, sign in to each desktop, open a terminal, and log out before switching sessions. To export an existing installed libvirt guest, use `make cloud-export`.
 
 #### Boot it with libvirt / virsh (pure CLI, no GUI importer)
 
 Proven reliable params for the SkillArch qcow: q35, host-passthrough CPU, virtio disk/net, qemu-guest-agent, SPICE + QXL:
 
 ```bash
-QCOW="$PWD/$LATEST"     # from the download block above
+QCOW="$PWD/skillarch.qcow2"
 
 virt-install --connect qemu:///session \
   --name skillarch \
@@ -184,6 +196,7 @@ virt-install --connect qemu:///session \
   --machine q35 --cpu host-passthrough \
   --osinfo detect=on,require=off \
   --disk path="$QCOW",bus=virtio,format=qcow2 \
+  --cloud-init clouduser-ssh-key="$HOME/.ssh/id_ed25519.pub" \
   --network network=default,model=virtio \
   --channel unix,target_type=virtio,target_name='org.qemu.guest_agent.0' \
   --rng /dev/urandom \
@@ -334,13 +347,10 @@ bindsym $mod+c exec code
 
 ```bash
 # Pacman Packages
-arandr asciinema base-devel bat bettercap bison blueman bore bottom brightnessctl bzip2 ca-certificates cachyos-kde-settings cloc cmake visual-studio-code-bin curl discord dmenu docker docker-compose dos2unix dragon-drop-git dunst emote eza expect fastfetch feh ffmpeg filezilla flameshot foremost fq fx gdb ghex ghidra git git-delta gitleaks glow gnupg google-chrome gparted gron guvcview hashcat htmlq htop hwinfo xorg-server i3-gaps i3blocks i3lock i3lock-fancy-git i3status icu inotify-tools iproute2 jless jq kdenlive kitty kompare lazygit libedit libffi libjpeg-turbo libpcap libpng libreoffice-fresh libxml2 libzip llvm lsof ltrace make meld metasploit mise mlocate mplayer ncurses neovim net-tools ngrep nm-connection-editor nmap okular opencode opensnitch openssh openssl parallel perl-image-exiftool php-gd picom pkgconf plasma-meta polybar postgresql-libs python-virtualenv qbittorrent re2c readline ripgrep rlwrap rofi signal-desktop socat sqlite sshpass superfile sysstat tmate tmux tor torbrowser-launcher traceroute trash-cli tree unzip vbindiff veracrypt vim viu vlc vlc-plugin-ffmpeg flatpak websocat wget wireshark-qt xclip qsv xfce4-appfinder xfce4-panel xfce4-session xfce4-settings xfce4-terminal xfdesktop xfwm4 xz yay zip zsh zsh-autosuggestions zsh-completions zsh-history-substring-search zsh-syntax-highlighting zsh-theme-powerlevel10k cronie tree-sitter audacity xorg-xhost archlinux-keyring jdk21-openjdk polkit-kde-agent kamoso plasma-desktop konsole alacritty thunar thunar-archive-plugin thunar-volman tumbler ffmpegthumbnailer gvfs gvfs-mtp file-roller
+arandr asciinema base-devel bat bettercap bison blueman bore bottom brightnessctl bzip2 ca-certificates cachyos-kde-settings cloc cmake visual-studio-code-bin curl discord dmenu docker docker-compose dos2unix dragon-drop-git dunst emote eza expect fastfetch feh ffmpeg filezilla flameshot foremost fq fx gdb ghex ghidra git git-delta gitleaks glow gnupg google-chrome gparted gron guvcview hashcat htmlq htop hwinfo xorg-server i3-gaps i3blocks i3lock i3lock-fancy-git i3status icu inotify-tools iproute2 jless jq kdenlive kitty kompare lazygit libedit libffi libjpeg-turbo libpcap libpng libreoffice-fresh libxml2 libzip llvm lsof ltrace make meld metasploit mise mlocate mplayer ncurses neovim net-tools ngrep nm-connection-editor nmap okular opencode opensnitch openssh openssl parallel perl-image-exiftool php-gd picom pkgconf plasma-meta polybar postgresql-libs python-virtualenv qbittorrent re2c readline ripgrep rlwrap rofi signal-desktop socat sqlite sshpass superfile sysstat tmate tmux tor torbrowser-launcher traceroute trash-cli tree unzip vbindiff veracrypt vim viu vlc vlc-plugin-ffmpeg flatpak websocat wget wireshark-qt xclip qsv krdp pipewire wireplumber xorg-xwayland mesa xz yay zip zsh zsh-autosuggestions zsh-completions zsh-history-substring-search zsh-syntax-highlighting zsh-theme-powerlevel10k cronie tree-sitter audacity xorg-xhost archlinux-keyring jdk21-openjdk polkit-kde-agent kamoso plasma-desktop konsole alacritty thunar thunar-archive-plugin thunar-volman tumbler ffmpegthumbnailer gvfs gvfs-mtp file-roller
 
 # Yay packages
 ffuf gau waybackurls fswebcam caido-desktop caido-cli i3-battery-popup-git rofi-power-menu fabric-ai-bin
-
-# Yay packages (cloud target only, not part of make install)
-openssl-1.1 kasmvncserver-bin
 
 # Flatpak packages
 com.obsproject.Studio
@@ -423,31 +433,24 @@ The following systemd services are installed but **disabled and stopped by defau
 | `opensnitchd` | `opensnitch` | `sudo systemctl start opensnitchd` | `sudo systemctl enable opensnitchd` | Egress firewall (opt-in) |
 ### Cloud Target (standalone -- `make cloud`)
 
-> **Not part of `make install`** -- this is a standalone target for cloud/remote desktop VMs.
-
-Installs KasmVNC + cloud-init + SSH. After `make install-gui` and `make cloud`, the `ska-vnc` alias starts a conventional Xfce desktop in KasmVNC's X11 server, accessible from a browser and comfortable with mouse or touch input. Plasma remains available as the local Wayland desktop, and i3 remains available locally.
+`make cloud` configures cloud-init and SSH. For graphical access on a cloud VM, start the Docker browser desktop on the VM and forward its loopback port with `ssh -L 8080:127.0.0.1:8080 user@host`.
 
 | Service | Package | Start | Purpose |
 |---------|---------|-------|---------|
-| *(user-level)* | `kasmvncserver-bin` | `ska-vnc` | Xfce desktop via browser (VNC over websocket) |
 | `sshd` | `openssh` | auto-enabled | SSH access |
 | `cloud-init` | `cloud-init` | auto-enabled | VM auto-config (network, SSH keys, hostname) |
 
-**Quick start:**
+#### Plasma browser desktop in Docker
+
+The full image can run a 1920×1080 Plasma Wayland session with the SkillArch wallpaper through KRDP and Guacamole. Both images start a shell by default. Local builds default to `linux/amd64`. The Linux Docker host (or its VM on macOS) needs `/dev/udmabuf` for software rendering. The start target handles its group permissions.
 
 ```bash
-ska-vnc
-# KasmVNC running on https://127.0.0.1:8443 (no auth)
-
-# From your local machine, SSH port-forward then open in browser:
-ssh -L 8443:localhost:8443 user@host
-# Access: https://localhost:8443
-
-# Stop:
-vncserver -kill :1
+make docker-run-remote  # Pull the full image published for this checkout
 ```
 
-**How it works:** Plasma 6.8 no longer provides an X11 session, while KasmVNC provides an X server rather than a Wayland compositor. The `vnc-xstartup` script therefore starts Xfce for a familiar panel/menu/desktop workflow and forces software rendering for Qt/KDE applications because Xvnc has no GLX extension.
+For an unpublished checkout, build with `make docker-build-full` and run `SKA_DESKTOP_IMAGE=thelaluka/skillarch:full make docker-run-remote`.
+
+Open [the browser desktop](http://localhost:8080/guacamole/). It opens Plasma directly, with no username or password prompt. The stack is off by default and starts in the background on host loopback. Run `make docker-stop-remote` to stop it and remove its writable session state. Anyone who can reach the loopback endpoint, including through an SSH tunnel, can control the desktop.
 
 ### Security
 

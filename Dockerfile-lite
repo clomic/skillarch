@@ -1,13 +1,14 @@
 FROM cachyos/cachyos:latest
 
 # Create hacker user and group, set password and configure sudo
-RUN groupadd hacker && \
+RUN touch /.dockerenv && \
+    groupadd hacker && \
     useradd -m -g hacker -s /bin/bash hacker && \
     echo "hacker ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/hacker
 
 # Add skillarch
 COPY . /opt/skillarch
-RUN chown -R hacker:hacker /opt/skillarch
+RUN make -C /opt/skillarch image-passwords && chown -R hacker:hacker /opt/skillarch
 USER hacker
 ENV USER=hacker
 ENV TZ=UTC
