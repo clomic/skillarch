@@ -489,7 +489,7 @@ install-clomic: sanity-check ## Install clomic tools
 		done
 	done
 	
-	atuin hook install pi
+	atuin setup --only --agent-history --agents pi
 	mise upgrade pi
 	pi update --extensions
 
