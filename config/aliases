@@ -694,7 +694,7 @@ alias dcu='docker compose up -d'
 
 ## Git scanning
 alias dtrufflehog='dockit trufflesecurity/trufflehog'
-alias dgitleaks="dockit zricethezav/gitleaks"
+alias dbetterleaks='dockit ghcr.io/betterleaks/betterleaks:v1.10.1'
 
 ## Recon & Enumeration
 alias drecon-amass='dockit caffix/amass'
